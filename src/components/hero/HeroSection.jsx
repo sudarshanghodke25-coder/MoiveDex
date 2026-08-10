@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
-import CinematicBackground from './StarfieldBackground';
 
 export default function HeroSection() {
   const badgeRef    = useRef(null);
@@ -37,13 +36,10 @@ export default function HeroSection() {
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'hidden',
-        background: '#050510',
+        background: 'transparent',
         padding: '6rem clamp(1rem, 6vw, 5rem) 5rem',
       }}
     >
-      {/* Cinematic parallax background */}
-      <CinematicBackground />
-
       {/* Content */}
       <div
         style={{

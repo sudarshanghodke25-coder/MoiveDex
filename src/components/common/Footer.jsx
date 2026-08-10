@@ -1,4 +1,9 @@
+import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const FOOTER_LINKS = [
   {
@@ -31,12 +36,35 @@ const FOOTER_LINKS = [
 ];
 
 export default function Footer() {
+  const footerRef = useRef(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.from('.footer-anim', {
+        y: 40,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.1,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: footerRef.current,
+          start: 'top 90%',
+          toggleActions: 'play reverse play reverse',
+        },
+      });
+    }, footerRef);
+    return () => ctx.revert();
+  }, []);
+
   return (
     <footer
+      ref={footerRef}
       role="contentinfo"
       style={{
-        background: 'var(--bg-dark)',
-        borderTop: '1px solid var(--border-subtle)',
+        background: 'rgba(10, 10, 26, 0.7)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        borderTop: '1px solid rgba(255,255,255,0.08)',
         padding: 'clamp(2.5rem, 6vh, 4rem) clamp(1rem, 5vw, 4rem)',
       }}
     >
@@ -49,22 +77,17 @@ export default function Footer() {
           marginBottom: '3rem',
         }}>
           {/* Brand */}
-          <div>
-            <Link to="/" aria-label="MovieDex home" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.875rem' }}>
-              <svg width="24" height="24" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-                <rect width="28" height="28" rx="8" fill="url(#foot-logo-grad)" />
-                <path d="M8 9l5 3.5L8 16V9z" fill="white" opacity="0.9" />
-                <path d="M13 9l5 3.5-5 3.5V9z" fill="white" opacity="0.6" />
-                <rect x="7" y="18" width="14" height="1.5" rx="0.75" fill="white" opacity="0.4" />
-                <defs>
-                  <linearGradient id="foot-logo-grad" x1="0" y1="0" x2="28" y2="28">
-                    <stop stopColor="#6366f1" />
-                    <stop offset="1" stopColor="#a855f7" />
-                  </linearGradient>
-                </defs>
-              </svg>
+          <div className="footer-anim">
+            <Link to="/" aria-label="MovieDex home" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.625rem', marginBottom: '0.875rem', textDecoration: 'none' }}>
+              <img
+                src="/logo.png"
+                alt="MovieDex logo"
+                style={{ width: '32px', height: '32px', borderRadius: '8px' }}
+              />
               <span style={{
-                fontWeight: 800,
+                fontWeight: 900,
+                fontSize: '1.25rem',
+                letterSpacing: '-0.02em',
                 background: 'linear-gradient(135deg, #6366f1, #a855f7)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
@@ -73,47 +96,35 @@ export default function Footer() {
                 MovieDex
               </span>
             </Link>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.6, maxWidth: '200px' }}>
+            <p style={{ fontSize: '0.875rem', color: 'rgba(148,163,184,0.8)', lineHeight: 1.6, maxWidth: '200px' }}>
               Your cinematic gateway to movies, TV shows &amp; anime.
-            </p>
-            <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.75rem' }}>
-              Movie data by{' '}
-              <a
-                href="https://www.themoviedb.org"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: 'var(--brand-primary)', textDecoration: 'underline' }}
-              >
-                TMDB
-              </a>
             </p>
           </div>
 
           {/* Link columns */}
           {FOOTER_LINKS.map(({ heading, links }) => (
-            <div key={heading}>
+            <div key={heading} className="footer-anim">
               <h3 style={{
                 fontSize: '0.75rem',
                 fontWeight: 700,
-                color: 'var(--text-muted)',
+                color: 'rgba(148,163,184,0.6)',
                 letterSpacing: '0.08em',
                 textTransform: 'uppercase',
                 marginBottom: '1rem',
               }}>
                 {heading}
               </h3>
-              <ul role="list" style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <ul role="list" style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.625rem', margin: 0, padding: 0 }}>
                 {links.map(({ label, to }) => (
                   <li key={label}>
                     <Link
                       to={to}
+                      className="footer-link"
                       style={{
                         fontSize: '0.875rem',
-                        color: 'var(--text-secondary)',
-                        transition: 'color 0.2s',
+                        color: 'rgba(148,163,184,0.9)',
+                        textDecoration: 'none',
                       }}
-                      onMouseEnter={e => { e.currentTarget.style.color = 'var(--text-primary)'; }}
-                      onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-secondary)'; }}
                     >
                       {label}
                     </Link>
@@ -124,25 +135,32 @@ export default function Footer() {
           ))}
         </div>
 
-        <div className="divider" />
+        <div className="footer-anim" style={{ width: '100%', height: '1px', background: 'rgba(255,255,255,0.08)', marginBottom: '1.5rem' }} />
 
         {/* Bottom bar */}
-        <div style={{
+        <div className="footer-anim" style={{
           display: 'flex',
           flexWrap: 'wrap',
           alignItems: 'center',
-          justifyContent: 'space-between',
+          justifyContent: 'center',
           gap: '0.75rem',
-          marginTop: '1.5rem',
         }}>
-          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            © {new Date().getFullYear()} MovieDex. Built as a learning project.
-          </p>
-          <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-            This product uses the TMDB API but is not endorsed or certified by TMDB.
+          <p style={{ fontSize: '0.75rem', color: 'rgba(148,163,184,0.6)' }}>
+            © {new Date().getFullYear()} MovieDex.
           </p>
         </div>
       </div>
+
+      <style>{`
+        .footer-link {
+          transition: color 0.2s ease, transform 0.2s ease;
+          display: inline-block;
+        }
+        .footer-link:hover {
+          color: #f8fafc !important;
+          transform: translateX(4px);
+        }
+      `}</style>
     </footer>
   );
 }

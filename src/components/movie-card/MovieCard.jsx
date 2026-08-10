@@ -54,7 +54,7 @@ export default function MovieCard({
       aria-label={`${title}${year ? `, ${year}` : ''}`}
       onKeyDown={onClick ? e => { if (e.key === 'Enter' || e.key === ' ') onClick(); } : undefined}
       style={{
-        width: 'clamp(140px, 16vw, 190px)',
+        width: 'clamp(160px, 18vw, 220px)',
         borderRadius: '12px',
         overflow: 'hidden',
         cursor: onClick ? 'pointer' : 'default',

@@ -16,18 +16,22 @@ export default function MovieRow({ title, items = [], loading = false, error = n
 
     const ctx = gsap.context(() => {
       // Title slide in
-      gsap.from(titleRef.current, {
-        x: -40, opacity: 0, duration: 0.65, ease: 'power3.out',
-        scrollTrigger: { trigger: sectionRef.current, start: 'top 88%', toggleActions: 'play none none none' },
-      });
+      gsap.fromTo(titleRef.current, 
+        { x: -40, opacity: 0 },
+        { x: 0, opacity: 1, duration: 0.65, ease: 'power3.out',
+          scrollTrigger: { trigger: sectionRef.current, start: 'top 88%', toggleActions: 'play reverse play reverse' }
+        }
+      );
 
       // Cards stagger up
       const cards = rowRef.current?.children || [];
       if (cards.length) {
-        gsap.from(Array.from(cards), {
-          y: 50, opacity: 0, duration: 0.55, stagger: 0.07, ease: 'power2.out',
-          scrollTrigger: { trigger: rowRef.current, start: 'top 92%', toggleActions: 'play none none none' },
-        });
+        gsap.fromTo(Array.from(cards), 
+          { y: 50, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.55, stagger: 0.07, ease: 'power2.out',
+            scrollTrigger: { trigger: rowRef.current, start: 'top 92%', toggleActions: 'play reverse play reverse' }
+          }
+        );
       }
     }, sectionRef);
 

@@ -5,7 +5,7 @@ export default function MovieCardSkeleton() {
       aria-hidden="true"
       aria-busy="true"
       style={{
-        width: 'clamp(130px, 15vw, 180px)',
+        width: 'clamp(160px, 18vw, 220px)',
         borderRadius: 'var(--radius-md)',
         overflow: 'hidden',
         flexShrink: 0,
