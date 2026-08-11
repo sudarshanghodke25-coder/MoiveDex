@@ -45,7 +45,7 @@ export default function MovieRow({ title, items = [], loading = false, error = n
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
           <div style={{
             width: '0.3rem', height: '1.5rem', borderRadius: '2px',
-            background: 'linear-gradient(to bottom, #6366f1, #a855f7)',
+            background: 'var(--brand-gradient)',
             boxShadow: '0 0 12px rgba(99,102,241,0.6)',
             flexShrink: 0,
           }} />
@@ -58,7 +58,7 @@ export default function MovieRow({ title, items = [], loading = false, error = n
             href={viewAllTo}
             aria-label={`View all ${title}`}
             style={{
-              fontSize: '0.82rem', fontWeight: 700, color: '#6366f1',
+              fontSize: '0.82rem', fontWeight: 700, color: 'var(--brand-primary)',
               display: 'flex', alignItems: 'center', gap: '0.3rem',
               textDecoration: 'none', transition: 'color 0.2s, gap 0.2s',
             }}

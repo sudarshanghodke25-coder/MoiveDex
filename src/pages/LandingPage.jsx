@@ -29,7 +29,7 @@ const FEATURES = [
     emoji: '🎬',
     title: 'Always Up-to-Date',
     desc: 'Powered by TMDB for real-time ratings, cast info, trailers and more.',
-    color: '#6366f1',
+    color: 'var(--brand-primary)',
   },
   {
     emoji: '❤️',
@@ -59,7 +59,7 @@ const FEATURES = [
     emoji: '✨',
     title: 'Premium UI',
     desc: 'Cinematic, distraction-free interface designed specifically for movie lovers.',
-    color: '#a855f7',
+    color: 'var(--brand-secondary)',
   }
 ];
 
@@ -177,7 +177,7 @@ export default function LandingPage() {
                     fontSize: '0.85rem', fontWeight: 600,
                     cursor: 'pointer', border: 'none', transition: 'all 0.2s ease',
                     background: activeGenre === label
-                      ? 'linear-gradient(135deg, #6366f1, #a855f7)'
+                      ? 'var(--brand-gradient)'
                       : 'rgba(255,255,255,0.06)',
                     color: activeGenre === label ? '#fff' : 'rgba(148,163,184,0.85)',
                     boxShadow: activeGenre === label ? '0 0 20px rgba(99,102,241,0.4)' : 'none',
@@ -229,7 +229,7 @@ export default function LandingPage() {
                 </div>
                 <h2 id="features-heading" style={{ fontSize: 'clamp(1.75rem, 5vw, 3rem)', fontWeight: 900, color: '#f8fafc', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
                   Everything you need to{' '}
-                  <span style={{ background: 'linear-gradient(135deg, #6366f1, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                  <span style={{ background: 'var(--brand-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                     discover more
                   </span>
                 </h2>
@@ -326,7 +326,7 @@ export default function LandingPage() {
                   id="cta-banner-signup"
                   style={{
                     display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                    background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+                    background: 'var(--brand-gradient)',
                     color: '#fff', fontWeight: 700, fontSize: '1rem',
                     padding: '1.1rem 2.5rem', borderRadius: '999px',
                     boxShadow: '0 0 40px rgba(99,102,241,0.4)', textDecoration: 'none',

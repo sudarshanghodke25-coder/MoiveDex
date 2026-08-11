@@ -11,7 +11,7 @@ export default function Loader({ onComplete }) {
     if ('scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual';
     }
-    
+
     // Lock scroll while loading
     document.body.style.overflow = 'hidden';
 
@@ -24,27 +24,27 @@ export default function Loader({ onComplete }) {
       });
 
       // Netflix style dramatic cinematic zoom intro
-      tl.fromTo(letterRef.current, 
+      tl.fromTo(letterRef.current,
         { scale: 0, opacity: 0, rotationX: 90 },
-        { scale: 1, opacity: 1, rotationX: 0, duration: 1.4, ease: 'expo.out' }
+        { scale: 1, opacity: 1, rotationX: 0, duration: 1.1, ease: 'expo.out' }
       )
-      .to(letterRef.current, {
-        scale: 1.2,
-        textShadow: '0 0 40px #e11d48, 0 0 80px #4f46e5',
-        duration: 0.8,
-        ease: 'power1.inOut'
-      })
-      .to(letterRef.current, {
-        scale: 100, // Massive zoom in to fill screen
-        opacity: 0,
-        duration: 0.7,
-        ease: 'expo.in'
-      }, '+=0.1')
-      .to(containerRef.current, {
-        opacity: 0,
-        duration: 0.4,
-        ease: 'power2.inOut'
-      }, '-=0.2');
+        .to(letterRef.current, {
+          scale: 1.2,
+          textShadow: '0 0 40px #3b82f6, 0 0 80px #a855f7',
+          duration: 0.8,
+          ease: 'power1.inOut'
+        })
+        .to(letterRef.current, {
+          scale: 100, // Massive zoom in to fill screen
+          opacity: 0,
+          duration: 0.7,
+          ease: 'expo.in'
+        }, '+=0.1')
+        .to(containerRef.current, {
+          opacity: 0,
+          duration: 0.4,
+          ease: 'power2.inOut'
+        }, '-=0.2');
 
     }, containerRef);
 
@@ -73,10 +73,10 @@ export default function Loader({ onComplete }) {
         style={{
           fontSize: 'clamp(6rem, 15vw, 12rem)',
           fontWeight: 900,
-          fontFamily: '"Inter", sans-serif',
+          fontFamily: '"Outfit", sans-serif',
           lineHeight: 1,
           transformOrigin: 'center center',
-          background: 'linear-gradient(180deg, #ef4444 0%, #6366f1 100%)',
+          background: 'linear-gradient(135deg, #38bdf8 0%, #3b82f6 50%, #a855f7 100%)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text',

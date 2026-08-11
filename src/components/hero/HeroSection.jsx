@@ -3,12 +3,11 @@ import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 
 export default function HeroSection() {
-  const badgeRef    = useRef(null);
-  const titleRef    = useRef(null);
+  const badgeRef = useRef(null);
+  const titleRef = useRef(null);
   const subtitleRef = useRef(null);
-  const ctaRef      = useRef(null);
-  const statsRef    = useRef(null);
-  const scrollRef   = useRef(null);
+  const ctaRef = useRef(null);
+  const statsRef = useRef(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -18,8 +17,7 @@ export default function HeroSection() {
         .from(titleRef.current.children, { y: 80, opacity: 0, rotateX: 20, duration: 1, stagger: 0.15 }, '-=0.4')
         .from(subtitleRef.current, { y: 30, opacity: 0, duration: 0.7 }, '-=0.5')
         .from(ctaRef.current.children, { y: 30, opacity: 0, scale: 0.92, duration: 0.6, stagger: 0.12 }, '-=0.45')
-        .from(statsRef.current.children, { y: 20, opacity: 0, duration: 0.5, stagger: 0.08 }, '-=0.3')
-        .from(scrollRef.current, { opacity: 0, duration: 0.6 }, '-=0.2');
+        .from(statsRef.current.children, { y: 20, opacity: 0, duration: 0.5, stagger: 0.08 }, '-=0.3');
     });
 
     return () => ctx.revert();
@@ -64,7 +62,7 @@ export default function HeroSection() {
             marginBottom: '2rem',
             fontSize: '0.78rem',
             fontWeight: 700,
-            color: '#a5b4fc',
+            color: 'var(--brand-primary)',
             letterSpacing: '0.06em',
             textTransform: 'uppercase',
             backdropFilter: 'blur(8px)',
@@ -72,12 +70,12 @@ export default function HeroSection() {
         >
           <span style={{
             width: 7, height: 7, borderRadius: '50%',
-            background: '#6366f1',
+            background: 'var(--brand-primary)',
             boxShadow: '0 0 10px rgba(99,102,241,0.9)',
             animation: 'pulse-dot 2s ease-in-out infinite',
             flexShrink: 0,
           }} />
-          🎬 Your Cinematic Universe Awaits
+          ⚡ YOUR ULTIMATE CINEMATIC ESCAPE
         </div>
 
         {/* Main title */}
@@ -91,30 +89,13 @@ export default function HeroSection() {
         >
           <span style={{
             display: 'block',
-            fontSize: 'clamp(3rem, 10vw, 7rem)',
+            fontSize: 'clamp(2.5rem, 7vw, 5rem)',
             fontWeight: 900,
             color: '#f8fafc',
-            letterSpacing: '-0.03em',
+            letterSpacing: '-0.02em',
             textShadow: '0 4px 40px rgba(99,102,241,0.3)',
           }}>
-            Movie
-            <span style={{
-              background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #f59e0b 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}>Dex</span>
-          </span>
-          <span style={{
-            display: 'block',
-            fontSize: 'clamp(1.1rem, 3.5vw, 2rem)',
-            fontWeight: 400,
-            color: 'rgba(248,250,252,0.55)',
-            letterSpacing: '0.15em',
-            textTransform: 'uppercase',
-            marginTop: '0.3rem',
-          }}>
-            Discover · Track · Explore
+            Endless Movies, Shows & Anime.
           </span>
         </h1>
 
@@ -129,8 +110,7 @@ export default function HeroSection() {
             lineHeight: 1.75,
           }}
         >
-          Your all-in-one gateway to movies, TV shows &amp; anime. Discover what to
-          watch, build your personal list, and never miss a great title.
+          Stream, track, and dive into 1M+ titles across every genre. Zero subscriptions, pure entertainment.
         </p>
 
         {/* CTA buttons */}
@@ -143,7 +123,7 @@ export default function HeroSection() {
             id="hero-cta-primary"
             style={{
               display: 'inline-flex', alignItems: 'center', gap: '0.625rem',
-              background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+              background: 'var(--brand-gradient)',
               color: '#fff', fontWeight: 700, fontSize: '1.05rem',
               padding: '1rem 2.5rem', borderRadius: '999px', border: 'none',
               boxShadow: '0 0 40px rgba(99,102,241,0.4), 0 8px 32px rgba(0,0,0,0.4)',
@@ -163,18 +143,19 @@ export default function HeroSection() {
             id="hero-cta-secondary"
             style={{
               display: 'inline-flex', alignItems: 'center', gap: '0.625rem',
-              background: 'rgba(255,255,255,0.06)', color: '#f8fafc', fontWeight: 600,
+              background: 'transparent', color: '#f8fafc', fontWeight: 600,
               fontSize: '1.05rem', padding: '1rem 2.5rem', borderRadius: '999px',
-              border: '1px solid rgba(255,255,255,0.18)', backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)',
               transition: 'all 0.25s ease', textDecoration: 'none',
+              opacity: 1, visibility: 'visible'
             }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.15)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.5)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)'; e.currentTarget.style.transform = ''; }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.4)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'; e.currentTarget.style.transform = ''; }}
           >
-            Browse Movies
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-              <path d="M5 12h14M12 5l7 7-7 7" />
+              <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
             </svg>
+            Watch Trailer
           </Link>
         </div>
 
@@ -189,10 +170,10 @@ export default function HeroSection() {
           }}
         >
           {[
-            { value: '1M+',   label: 'Titles', icon: '🎬' },
-            { value: '150+',  label: 'Countries', icon: '🌍' },
-            { value: '50+',   label: 'Genres', icon: '🎭' },
-            { value: 'Free',  label: 'Forever', icon: '✨' },
+            { value: '1M+', label: 'Titles', icon: '🎬' },
+            { value: '150+', label: 'Countries', icon: '🌍' },
+            { value: '50+', label: 'Genres', icon: '🎭' },
+            { value: 'Free', label: 'Forever', icon: '✨' },
           ].map(({ value, label, icon }) => (
             <div key={label} role="listitem" style={{ textAlign: 'center' }}>
               <div style={{
@@ -214,39 +195,10 @@ export default function HeroSection() {
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <div
-        ref={scrollRef}
-        aria-hidden="true"
-        style={{
-          position: 'absolute', bottom: '2.5rem', left: '50%',
-          transform: 'translateX(-50%)', zIndex: 2,
-          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',
-        }}
-      >
-        <div style={{
-          width: '22px', height: '36px', borderRadius: '11px',
-          border: '2px solid rgba(255,255,255,0.2)',
-          display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-          padding: '5px',
-        }}>
-          <div style={{
-            width: '3px', height: '8px', borderRadius: '1.5px',
-            background: 'linear-gradient(to bottom, #6366f1, #a855f7)',
-            animation: 'scroll-wheel 1.8s ease-in-out infinite',
-          }} />
-        </div>
-      </div>
-
       <style>{`
         @keyframes pulse-dot {
           0%,100% { opacity:1; box-shadow:0 0 10px rgba(99,102,241,0.9); }
           50%      { opacity:0.5; box-shadow:0 0 20px rgba(99,102,241,0.4); }
-        }
-        @keyframes scroll-wheel {
-          0%   { transform:translateY(0); opacity:1; }
-          80%  { transform:translateY(12px); opacity:0; }
-          100% { transform:translateY(0); opacity:0; }
         }
       `}</style>
     </section>

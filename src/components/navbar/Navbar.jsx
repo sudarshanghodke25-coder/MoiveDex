@@ -1,12 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import gsap from 'gsap';
+import logoImg from '../../assets/MovieDex.jpg';
 
 const NAV_LINKS = [
-  { label: 'Home',   to: '/' },
-  { label: 'Movies', to: '/movies' },
-  { label: 'TV',     to: '/tv' },
-  { label: 'Anime',  to: '/anime' },
+  { label: 'Home',     to: '/' },
+  { label: 'Movies',   to: '/movies' },
+  { label: 'TV Shows', to: '/tv' },
+  { label: 'Anime',    to: '/anime' },
+  { label: 'Trending', to: '/trending' },
 ];
 
 export default function Navbar() {
@@ -14,6 +17,17 @@ export default function Navbar() {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { currentUser, logout } = useAuth();
+  const navigate = useNavigate();
+
+  async function handleLogout() {
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error("Failed to log out", error);
+    }
+  }
 
   // Entrance animation
   useEffect(() => {
@@ -48,20 +62,20 @@ export default function Navbar() {
       role="banner"
       style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-        transition: 'background 0.35s ease, border-color 0.35s ease, backdrop-filter 0.35s ease',
-        background: scrolled ? 'rgba(5,5,16,0.88)' : 'rgba(5,5,16,0.2)',
-        backdropFilter: scrolled ? 'blur(20px)' : 'blur(4px)',
-        WebkitBackdropFilter: scrolled ? 'blur(20px)' : 'blur(4px)',
-        borderBottom: scrolled ? '1px solid rgba(99,102,241,0.12)' : '1px solid transparent',
+        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+        background: scrolled ? 'rgba(5,5,16,0.95)' : 'linear-gradient(to bottom, rgba(5,5,16,0.8) 0%, transparent 100%)',
+        backdropFilter: scrolled ? 'blur(20px)' : 'none',
+        WebkitBackdropFilter: scrolled ? 'blur(20px)' : 'none',
+        borderBottom: scrolled ? '1px solid rgba(255,255,255,0.05)' : '1px solid transparent',
       }}
     >
       <nav
         aria-label="Main navigation"
         style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '0 clamp(1rem, 5vw, 4rem)',
-          height: '4.25rem',
-          maxWidth: '1400px', margin: '0 auto',
+          padding: '0 clamp(1.5rem, 5vw, 4rem)',
+          height: '5.5rem',
+          maxWidth: '1600px', margin: '0 auto',
         }}
       >
         {/* Logo */}
@@ -71,14 +85,13 @@ export default function Navbar() {
           style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', flexShrink: 0, textDecoration: 'none' }}
         >
           <img
-            src="/logo.png"
+            src={logoImg}
             alt="MovieDex logo"
-            style={{ width: '36px', height: '36px', borderRadius: '8px', objectFit: 'cover' }}
-            onError={e => { e.currentTarget.style.display = 'none'; }}
+            style={{ width: '38px', height: '38px', borderRadius: '10px', objectFit: 'cover', boxShadow: '0 0 15px rgba(168,85,247,0.4)' }}
           />
           <span style={{
-            fontSize: '1.25rem', fontWeight: 900, letterSpacing: '-0.02em',
-            background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+            fontSize: '1.35rem', fontWeight: 900, letterSpacing: '-0.02em',
+            background: 'var(--brand-gradient)',
             WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
           }}>
             MovieDex
@@ -88,7 +101,7 @@ export default function Navbar() {
         {/* Desktop nav links */}
         <ul
           role="list"
-          style={{ display: 'flex', alignItems: 'center', gap: '0.125rem', listStyle: 'none', margin: 0, padding: 0 }}
+          style={{ display: 'flex', alignItems: 'center', gap: '2.5rem', listStyle: 'none', margin: 0, padding: 0 }}
           className="nav-desktop"
         >
           {NAV_LINKS.map(({ label, to }) => {
@@ -99,17 +112,16 @@ export default function Navbar() {
                   to={to}
                   aria-current={active ? 'page' : undefined}
                   style={{
-                    padding: '0.45rem 1rem',
-                    borderRadius: '999px',
-                    fontSize: '0.9rem', fontWeight: 500,
+                    padding: '0.5rem 0',
+                    fontSize: '0.95rem', fontWeight: 500,
                     color: active ? '#f8fafc' : 'rgba(148,163,184,0.85)',
-                    background: active ? 'rgba(99,102,241,0.18)' : 'transparent',
-                    border: active ? '1px solid rgba(99,102,241,0.25)' : '1px solid transparent',
+                    background: 'transparent',
+                    borderBottom: active ? '2px solid var(--brand-secondary)' : '2px solid transparent',
                     transition: 'all 0.2s ease',
                     display: 'block', textDecoration: 'none',
                   }}
-                  onMouseEnter={e => { if (!active) { e.currentTarget.style.color = '#f8fafc'; e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}}
-                  onMouseLeave={e => { if (!active) { e.currentTarget.style.color = 'rgba(148,163,184,0.85)'; e.currentTarget.style.background = 'transparent'; }}}
+                  onMouseEnter={e => { if (!active) { e.currentTarget.style.color = '#f8fafc'; e.currentTarget.style.borderBottom = '2px solid rgba(255,255,255,0.5)'; }}}
+                  onMouseLeave={e => { if (!active) { e.currentTarget.style.color = 'rgba(148,163,184,0.85)'; e.currentTarget.style.borderBottom = '2px solid transparent'; }}}
                 >
                   {label}
                 </Link>
@@ -119,57 +131,72 @@ export default function Navbar() {
         </ul>
 
         {/* Right actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
           {/* Search */}
           <button
             aria-label="Open search"
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              width: '2.375rem', height: '2.375rem', borderRadius: '999px',
-              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-              color: 'rgba(148,163,184,0.85)', cursor: 'pointer',
-              transition: 'all 0.2s ease',
+              width: '2.5rem', height: '2.5rem',
+              color: 'rgba(255,255,255,0.85)', cursor: 'pointer',
+              background: 'transparent', border: 'none',
+              transition: 'color 0.2s ease',
             }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.18)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.35)'; e.currentTarget.style.color = '#f8fafc'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'rgba(148,163,184,0.85)'; }}
+            onMouseEnter={e => e.currentTarget.style.color = '#fff'}
+            onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.85)'}
           >
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
             </svg>
           </button>
 
-          {/* Login link */}
-          <Link
-            to="/login"
-            className="nav-login"
-            style={{
-              fontSize: '0.875rem', fontWeight: 600,
-              color: 'rgba(148,163,184,0.85)', textDecoration: 'none',
-              transition: 'color 0.2s ease',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.color = '#f8fafc'; }}
-            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(148,163,184,0.85)'; }}
-          >
-            Sign In
-          </Link>
-
-          {/* CTA */}
-          <Link
-            to="/register"
-            className="nav-cta"
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-              background: 'linear-gradient(135deg, #6366f1, #a855f7)',
-              color: '#fff', fontWeight: 700, fontSize: '0.875rem',
-              padding: '0.55rem 1.35rem', borderRadius: '999px',
-              boxShadow: '0 0 20px rgba(99,102,241,0.3)',
-              transition: 'all 0.25s ease', textDecoration: 'none',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 0 35px rgba(99,102,241,0.5)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 0 20px rgba(99,102,241,0.3)'; }}
-          >
-            Get Started
-          </Link>
+          {/* Auth Actions */}
+          {currentUser ? (
+            <button
+              onClick={handleLogout}
+              className="nav-cta"
+              style={{
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                background: 'rgba(255,255,255,0.06)',
+                border: '1px solid var(--border-glass)',
+                color: '#fff', fontWeight: 600, fontSize: '0.95rem',
+                padding: '0.65rem 1.75rem', borderRadius: '999px',
+                transition: 'all 0.25s ease', cursor: 'pointer'
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'; e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.5)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.borderColor = 'var(--border-glass)'; }}
+            >
+              Log Out
+            </button>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                className="nav-login"
+                style={{
+                  fontSize: '0.95rem', fontWeight: 600,
+                  color: '#f8fafc', textDecoration: 'none',
+                }}
+              >
+                Sign In
+              </Link>
+              <Link
+                to="/register"
+                className="nav-cta"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  background: '#a855f7',
+                  color: '#fff', fontWeight: 600, fontSize: '0.95rem',
+                  padding: '0.65rem 1.75rem', borderRadius: '999px',
+                  transition: 'all 0.25s ease', textDecoration: 'none',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 5px 15px rgba(168,85,247,0.4)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = 'none'; }}
+              >
+                Get Started
+              </Link>
+            </>
+          )}
 
           {/* Hamburger (mobile) */}
           <button
@@ -223,18 +250,33 @@ export default function Navbar() {
             </Link>
           ))}
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: '0.75rem', paddingTop: '0.875rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <Link to="/login" style={{ padding: '0.875rem 1rem', textAlign: 'center', color: 'rgba(148,163,184,0.85)', borderRadius: '10px', textDecoration: 'none', fontWeight: 600 }}>
-              Sign In
-            </Link>
-            <Link
-              to="/register"
-              style={{
-                padding: '0.9rem', textAlign: 'center', borderRadius: '10px', fontWeight: 700,
-                background: 'linear-gradient(135deg, #6366f1, #a855f7)', color: '#fff', textDecoration: 'none',
-              }}
-            >
-              Get Started Free
-            </Link>
+            {currentUser ? (
+              <button 
+                onClick={handleLogout} 
+                style={{ 
+                  padding: '0.9rem', textAlign: 'center', borderRadius: '10px', fontWeight: 700, 
+                  background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', border: '1px solid rgba(239, 68, 68, 0.3)', 
+                  cursor: 'pointer', width: '100%', fontSize: '1rem' 
+                }}
+              >
+                Log Out
+              </button>
+            ) : (
+              <>
+                <Link to="/login" style={{ padding: '0.875rem 1rem', textAlign: 'center', color: 'rgba(148,163,184,0.85)', borderRadius: '10px', textDecoration: 'none', fontWeight: 600 }}>
+                  Sign In
+                </Link>
+                <Link
+                  to="/register"
+                  style={{
+                    padding: '0.9rem', textAlign: 'center', borderRadius: '10px', fontWeight: 700,
+                    background: 'var(--brand-gradient)', color: '#111', textDecoration: 'none',
+                  }}
+                >
+                  Get Started Free
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}

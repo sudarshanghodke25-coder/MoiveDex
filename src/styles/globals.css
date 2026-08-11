@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
-/* ─── Inter Font ─────────────────────────────────────────────────── */
+/* ─── Outfit Font ─────────────────────────────────────────────────── */
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Outfit', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -16,16 +16,16 @@ body {
   --bg-elevated:  #1a1a35;
   --bg-glass:     rgba(255, 255, 255, 0.05);
 
-  /* Brand */
-  --brand-primary:   #6366f1;
-  --brand-secondary: #a855f7;
-  --brand-accent:    #f59e0b;
-  --brand-gradient:  linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  /* Brand - Updated to sleek 'blacky/silver' shade */
+  --brand-primary:   #ffffff;
+  --brand-secondary: #a1a1aa;
+  --brand-accent:    #d4d4d8;
+  --brand-gradient:  linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%);
 
   /* Text */
   --text-primary:   #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted:     #475569;
+  --text-secondary: #a1a1aa;
+  --text-muted:     #71717a;
 
   /* Status */
   --success: #10b981;
@@ -37,8 +37,8 @@ body {
   --border-glass:  rgba(255, 255, 255, 0.14);
 
   /* Glows */
-  --glow-primary: 0 0 40px rgba(99, 102, 241, 0.28);
-  --glow-accent:  0 0 20px rgba(168, 85, 247, 0.35);
+  --glow-primary: 0 0 40px rgba(255, 255, 255, 0.15);
+  --glow-accent:  0 0 20px rgba(255, 255, 255, 0.2);
 
   /* Spacing */
   --section-px: clamp(1rem, 5vw, 4rem);
@@ -145,7 +145,7 @@ a {
   gap: 0.5rem;
   background: var(--brand-gradient);
   color: #fff;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 1rem;
   font-weight: 600;
   padding: 0.875rem 2rem;
@@ -172,7 +172,7 @@ a {
   gap: 0.5rem;
   background: transparent;
   color: var(--text-primary);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 1rem;
   font-weight: 500;
   padding: 0.875rem 2rem;
