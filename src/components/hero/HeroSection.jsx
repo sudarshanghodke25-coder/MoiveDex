@@ -130,6 +130,7 @@ export default function HeroSection() {
               boxShadow: '0 0 30px rgba(225, 29, 72, 0.4)',
               transition: 'all 0.25s ease',
               textDecoration: 'none',
+              opacity: 1, visibility: 'visible',
               flex: '1 1 auto', maxWidth: '280px',
             }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.background = 'linear-gradient(135deg, #f43f5e 0%, #f59e0b 100%)'; e.currentTarget.style.boxShadow = '0 0 50px rgba(245, 158, 11, 0.6)'; }}
