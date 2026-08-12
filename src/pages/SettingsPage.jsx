@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useWatchlist } from '../contexts/WatchlistContext';
 import { getUserSettings, updateUserSettings } from '../services/settings';
+import { clearAllHistory } from '../services/history';
 import { useNavigate } from 'react-router-dom';
 
 const LANGUAGES = [
@@ -55,8 +56,8 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (!currentUser?.uid) return;
-    getUserSettings(currentUser.uid).then(data => {
-      setSettings(prev => ({ ...prev, ...data }));
+    getUserSettings(currentUser.uid).then((data) => {
+      setSettings((prev) => ({ ...prev, ...data }));
       setLoading(false);
     });
   }, [currentUser]);
@@ -108,8 +109,8 @@ export default function SettingsPage() {
     }
   };
 
-  const handleClearHistory = () => {
-    localStorage.removeItem('moviedex_watch_history');
+  const handleClearHistory = async () => {
+    await clearAllHistory(currentUser?.uid);
     setShowClearHistoryModal(false);
     setMsg({ type: 'success', text: 'Watch history cleared successfully.' });
   };
@@ -133,7 +134,7 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="page-content" style={{ maxWidth: '900px', margin: '0 auto' }}>
+      <div className="page-content" style={{ maxWidth: '960px', margin: '0 auto', padding: '1rem' }}>
         <div className="skeleton" style={{ height: '4rem', borderRadius: '16px', marginBottom: '2rem' }} />
         <div className="skeleton" style={{ height: '300px', borderRadius: '16px' }} />
       </div>
@@ -141,8 +142,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="page-content" style={{ maxWidth: '960px', margin: '0 auto' }}>
-      
+    <div className="page-content" style={{ maxWidth: '960px', margin: '0 auto', padding: 'clamp(1rem, 3vw, 2rem)' }}>
       {/* Page Header */}
       <div className="page-header" style={{ marginBottom: '2rem' }}>
         <h1 className="text-hero page-title">
@@ -153,27 +153,34 @@ export default function SettingsPage() {
 
       {/* Message Toast */}
       {msg && (
-        <div style={{
-          padding: '0.875rem 1.25rem', borderRadius: '12px', marginBottom: '1.5rem',
-          background: msg.type === 'success' ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)',
-          border: `1px solid ${msg.type === 'success' ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}`,
-          color: msg.type === 'success' ? '#10b981' : '#ef4444',
-          fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem',
-        }}>
+        <div
+          style={{
+            padding: '0.875rem 1.25rem',
+            borderRadius: '12px',
+            marginBottom: '1.5rem',
+            background: msg.type === 'success' ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)',
+            border: `1px solid ${msg.type === 'success' ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}`,
+            color: msg.type === 'success' ? '#10b981' : '#ef4444',
+            fontSize: '0.9rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+          }}
+        >
           <span>{msg.type === 'success' ? '✅' : '⚠️'}</span>
           <span>{msg.text}</span>
         </div>
       )}
 
-      {/* Tabs */}
-      <div className="tab-bar" style={{ marginBottom: '2rem' }}>
+      {/* Responsive Tabs */}
+      <div className="tab-bar">
         {[
           { id: 'profile', label: '👤 Profile' },
           { id: 'account', label: '🔒 Account' },
           { id: 'preferences', label: '⚙️ Preferences' },
           { id: 'notifications', label: '🔔 Notifications' },
           { id: 'privacy', label: '🛡️ Privacy' },
-        ].map(tab => (
+        ].map((tab) => (
           <button
             key={tab.id}
             className={`tab-btn ${activeTab === tab.id ? 'active' : ''}`}
@@ -186,18 +193,28 @@ export default function SettingsPage() {
 
       {/* ── TAB 1: PROFILE ── */}
       {activeTab === 'profile' && (
-        <div className="glass-card" style={{ padding: '2rem' }}>
+        <div className="glass-card" style={{ padding: 'clamp(1.25rem, 4vw, 2rem)' }}>
           <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f8fafc', marginBottom: '1.5rem' }}>
             Profile Overview
           </h3>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
-            <div style={{
-              width: '80px', height: '80px', borderRadius: '50%',
-              background: 'linear-gradient(135deg, #e11d48 0%, #f59e0b 100%)',
-              color: '#fff', fontSize: '2rem', fontWeight: 800,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
-            }}>
+            <div
+              style={{
+                width: '80px',
+                height: '80px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #e11d48 0%, #f59e0b 100%)',
+                color: '#fff',
+                fontSize: '2rem',
+                fontWeight: 800,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden',
+                flexShrink: 0,
+              }}
+            >
               {currentUser?.photoURL ? (
                 <img src={currentUser.photoURL} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
@@ -205,11 +222,11 @@ export default function SettingsPage() {
               )}
             </div>
 
-            <div>
+            <div style={{ flex: '1 1 200px' }}>
               <h4 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', margin: '0 0 0.3rem' }}>
                 {currentUser?.displayName || 'MovieHub User'}
               </h4>
-              <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: '0 0 0.4rem' }}>
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: '0 0 0.4rem', wordBreak: 'break-all' }}>
                 {currentUser?.email}
               </p>
               <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
@@ -239,7 +256,7 @@ export default function SettingsPage() {
       {/* ── TAB 2: ACCOUNT ── */}
       {activeTab === 'account' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div className="glass-card" style={{ padding: '2rem' }}>
+          <div className="glass-card" style={{ padding: 'clamp(1.25rem, 4vw, 2rem)' }}>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', marginBottom: '1.25rem' }}>
               Security & Credentials
             </h3>
@@ -267,21 +284,24 @@ export default function SettingsPage() {
             <h4 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
               Account Metadata
             </h4>
-            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-              <span>User ID: <code style={{ color: '#a5b4fc' }}>{currentUser?.uid}</code></span>
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.4rem', wordBreak: 'break-all' }}>
+              <span>User ID: <code style={{ color: '#fbbf24' }}>{currentUser?.uid}</code></span>
               <span>Authentication Provider: <strong style={{ color: '#fff' }}>{currentUser?.providerData?.[0]?.providerId || 'password'}</strong></span>
               <span>Account Created: <strong style={{ color: '#fff' }}>{currentUser?.metadata?.creationTime || 'N/A'}</strong></span>
             </div>
           </div>
 
-          <div className="glass-card" style={{ padding: '1.5rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="glass-card" style={{ padding: '1.5rem clamp(1rem, 3vw, 2rem)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#f8fafc', margin: '0 0 0.2rem' }}>Log Out</h4>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>End your current viewing session safely.</p>
             </div>
             <button
               className="btn-ghost"
-              onClick={async () => { await logout(); navigate('/'); }}
+              onClick={async () => {
+                await logout();
+                navigate('/');
+              }}
               style={{ borderRadius: '999px', color: 'var(--danger)', borderColor: 'rgba(239,68,68,0.3)' }}
             >
               🚪 Log Out
@@ -292,14 +312,14 @@ export default function SettingsPage() {
 
       {/* ── TAB 3: PREFERENCES ── */}
       {activeTab === 'preferences' && (
-        <div className="glass-card" style={{ padding: '2rem' }}>
+        <div className="glass-card" style={{ padding: 'clamp(1.25rem, 4vw, 2rem)' }}>
           <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f8fafc', marginBottom: '1.5rem' }}>
             Playback & Localization
           </h3>
 
           {/* Interface Language */}
           <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-            <div>
+            <div style={{ flex: '1 1 200px' }}>
               <label style={{ display: 'block', fontSize: '0.95rem', fontWeight: 700, color: '#f8fafc' }}>
                 Interface Language
               </label>
@@ -307,15 +327,23 @@ export default function SettingsPage() {
             </div>
             <select
               value={settings.preferredLanguage}
-              onChange={e => handleSettingChange('preferredLanguage', e.target.value)}
+              onChange={(e) => handleSettingChange('preferredLanguage', e.target.value)}
               style={{
-                padding: '0.6rem 1.25rem', borderRadius: '999px',
-                background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.15)',
-                color: '#fff', fontSize: '0.9rem', fontWeight: 700, outline: 'none', cursor: 'pointer',
+                padding: '0.6rem 1.25rem',
+                borderRadius: '999px',
+                background: '#121216',
+                border: '1px solid rgba(255,255,255,0.15)',
+                color: '#fff',
+                fontSize: '0.9rem',
+                fontWeight: 700,
+                outline: 'none',
+                cursor: 'pointer',
               }}
             >
-              {LANGUAGES.map(l => (
-                <option key={l.code} value={l.code} style={{ background: '#0f172a', color: '#fff' }}>{l.label}</option>
+              {LANGUAGES.map((l) => (
+                <option key={l.code} value={l.code} style={{ background: '#121216', color: '#fff' }}>
+                  {l.label}
+                </option>
               ))}
             </select>
           </div>
@@ -324,7 +352,7 @@ export default function SettingsPage() {
 
           {/* Subtitles Language */}
           <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-            <div>
+            <div style={{ flex: '1 1 200px' }}>
               <label style={{ display: 'block', fontSize: '0.95rem', fontWeight: 700, color: '#f8fafc' }}>
                 Default Subtitle Track
               </label>
@@ -332,15 +360,23 @@ export default function SettingsPage() {
             </div>
             <select
               value={settings.preferredSubtitleLanguage}
-              onChange={e => handleSettingChange('preferredSubtitleLanguage', e.target.value)}
+              onChange={(e) => handleSettingChange('preferredSubtitleLanguage', e.target.value)}
               style={{
-                padding: '0.6rem 1.25rem', borderRadius: '999px',
-                background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.15)',
-                color: '#fff', fontSize: '0.9rem', fontWeight: 700, outline: 'none', cursor: 'pointer',
+                padding: '0.6rem 1.25rem',
+                borderRadius: '999px',
+                background: '#121216',
+                border: '1px solid rgba(255,255,255,0.15)',
+                color: '#fff',
+                fontSize: '0.9rem',
+                fontWeight: 700,
+                outline: 'none',
+                cursor: 'pointer',
               }}
             >
-              {SUBTITLES.map(s => (
-                <option key={s.code} value={s.code} style={{ background: '#0f172a', color: '#fff' }}>{s.label}</option>
+              {SUBTITLES.map((s) => (
+                <option key={s.code} value={s.code} style={{ background: '#121216', color: '#fff' }}>
+                  {s.label}
+                </option>
               ))}
             </select>
           </div>
@@ -349,7 +385,7 @@ export default function SettingsPage() {
 
           {/* Autoplay Toggle */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-            <div>
+            <div style={{ flex: '1 1 200px' }}>
               <label style={{ display: 'block', fontSize: '0.95rem', fontWeight: 700, color: '#f8fafc' }}>
                 Autoplay Next Episode
               </label>
@@ -358,11 +394,14 @@ export default function SettingsPage() {
             <button
               onClick={() => handleSettingChange('autoplay', !settings.autoplay)}
               style={{
-                padding: '0.5rem 1.25rem', borderRadius: '999px',
-                background: settings.autoplay ? 'rgba(99,102,241,0.25)' : 'rgba(255,255,255,0.06)',
-                border: `1px solid ${settings.autoplay ? 'var(--brand-primary)' : 'rgba(255,255,255,0.15)'}`,
-                color: settings.autoplay ? '#a5b4fc' : 'var(--text-secondary)',
-                fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer',
+                padding: '0.5rem 1.25rem',
+                borderRadius: '999px',
+                background: settings.autoplay ? 'rgba(245,158,11,0.2)' : 'rgba(255,255,255,0.06)',
+                border: `1px solid ${settings.autoplay ? '#f59e0b' : 'rgba(255,255,255,0.15)'}`,
+                color: settings.autoplay ? '#fbbf24' : 'var(--text-secondary)',
+                fontWeight: 700,
+                fontSize: '0.85rem',
+                cursor: 'pointer',
               }}
             >
               {settings.autoplay ? 'ENABLED' : 'DISABLED'}
@@ -373,7 +412,7 @@ export default function SettingsPage() {
 
       {/* ── TAB 4: NOTIFICATIONS ── */}
       {activeTab === 'notifications' && (
-        <div className="glass-card" style={{ padding: '2rem' }}>
+        <div className="glass-card" style={{ padding: 'clamp(1.25rem, 4vw, 2rem)' }}>
           <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f8fafc', marginBottom: '1.5rem' }}>
             Notification Preferences
           </h3>
@@ -388,7 +427,7 @@ export default function SettingsPage() {
           ].map((item, idx) => (
             <div key={item.key}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.85rem 0', flexWrap: 'wrap', gap: '1rem' }}>
-                <div>
+                <div style={{ flex: '1 1 200px' }}>
                   <label style={{ display: 'block', fontSize: '0.95rem', fontWeight: 700, color: '#f8fafc' }}>
                     {item.label}
                   </label>
@@ -397,11 +436,14 @@ export default function SettingsPage() {
                 <button
                   onClick={() => handleSettingChange(item.key, !settings[item.key])}
                   style={{
-                    padding: '0.45rem 1.1rem', borderRadius: '999px',
-                    background: settings[item.key] ? 'rgba(99,102,241,0.25)' : 'rgba(255,255,255,0.06)',
-                    border: `1px solid ${settings[item.key] ? 'var(--brand-primary)' : 'rgba(255,255,255,0.15)'}`,
-                    color: settings[item.key] ? '#a5b4fc' : 'var(--text-secondary)',
-                    fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer',
+                    padding: '0.45rem 1.1rem',
+                    borderRadius: '999px',
+                    background: settings[item.key] ? 'rgba(245,158,11,0.2)' : 'rgba(255,255,255,0.06)',
+                    border: `1px solid ${settings[item.key] ? '#f59e0b' : 'rgba(255,255,255,0.15)'}`,
+                    color: settings[item.key] ? '#fbbf24' : 'var(--text-secondary)',
+                    fontWeight: 700,
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
                   }}
                 >
                   {settings[item.key] ? 'ON' : 'OFF'}
@@ -416,14 +458,14 @@ export default function SettingsPage() {
       {/* ── TAB 5: PRIVACY & DATA ── */}
       {activeTab === 'privacy' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div className="glass-card" style={{ padding: '2rem' }}>
+          <div className="glass-card" style={{ padding: 'clamp(1.25rem, 4vw, 2rem)' }}>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', marginBottom: '1.25rem' }}>
               Data & Viewing History
             </h3>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-                <div>
+                <div style={{ flex: '1 1 200px' }}>
                   <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#f8fafc', margin: 0 }}>Clear Watch History</h4>
                   <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Remove all progress logs from Continue Watching.</span>
                 </div>
@@ -439,7 +481,7 @@ export default function SettingsPage() {
               <div className="divider" />
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-                <div>
+                <div style={{ flex: '1 1 200px' }}>
                   <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#f8fafc', margin: 0 }}>Clear My List</h4>
                   <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Remove all bookmarked items from your list.</span>
                 </div>
@@ -455,10 +497,14 @@ export default function SettingsPage() {
           </div>
 
           {/* DANGER ZONE */}
-          <div style={{
-            padding: '2rem', borderRadius: '16px',
-            background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.3)',
-          }}>
+          <div
+            style={{
+              padding: 'clamp(1.25rem, 4vw, 2rem)',
+              borderRadius: '16px',
+              background: 'rgba(239,68,68,0.06)',
+              border: '1px solid rgba(239,68,68,0.3)',
+            }}
+          >
             <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--danger)', marginBottom: '0.5rem' }}>
               ⚠️ Danger Zone — Delete Account
             </h3>
@@ -468,9 +514,14 @@ export default function SettingsPage() {
             <button
               onClick={() => setShowDeleteModal(true)}
               style={{
-                padding: '0.75rem 1.75rem', borderRadius: '999px',
-                background: 'var(--danger)', color: '#fff', fontWeight: 800,
-                fontSize: '0.9rem', cursor: 'pointer', border: 'none',
+                padding: '0.75rem 1.75rem',
+                borderRadius: '999px',
+                background: 'var(--danger)',
+                color: '#fff',
+                fontWeight: 800,
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                border: 'none',
                 boxShadow: '0 0 20px rgba(239,68,68,0.4)',
               }}
             >
@@ -484,8 +535,24 @@ export default function SettingsPage() {
 
       {/* Change Password Modal */}
       {showPasswordModal && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(5,5,16,0.85)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-          <form onSubmit={handleChangePasswordSubmit} className="glass-card" style={{ width: 'min(420px, 100%)', padding: '2rem' }}>
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 200,
+            background: 'rgba(3,3,4,0.88)',
+            backdropFilter: 'blur(12px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem',
+          }}
+        >
+          <form
+            onSubmit={handleChangePasswordSubmit}
+            className="glass-card"
+            style={{ width: 'min(420px, 92vw)', padding: 'clamp(1.25rem, 4vw, 2rem)', background: '#0e0e12' }}
+          >
             <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', marginBottom: '1.25rem' }}>
               Change Password
             </h3>
@@ -496,10 +563,17 @@ export default function SettingsPage() {
               <input
                 type="password"
                 value={newPassword}
-                onChange={e => setNewPassword(e.target.value)}
+                onChange={(e) => setNewPassword(e.target.value)}
                 required
                 minLength={6}
-                style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff' }}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem 1rem',
+                  borderRadius: '10px',
+                  background: '#181820',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  color: '#fff',
+                }}
               />
             </div>
             <div style={{ marginBottom: '1.5rem' }}>
@@ -509,13 +583,20 @@ export default function SettingsPage() {
               <input
                 type="password"
                 value={confirmPassword}
-                onChange={e => setConfirmPassword(e.target.value)}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 minLength={6}
-                style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff' }}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem 1rem',
+                  borderRadius: '10px',
+                  background: '#181820',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  color: '#fff',
+                }}
               />
             </div>
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
               <button type="submit" className="btn-primary" disabled={passwordLoading} style={{ borderRadius: '999px', padding: '0.65rem 1.5rem' }}>
                 {passwordLoading ? 'Updating...' : 'Update Password'}
               </button>
@@ -529,14 +610,26 @@ export default function SettingsPage() {
 
       {/* Clear Watch History Confirmation Modal */}
       {showClearHistoryModal && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(5,5,16,0.85)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-          <div className="glass-card" style={{ width: 'min(400px, 100%)', padding: '2rem', textAlign: 'center' }}>
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 200,
+            background: 'rgba(3,3,4,0.88)',
+            backdropFilter: 'blur(12px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem',
+          }}
+        >
+          <div className="glass-card" style={{ width: 'min(400px, 92vw)', padding: 'clamp(1.25rem, 4vw, 2rem)', textAlign: 'center', background: '#0e0e12' }}>
             <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: '0.5rem' }}>🗑️</span>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', marginBottom: '0.5rem' }}>Clear Watch History?</h3>
             <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
               This will reset your watch progress for all titles.
             </p>
-            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
               <button onClick={handleClearHistory} className="btn-primary" style={{ background: 'var(--danger)', borderColor: 'var(--danger)', borderRadius: '999px' }}>
                 Yes, Clear History
               </button>
@@ -550,14 +643,26 @@ export default function SettingsPage() {
 
       {/* Clear My List Confirmation Modal */}
       {showClearListModal && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(5,5,16,0.85)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-          <div className="glass-card" style={{ width: 'min(400px, 100%)', padding: '2rem', textAlign: 'center' }}>
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 200,
+            background: 'rgba(3,3,4,0.88)',
+            backdropFilter: 'blur(12px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem',
+          }}
+        >
+          <div className="glass-card" style={{ width: 'min(400px, 92vw)', padding: 'clamp(1.25rem, 4vw, 2rem)', textAlign: 'center', background: '#0e0e12' }}>
             <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: '0.5rem' }}>📑</span>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', marginBottom: '0.5rem' }}>Clear My List?</h3>
             <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
               This will remove all saved movies and shows from your watchlist.
             </p>
-            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
               <button onClick={handleClearMyList} className="btn-primary" style={{ background: 'var(--danger)', borderColor: 'var(--danger)', borderRadius: '999px' }}>
                 Yes, Clear My List
               </button>
@@ -571,8 +676,20 @@ export default function SettingsPage() {
 
       {/* Delete Account Confirmation Modal */}
       {showDeleteModal && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(5,5,16,0.85)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-          <div className="glass-card" style={{ width: 'min(420px, 100%)', padding: '2rem' }}>
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 200,
+            background: 'rgba(3,3,4,0.88)',
+            backdropFilter: 'blur(12px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem',
+          }}
+        >
+          <div className="glass-card" style={{ width: 'min(420px, 92vw)', padding: 'clamp(1.25rem, 4vw, 2rem)', background: '#0e0e12' }}>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--danger)', marginBottom: '0.5rem' }}>
               Confirm Account Deletion
             </h3>
@@ -582,17 +699,30 @@ export default function SettingsPage() {
             <input
               type="text"
               value={deleteConfirmText}
-              onChange={e => setDeleteConfirmText(e.target.value)}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
               placeholder="DELETE"
-              style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(239,68,68,0.4)', color: '#fff', marginBottom: '1.5rem' }}
+              style={{
+                width: '100%',
+                padding: '0.75rem 1rem',
+                borderRadius: '10px',
+                background: '#181820',
+                border: '1px solid rgba(239,68,68,0.4)',
+                color: '#fff',
+                marginBottom: '1.5rem',
+              }}
             />
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
               <button
                 onClick={handleDeleteAccount}
                 disabled={deleteConfirmText !== 'DELETE'}
                 style={{
-                  padding: '0.65rem 1.5rem', borderRadius: '999px', background: deleteConfirmText === 'DELETE' ? 'var(--danger)' : 'rgba(239,68,68,0.3)',
-                  color: '#fff', fontWeight: 800, border: 'none', cursor: deleteConfirmText === 'DELETE' ? 'pointer' : 'not-allowed',
+                  padding: '0.65rem 1.5rem',
+                  borderRadius: '999px',
+                  background: deleteConfirmText === 'DELETE' ? 'var(--danger)' : 'rgba(239,68,68,0.3)',
+                  color: '#fff',
+                  fontWeight: 800,
+                  border: 'none',
+                  cursor: deleteConfirmText === 'DELETE' ? 'pointer' : 'not-allowed',
                 }}
               >
                 Delete Account
@@ -604,7 +734,6 @@ export default function SettingsPage() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

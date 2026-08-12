@@ -239,17 +239,19 @@ export default function LandingPage() {
             }}
           >
             <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-              <div className="section-header" style={{ textAlign: 'center', marginBottom: '4rem' }}>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.875rem', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', borderRadius: '999px', padding: '0.35rem 1rem' }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#fbbf24', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Why MovieDex</span>
+              <div className="section-header" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '2rem', marginBottom: '4rem' }}>
+                <div style={{ flex: '1 1 400px', textAlign: 'left' }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.875rem', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', borderRadius: '999px', padding: '0.35rem 1rem' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#fbbf24', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Why MovieDex</span>
+                  </div>
+                  <h2 id="features-heading" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 900, color: '#f8fafc', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
+                    Everything you need to <br/>
+                    <span style={{ background: 'linear-gradient(135deg, #e11d48 0%, #f59e0b 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'inline-block', paddingBottom: '0.2em' }}>
+                      discover more
+                    </span>
+                  </h2>
                 </div>
-                <h2 id="features-heading" style={{ fontSize: 'clamp(1.75rem, 5vw, 3rem)', fontWeight: 900, color: '#f8fafc', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
-                  Everything you need to{' '}
-                  <span style={{ background: 'var(--brand-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                    discover more
-                  </span>
-                </h2>
-                <p style={{ color: 'rgba(148,163,184,0.85)', marginTop: '1rem', fontSize: '1.05rem', maxWidth: '600px', margin: '1rem auto 0' }}>
+                <p style={{ flex: '1 1 300px', color: 'rgba(148,163,184,0.85)', fontSize: '1.1rem', lineHeight: 1.7, textAlign: 'left', margin: 0 }}>
                   Designed specifically for cinema lovers. An elegant, fast, and feature-rich 
                   platform that redefines how you track your favorite content.
                 </p>

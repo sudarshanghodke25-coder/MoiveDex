@@ -17,6 +17,8 @@ export default function TopBar() {
   const [notifications, setNotifications] = useState([]);
 
   const searchContainerRef = useRef(null);
+  const profileRef = useRef(null);
+  const notifRef = useRef(null);
 
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
@@ -29,6 +31,20 @@ export default function TopBar() {
     setNotifOpen(false);
     setProfileOpen(false);
   }, [location.pathname]);
+
+  // Click outside listener for popovers
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
+        setProfileOpen(false);
+      }
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setNotifOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Subscribe to notifications & seed initial notifications
   useEffect(() => {
@@ -95,6 +111,13 @@ export default function TopBar() {
     markAllNotificationsAsRead(currentUser.uid, notifications);
   };
 
+  const getNotificationImageUrl = (notif) => {
+    const raw = notif.imageUrl || notif.posterPath;
+    if (!raw) return null;
+    if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
+    return `https://image.tmdb.org/t/p/w185${raw.startsWith('/') ? '' : '/'}${raw}`;
+  };
+
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const userInitial =
@@ -147,15 +170,16 @@ export default function TopBar() {
         </form>
 
         {/* Notification Bell & Dropdown */}
-        <div style={{ position: 'relative' }}>
+        <div ref={notifRef} style={{ position: 'relative' }}>
           <button
             className="btn-icon"
             aria-label="Notifications"
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               setNotifOpen(!notifOpen);
               setProfileOpen(false);
             }}
-            style={{ position: 'relative' }}
+            style={{ position: 'relative', cursor: 'pointer' }}
           >
             <svg
               width="20"
@@ -186,7 +210,7 @@ export default function TopBar() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 0 10px rgba(99,102,241,0.6)',
+                  boxShadow: '0 0 10px rgba(225,29,72,0.6)',
                 }}
               >
                 {unreadCount > 9 ? '9+' : unreadCount}
@@ -204,10 +228,11 @@ export default function TopBar() {
                 width: 'min(360px, 90vw)',
                 padding: '0',
                 zIndex: 100,
-                boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.8)',
                 border: '1px solid rgba(255,255,255,0.14)',
                 borderRadius: '16px',
                 overflow: 'hidden',
+                background: '#0e0e12',
               }}
             >
               <div
@@ -217,7 +242,7 @@ export default function TopBar() {
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  background: 'rgba(15,23,42,0.8)',
+                  background: 'rgba(18,18,22,0.95)',
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -229,11 +254,11 @@ export default function TopBar() {
                       style={{
                         fontSize: '0.72rem',
                         fontWeight: 700,
-                        background: 'rgba(99,102,241,0.2)',
-                        color: '#a5b4fc',
+                        background: 'rgba(245,158,11,0.2)',
+                        color: '#fbbf24',
                         padding: '0.15rem 0.5rem',
                         borderRadius: '999px',
-                        border: '1px solid rgba(99,102,241,0.3)',
+                        border: '1px solid rgba(245,158,11,0.3)',
                       }}
                     >
                       {unreadCount} new
@@ -272,117 +297,125 @@ export default function TopBar() {
                     <p style={{ fontSize: '0.875rem', margin: 0 }}>No notifications yet.</p>
                   </div>
                 ) : (
-                  notifications.map((notif) => (
-                    <div
-                      key={notif.id}
-                      onClick={() => handleNotificationClick(notif)}
-                      style={{
-                        padding: '0.875rem 1.25rem',
-                        borderBottom: '1px solid rgba(255,255,255,0.04)',
-                        background: notif.isRead ? 'transparent' : 'rgba(99,102,241,0.06)',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        gap: '0.875rem',
-                        alignItems: 'flex-start',
-                        transition: 'background 0.2s ease',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = notif.isRead
-                          ? 'transparent'
-                          : 'rgba(99,102,241,0.06)';
-                      }}
-                    >
-                      {/* Icon or Poster Thumbnail */}
+                  notifications.map((notif) => {
+                    const imgUrl = getNotificationImageUrl(notif);
+                    return (
                       <div
+                        key={notif.id}
+                        onClick={() => handleNotificationClick(notif)}
                         style={{
-                          width: '40px',
-                          height: '40px',
-                          borderRadius: '10px',
-                          flexShrink: 0,
-                          overflow: 'hidden',
-                          background: 'rgba(15,23,42,0.8)',
+                          padding: '0.875rem 1.25rem',
+                          borderBottom: '1px solid rgba(255,255,255,0.04)',
+                          background: notif.isRead ? 'transparent' : 'rgba(245,158,11,0.06)',
+                          cursor: 'pointer',
                           display: 'flex',
+                          gap: '0.875rem',
                           alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '1.2rem',
-                          border: '1px solid rgba(255,255,255,0.1)',
+                          transition: 'background 0.2s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'rgba(255,255,255,0.06)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = notif.isRead
+                            ? 'transparent'
+                            : 'rgba(245,158,11,0.06)';
                         }}
                       >
-                        {notif.imageUrl ? (
-                          <img
-                            src={notif.imageUrl}
-                            alt=""
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                          />
-                        ) : (
-                          <span>
-                            {notif.type === 'new_movie'
-                              ? '🎬'
-                              : notif.type === 'new_tv'
-                              ? '📺'
-                              : notif.type === 'new_anime'
-                              ? '⚡'
-                              : '🔔'}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Content text */}
-                      <div style={{ flex: 1, minWidth: 0 }}>
+                        {/* Real Poster Thumbnail */}
                         <div
                           style={{
+                            width: '42px',
+                            height: '56px',
+                            borderRadius: '8px',
+                            flexShrink: 0,
+                            overflow: 'hidden',
+                            background: '#181820',
                             display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'baseline',
-                            gap: '0.5rem',
-                            marginBottom: '0.2rem',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '1.2rem',
+                            border: '1px solid rgba(255,255,255,0.12)',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
                           }}
                         >
-                          <h4
-                            style={{
-                              fontSize: '0.875rem',
-                              fontWeight: notif.isRead ? 600 : 800,
-                              color: notif.isRead ? 'var(--text-secondary)' : '#f8fafc',
-                              margin: 0,
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                            }}
-                          >
-                            {notif.title}
-                          </h4>
-                          {!notif.isRead && (
-                            <span
-                              style={{
-                                width: '7px',
-                                height: '7px',
-                                borderRadius: '50%',
-                                background: 'var(--brand-primary)',
-                                flexShrink: 0,
+                          {imgUrl ? (
+                            <img
+                              src={imgUrl}
+                              alt={notif.title}
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                                e.currentTarget.parentElement.innerHTML = '🎬';
                               }}
                             />
+                          ) : (
+                            <span>
+                              {notif.type === 'new_movie'
+                                ? '🎬'
+                                : notif.type === 'new_tv'
+                                ? '📺'
+                                : notif.type === 'new_anime'
+                                ? '⚡'
+                                : '🔔'}
+                            </span>
                           )}
                         </div>
-                        <p
-                          style={{
-                            fontSize: '0.8rem',
-                            color: 'var(--text-secondary)',
-                            margin: 0,
-                            lineHeight: 1.35,
-                            display: '-webkit-box',
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: 'vertical',
-                            overflow: 'hidden',
-                          }}
-                        >
-                          {notif.message}
-                        </p>
+
+                        {/* Content text */}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'baseline',
+                              gap: '0.5rem',
+                              marginBottom: '0.2rem',
+                            }}
+                          >
+                            <h4
+                              style={{
+                                fontSize: '0.875rem',
+                                fontWeight: notif.isRead ? 600 : 800,
+                                color: notif.isRead ? 'var(--text-secondary)' : '#f8fafc',
+                                margin: 0,
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                              }}
+                            >
+                              {notif.title}
+                            </h4>
+                            {!notif.isRead && (
+                              <span
+                                style={{
+                                  width: '7px',
+                                  height: '7px',
+                                  borderRadius: '50%',
+                                  background: 'var(--brand-primary)',
+                                  flexShrink: 0,
+                                }}
+                              />
+                            )}
+                          </div>
+                          <p
+                            style={{
+                              fontSize: '0.8rem',
+                              color: 'var(--text-secondary)',
+                              margin: 0,
+                              lineHeight: 1.35,
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden',
+                            }}
+                          >
+                            {notif.message}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </div>
@@ -391,11 +424,31 @@ export default function TopBar() {
 
         {/* User Profile Dropdown */}
         <div
+          ref={profileRef}
           className="profile-container"
           onMouseEnter={() => setProfileOpen(true)}
           onMouseLeave={() => setProfileOpen(false)}
+          style={{ position: 'relative', paddingBottom: '1rem', marginBottom: '-1rem' }}
         >
-          <button className="profile-btn" aria-label="User menu" aria-expanded={profileOpen}>
+          <button
+            className="profile-btn"
+            aria-label="User menu"
+            aria-expanded={profileOpen}
+            onClick={(e) => {
+              e.stopPropagation();
+              setProfileOpen(!profileOpen);
+              setNotifOpen(false);
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'var(--text-secondary)',
+            }}
+          >
             <div
               className="profile-avatar"
               style={{
@@ -430,13 +483,29 @@ export default function TopBar() {
           </button>
 
           {profileOpen && (
-            <div className="profile-dropdown glass-card">
-              <div className="dropdown-header">
-                <span className="dropdown-name">
+            <div
+              className="profile-dropdown glass-card"
+              style={{
+                position: 'absolute',
+                top: 'calc(100% + 0.75rem)',
+                right: 0,
+                minWidth: '230px',
+                zIndex: 100,
+                background: '#0e0e12',
+                border: '1px solid rgba(255,255,255,0.14)',
+                borderRadius: '16px',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.8)',
+                overflow: 'hidden',
+              }}
+            >
+              <div className="dropdown-header" style={{ padding: '1rem' }}>
+                <span className="dropdown-name" style={{ fontWeight: 800, fontSize: '0.95rem', color: '#f8fafc', display: 'block' }}>
                   {currentUser?.displayName || 'MovieHub Fan'}
                 </span>
-                <span className="dropdown-email">{currentUser?.email}</span>
-                <div style={{ marginTop: '0.4rem' }}>
+                <span className="dropdown-email" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', wordBreak: 'break-all' }}>
+                  {currentUser?.email}
+                </span>
+                <div style={{ marginTop: '0.5rem' }}>
                   {currentUser?.emailVerified ? (
                     <span
                       style={{
@@ -468,7 +537,9 @@ export default function TopBar() {
                   )}
                 </div>
               </div>
-              <div className="divider" style={{ margin: '0.5rem 0' }} />
+
+              <div className="divider" style={{ margin: '0', borderColor: 'rgba(255,255,255,0.08)' }} />
+
               <button
                 className="dropdown-item"
                 onClick={() => {
@@ -496,7 +567,9 @@ export default function TopBar() {
               >
                 ⚙️ Settings
               </button>
-              <div className="divider" style={{ margin: '0.5rem 0' }} />
+
+              <div className="divider" style={{ margin: '0', borderColor: 'rgba(255,255,255,0.08)' }} />
+
               <button className="dropdown-item text-danger" onClick={handleLogout}>
                 🚪 Log Out
               </button>

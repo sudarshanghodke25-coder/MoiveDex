@@ -158,3 +158,25 @@ export async function removeFromHistory(uid, contentId) {
     }
   }
 }
+
+/**
+ * Clear all history for a user.
+ */
+export async function clearAllHistory(uid) {
+  localStorage.removeItem(LOCAL_HISTORY_KEY);
+
+  if (uid) {
+    try {
+      const colRef = collection(db, 'users', uid, 'history');
+      const snap = await getDocs(colRef);
+      // Delete in chunks if there are many, but Promise.all is fine for reasonable numbers
+      const deletePromises = [];
+      snap.forEach(docSnap => {
+        deletePromises.push(deleteDoc(docSnap.ref));
+      });
+      await Promise.all(deletePromises);
+    } catch (err) {
+      console.warn('Firestore clear all history error:', err?.message);
+    }
+  }
+}

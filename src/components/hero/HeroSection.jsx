@@ -116,20 +116,21 @@ export default function HeroSection() {
         {/* CTA buttons */}
         <div
           ref={ctaRef}
-          style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center', marginBottom: '4rem' }}
+          style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center', marginBottom: '4rem', width: '100%', padding: '0 1rem' }}
         >
           <Link
             to="/register"
             id="hero-cta-primary"
             style={{
-              display: 'inline-flex', alignItems: 'center', gap: '0.625rem',
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.625rem',
               background: 'linear-gradient(135deg, #e11d48 0%, #d97706 100%)',
               border: '1px solid rgba(245, 158, 11, 0.5)',
               color: '#f8fafc', fontWeight: 700, fontSize: '1.05rem',
-              padding: '1rem 2.5rem', borderRadius: '999px',
+              padding: '1rem 2rem', borderRadius: '999px',
               boxShadow: '0 0 30px rgba(225, 29, 72, 0.4)',
               transition: 'all 0.25s ease',
               textDecoration: 'none',
+              flex: '1 1 auto', maxWidth: '280px',
             }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.background = 'linear-gradient(135deg, #f43f5e 0%, #f59e0b 100%)'; e.currentTarget.style.boxShadow = '0 0 50px rgba(245, 158, 11, 0.6)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.background = 'linear-gradient(135deg, #e11d48 0%, #d97706 100%)'; e.currentTarget.style.boxShadow = '0 0 30px rgba(225, 29, 72, 0.4)'; }}
@@ -143,12 +144,13 @@ export default function HeroSection() {
             to="/movies"
             id="hero-cta-secondary"
             style={{
-              display: 'inline-flex', alignItems: 'center', gap: '0.625rem',
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.625rem',
               background: 'rgba(15, 23, 42, 0.85)', color: '#f8fafc', fontWeight: 600,
-              fontSize: '1.05rem', padding: '1rem 2.5rem', borderRadius: '999px',
+              fontSize: '1.05rem', padding: '1rem 2rem', borderRadius: '999px',
               border: '1px solid rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)',
               transition: 'all 0.25s ease', textDecoration: 'none',
-              opacity: 1, visibility: 'visible'
+              opacity: 1, visibility: 'visible',
+              flex: '1 1 auto', maxWidth: '280px',
             }}
             onMouseEnter={e => { e.currentTarget.style.background = 'rgba(30, 41, 59, 0.95)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.5)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
             onMouseLeave={e => { e.currentTarget.style.background = 'rgba(15, 23, 42, 0.85)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; e.currentTarget.style.transform = ''; }}

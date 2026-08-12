@@ -6,11 +6,11 @@ import { getContinueWatchingList } from '../services/history';
 import { useNavigate } from 'react-router-dom';
 
 const AVATAR_PRESETS = [
-  { id: 'crimson', label: 'Cinema Crimson', gradient: 'linear-gradient(135deg, #e11d48 0%, #f59e0b 100%)', emoji: '🎬' },
-  { id: 'gold', label: 'Radiant Gold', gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', emoji: '🍿' },
-  { id: 'rose', label: 'Velvet Rose', gradient: 'linear-gradient(135deg, #f43f5e 0%, #8b5cf6 100%)', emoji: '⚡' },
-  { id: 'emerald', label: 'Matrix Emerald', gradient: 'linear-gradient(135deg, #10b981 0%, #3b82f6 100%)', emoji: '🌌' },
-  { id: 'slate', label: 'Obsidian Black', gradient: 'linear-gradient(135deg, #181820 0%, #08080a 100%)', emoji: '🎭' },
+  { id: 'crimson', label: 'Cinema Crimson', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=Crimson&backgroundColor=e11d48', gradient: 'linear-gradient(135deg, #e11d48 0%, #f59e0b 100%)', emoji: '🎬' },
+  { id: 'gold', label: 'Radiant Gold', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=Gold&backgroundColor=f59e0b', gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', emoji: '🍿' },
+  { id: 'rose', label: 'Velvet Rose', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=Rose&backgroundColor=f43f5e', gradient: 'linear-gradient(135deg, #f43f5e 0%, #8b5cf6 100%)', emoji: '⚡' },
+  { id: 'emerald', label: 'Matrix Emerald', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=Emerald&backgroundColor=10b981', gradient: 'linear-gradient(135deg, #10b981 0%, #3b82f6 100%)', emoji: '🌌' },
+  { id: 'slate', label: 'Obsidian Black', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=Slate&backgroundColor=181820', gradient: 'linear-gradient(135deg, #181820 0%, #08080a 100%)', emoji: '🎭' },
 ];
 
 export default function ProfilePage() {
@@ -95,7 +95,7 @@ export default function ProfilePage() {
     : 'Member';
 
   const userInitial = (currentUser?.displayName || currentUser?.email || 'U').charAt(0).toUpperCase();
-  const currentAvatar = currentUser?.photoURL || selectedAvatarUrl;
+  const currentAvatar = isEditing ? (selectedAvatarUrl || currentUser?.photoURL) : (currentUser?.photoURL);
 
   return (
     <div className="page-content" style={{ maxWidth: '1000px', margin: '0 auto' }}>
@@ -164,7 +164,14 @@ export default function ProfilePage() {
           {/* Edit toggle button */}
           <button
             className="btn-ghost"
-            onClick={() => setIsEditing(!isEditing)}
+            onClick={() => {
+              if (isEditing) {
+                setDisplayNameInput(currentUser?.displayName || '');
+                setSelectedAvatarUrl(currentUser?.photoURL || '');
+                setCustomAvatarInput('');
+              }
+              setIsEditing(!isEditing);
+            }}
             style={{ borderRadius: '999px', padding: '0.65rem 1.4rem' }}
           >
             {isEditing ? 'Cancel' : '✏️ Edit Profile'}
@@ -241,11 +248,11 @@ export default function ProfilePage() {
               {AVATAR_PRESETS.map(preset => (
                 <div
                   key={preset.id}
-                  onClick={() => { setSelectedAvatarUrl(''); setCustomAvatarInput(''); }}
+                  onClick={() => { setSelectedAvatarUrl(preset.url); setCustomAvatarInput(''); }}
                   style={{
                     width: '54px', height: '54px', borderRadius: '50%', cursor: 'pointer',
                     background: preset.gradient, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '1.4rem', border: selectedAvatarUrl === '' ? '2.5px solid var(--brand-primary)' : '1px solid transparent',
+                    fontSize: '1.4rem', border: selectedAvatarUrl === preset.url ? '2.5px solid var(--brand-primary)' : '1px solid transparent',
                     transition: 'transform 0.2s',
                   }}
                   title={preset.label}
@@ -287,7 +294,12 @@ export default function ProfilePage() {
             <button
               type="button"
               className="btn-ghost"
-              onClick={() => setIsEditing(false)}
+              onClick={() => {
+                setDisplayNameInput(currentUser?.displayName || '');
+                setSelectedAvatarUrl(currentUser?.photoURL || '');
+                setCustomAvatarInput('');
+                setIsEditing(false);
+              }}
               style={{ borderRadius: '999px', padding: '0.75rem 1.5rem' }}
             >
               Cancel
