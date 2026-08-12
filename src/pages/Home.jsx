@@ -22,6 +22,7 @@ import {
 import HeroBanner   from '../components/hero/HeroBanner';
 import ScrollRow    from '../components/common/ScrollRow';
 import ErrorBoundary from '../components/common/ErrorBoundary';
+import ContinueWatchingRow from '../components/home/ContinueWatchingRow';
 
 // Fetcher wrappers that accept AbortSignal from the hook
 const fetchTrending      = s => getTrending('week', s);
@@ -74,6 +75,10 @@ export default function Home() {
 
       {/* ── Content Rows ─────────────────────────── */}
       <div className="page-sections">
+        <ErrorBoundary fallback={e => <RowError error={e?.message} />}>
+          <ContinueWatchingRow />
+        </ErrorBoundary>
+
         <ErrorBoundary fallback={e => <RowError error={e?.message} />}>
           <ScrollRow title="Now Playing in Cinemas" items={nowPlaying}    loading={l2} />
         </ErrorBoundary>

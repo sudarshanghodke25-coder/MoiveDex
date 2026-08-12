@@ -1,27 +1,27 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import HeroSection from '../components/hero/HeroSection';
 import MovieRow from '../components/movie-card/MovieRow';
 import Footer from '../components/common/Footer';
 import useTMDB from '../hooks/useTMDB';
-import { getTrending, getPopularMovies, getPopularTV, getAnime } from '../services/tmdb';
+import { getTrending, getPopularMovies, getPopularTV, getAnime, discoverMoviesByGenre } from '../services/tmdb';
 import CinematicBackground from '../components/common/CinematicBackground';
 import Loader from '../components/common/Loader';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const GENRE_PILLS = [
-  { label: 'Action', emoji: '💥' },
-  { label: 'Drama',  emoji: '🎭' },
-  { label: 'Sci-Fi', emoji: '🚀' },
-  { label: 'Thriller', emoji: '🔪' },
-  { label: 'Comedy',  emoji: '😂' },
-  { label: 'Horror',  emoji: '👻' },
-  { label: 'Romance', emoji: '💕' },
-  { label: 'Animation', emoji: '✨' },
-  { label: 'Fantasy', emoji: '🧙' },
-  { label: 'Documentary', emoji: '🎥' },
+  { label: 'Action',      emoji: '💥', id: 28 },
+  { label: 'Drama',       emoji: '🎭', id: 18 },
+  { label: 'Sci-Fi',      emoji: '🚀', id: 878 },
+  { label: 'Thriller',    emoji: '🔪', id: 53 },
+  { label: 'Comedy',      emoji: '😂', id: 35 },
+  { label: 'Horror',      emoji: '👻', id: 27 },
+  { label: 'Romance',     emoji: '💕', id: 10749 },
+  { label: 'Animation',   emoji: '✨', id: 16 },
+  { label: 'Fantasy',     emoji: '🧙', id: 14 },
+  { label: 'Documentary', emoji: '🎥', id: 99 },
 ];
 
 const FEATURES = [
@@ -67,7 +67,7 @@ export default function LandingPage() {
   const featuresRef  = useRef(null);
   const ctaRef       = useRef(null);
   const genreRef     = useRef(null);
-  const [activeGenre, setActiveGenre] = useState('Action');
+  const [activeGenre, setActiveGenre] = useState(GENRE_PILLS[0]);
   const [loadingComplete, setLoadingComplete] = useState(false);
 
   // ── Live TMDB data ──────────────────────────────────────────────
@@ -75,6 +75,9 @@ export default function LandingPage() {
   const movies   = useTMDB(getPopularMovies,   []);
   const tv       = useTMDB(getPopularTV,       []);
   const anime    = useTMDB(getAnime,           []);
+  
+  const genreFetcher = useCallback(() => discoverMoviesByGenre(activeGenre.id).then(r => r.results), [activeGenre.id]);
+  const genreMovies = useTMDB(genreFetcher, [activeGenre.id]);
 
   // ── Scroll animations ───────────────────────────────────────────
   useEffect(() => {
@@ -164,35 +167,48 @@ export default function LandingPage() {
               </h2>
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.625rem' }} role="list" aria-label="Genre filters">
-              {GENRE_PILLS.map(({ label, emoji }) => (
-                <button
-                  key={label}
-                  role="listitem"
-                  aria-pressed={activeGenre === label}
-                  className="genre-pill"
-                  onClick={() => setActiveGenre(label)}
-                  style={{
-                    display: 'inline-flex', alignItems: 'center', gap: '0.375rem',
-                    padding: '0.5rem 1.1rem', borderRadius: '999px',
-                    fontSize: '0.85rem', fontWeight: 600,
-                    cursor: 'pointer', border: 'none', transition: 'all 0.2s ease',
-                    background: activeGenre === label
-                      ? 'var(--brand-gradient)'
-                      : 'rgba(255,255,255,0.06)',
-                    color: activeGenre === label ? '#fff' : 'rgba(148,163,184,0.85)',
-                    boxShadow: activeGenre === label ? '0 0 20px rgba(99,102,241,0.4)' : 'none',
-                    outline: 'none',
-                    backdropFilter: 'blur(8px)',
-                  }}
-                  onMouseEnter={e => { if (activeGenre !== label) { e.currentTarget.style.background = 'rgba(99,102,241,0.15)'; e.currentTarget.style.color = '#f8fafc'; } }}
-                  onMouseLeave={e => { if (activeGenre !== label) { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'rgba(148,163,184,0.85)'; } }}
-                >
-                  <span>{emoji}</span>
-                  {label}
-                </button>
-              ))}
+              {GENRE_PILLS.map((genre) => {
+                const isSelected = activeGenre.id === genre.id;
+                return (
+                  <button
+                    key={genre.label}
+                    role="listitem"
+                    aria-pressed={isSelected}
+                    className="genre-pill"
+                    onClick={() => setActiveGenre(genre)}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: '0.375rem',
+                      padding: '0.5rem 1.1rem', borderRadius: '999px',
+                      fontSize: '0.85rem', fontWeight: 600,
+                      cursor: 'pointer', transition: 'all 0.2s ease',
+                      background: isSelected
+                        ? 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)'
+                        : 'rgba(15, 23, 42, 0.75)',
+                      color: isSelected ? '#f8fafc' : 'rgba(148,163,184,0.85)',
+                      border: isSelected ? '1px solid rgba(99, 102, 241, 0.6)' : '1px solid rgba(255, 255, 255, 0.08)',
+                      boxShadow: isSelected ? '0 0 20px rgba(99,102,241,0.4)' : 'none',
+                      outline: 'none',
+                      backdropFilter: 'blur(8px)',
+                    }}
+                    onMouseEnter={e => { if (!isSelected) { e.currentTarget.style.background = 'rgba(30, 41, 59, 0.9)'; e.currentTarget.style.color = '#f8fafc'; } }}
+                    onMouseLeave={e => { if (!isSelected) { e.currentTarget.style.background = 'rgba(15, 23, 42, 0.75)'; e.currentTarget.style.color = 'rgba(148,163,184,0.85)'; } }}
+                  >
+                    <span>{genre.emoji}</span>
+                    {genre.label}
+                  </button>
+                );
+              })}
             </div>
           </section>
+
+          {/* ── Dynamic Genre Row ────────────────────────────────────── */}
+          <MovieRow
+            title={`${activeGenre.emoji} Top ${activeGenre.label} Movies`}
+            items={genreMovies.data}
+            loading={genreMovies.loading}
+            error={genreMovies.error}
+            viewAllTo="/movies"
+          />
 
           {/* ── Popular TV (live TMDB) ────────────────────────────────── */}
           <MovieRow
@@ -326,14 +342,15 @@ export default function LandingPage() {
                   id="cta-banner-signup"
                   style={{
                     display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                    background: 'var(--brand-gradient)',
-                    color: '#fff', fontWeight: 700, fontSize: '1rem',
+                    background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)',
+                    border: '1px solid rgba(99, 102, 241, 0.5)',
+                    color: '#f8fafc', fontWeight: 700, fontSize: '1rem',
                     padding: '1.1rem 2.5rem', borderRadius: '999px',
-                    boxShadow: '0 0 40px rgba(99,102,241,0.4)', textDecoration: 'none',
+                    boxShadow: '0 0 30px rgba(99,102,241,0.35)', textDecoration: 'none',
                     transition: 'all 0.25s ease',
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 0 60px rgba(99,102,241,0.6)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 0 40px rgba(99,102,241,0.4)'; }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.background = 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)'; e.currentTarget.style.boxShadow = '0 0 50px rgba(99,102,241,0.55)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.background = 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)'; e.currentTarget.style.boxShadow = '0 0 30px rgba(99,102,241,0.35)'; }}
                 >
                   🚀 Create Free Account
                 </a>
@@ -341,15 +358,15 @@ export default function LandingPage() {
                   href="/movies"
                   style={{
                     display: 'inline-flex', alignItems: 'center',
-                    background: 'rgba(255,255,255,0.06)', color: '#f8fafc',
+                    background: 'rgba(15, 23, 42, 0.85)', color: '#f8fafc',
                     fontWeight: 600, fontSize: '1rem',
                     padding: '1.1rem 2.5rem', borderRadius: '999px',
                     border: '1px solid rgba(255,255,255,0.15)',
                     backdropFilter: 'blur(8px)', textDecoration: 'none',
                     transition: 'all 0.25s ease',
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.12)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.4)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(30, 41, 59, 0.95)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.5)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(15, 23, 42, 0.85)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; }}
                 >
                   Browse First
                 </a>

@@ -20,8 +20,6 @@ const MAX_SLIDES     = 6;
 
 export default function HeroBanner({ items = [], loading = false }) {
   const [activeIdx,  setActiveIdx]  = useState(0);
-  const [prevIdx,    setPrevIdx]    = useState(null);
-  const [nextReady,  setNextReady]  = useState(false); // true once next image is preloaded
   const contentRef = useRef(null);
   const navigate   = useNavigate();
 
@@ -41,9 +39,7 @@ export default function HeroBanner({ items = [], loading = false }) {
       );
     }
 
-    setPrevIdx(activeIdx);
     setActiveIdx(clampedIdx);
-    setNextReady(false);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeIdx, slides.length]);
 
@@ -53,9 +49,7 @@ export default function HeroBanner({ items = [], loading = false }) {
     const next = slides[(activeIdx + 1) % slides.length];
     if (!next?.backdropPath) return;
     const url = backdropUrl(next.backdropPath, 'lg');
-    preloadImage(url)
-      .then(() => setNextReady(true))
-      .catch(() => setNextReady(true)); // continue regardless
+    preloadImage(url).catch(() => {});
   }, [activeIdx, slides]);
 
   // ── Auto-rotate ───────────────────────────────────────────────────

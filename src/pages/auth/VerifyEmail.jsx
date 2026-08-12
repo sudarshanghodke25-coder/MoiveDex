@@ -91,12 +91,15 @@ export default function VerifyEmail() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <button onClick={handleVerify} disabled={loading} className="auth-elem" style={{ 
               width: '100%', padding: '1.125rem', borderRadius: '8px',
-              background: '#fff', color: '#000', fontWeight: 700, fontSize: '1rem',
-              border: 'none', cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s',
+              background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)',
+              border: '1px solid rgba(99, 102, 241, 0.5)',
+              color: '#f8fafc', fontWeight: 700, fontSize: '1rem',
+              cursor: 'pointer', transition: 'all 0.25s ease',
+              boxShadow: '0 0 20px rgba(99,102,241,0.3)',
               display: 'flex', justifyContent: 'center', alignItems: 'center'
             }}
-            onMouseEnter={(e) => { e.target.style.transform = 'translateY(-2px)'; e.target.style.boxShadow = '0 10px 25px rgba(255,255,255,0.15)'; }}
-            onMouseLeave={(e) => { e.target.style.transform = 'none'; e.target.style.boxShadow = 'none'; }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)'; e.currentTarget.style.boxShadow = '0 0 30px rgba(99,102,241,0.5)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.background = 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)'; e.currentTarget.style.boxShadow = '0 0 20px rgba(99,102,241,0.3)'; }}
             >
               {loading ? 'Sending...' : 'Send Verification Email'}
             </button>

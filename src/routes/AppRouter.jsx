@@ -16,6 +16,7 @@ import TVPage from '../pages/TVPage';
 import AnimePage from '../pages/AnimePage';
 import SearchPage from '../pages/SearchPage';
 import DetailPage from '../pages/DetailPage';
+import MyListPage from '../pages/MyListPage';
 
 /**
  * AppRouter — Phase 3 full routes.
@@ -46,7 +47,7 @@ export default function AppRouter() {
           <Route path="/search"      element={<SearchPage />} />
           <Route path="/movie/:id"   element={<DetailPage mediaType="movie" />} />
           <Route path="/tv/:id"      element={<DetailPage mediaType="tv" />} />
-          <Route path="/mylist"      element={<ComingSoon page="My List" desc="Save your favorite movies and shows to watch later." emoji="🔖" />} />
+          <Route path="/mylist"      element={<MyListPage />} />
           <Route path="/profile"     element={<ComingSoon page="Profile" desc="Manage your account and viewing preferences." emoji="👤" />} />
           <Route path="/settings"    element={<ComingSoon page="Settings" desc="Customize your MovieDex experience." emoji="⚙️" />} />
           <Route path="/trending"    element={<ComingSoon page="Trending" desc="See what's trending globally right now." emoji="🔥" />} />

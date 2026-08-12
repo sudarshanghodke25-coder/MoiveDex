@@ -307,6 +307,56 @@ export async function getTVDetails(id, signal = null) {
   return normalise(data, 'tv');
 }
 
+/** TV season details with episode list */
+export async function getTVSeasonDetails(tvId, seasonNumber = 1, signal = null) {
+  const data = await get(`/tv/${tvId}/season/${seasonNumber}`, {}, signal);
+  return normaliseSeason(data, tvId);
+}
+
+/** TV episode details */
+export async function getTVEpisodeDetails(tvId, seasonNumber = 1, episodeNumber = 1, signal = null) {
+  const data = await get(`/tv/${tvId}/season/${seasonNumber}/episode/${episodeNumber}`, {}, signal);
+  return normaliseEpisode(data, tvId, seasonNumber);
+}
+
+/** Watch providers (legal streaming links/providers) */
+export async function getWatchProviders(id, mediaType = 'movie', signal = null) {
+  const data = await get(`/${mediaType}/${id}/watch/providers`, {}, signal);
+  return data.results || {};
+}
+
+/** Normalise TV episode */
+export function normaliseEpisode(ep, tvId = null, seasonNumber = 1) {
+  return {
+    id: ep.id,
+    tvId,
+    episodeNumber: ep.episode_number,
+    seasonNumber: ep.season_number ?? seasonNumber,
+    name: ep.name || `Episode ${ep.episode_number}`,
+    overview: ep.overview || '',
+    stillPath: ep.still_path || null,
+    airDate: ep.air_date || null,
+    voteAverage: ep.vote_average ?? null,
+    voteCount: ep.vote_count ?? 0,
+    runtime: ep.runtime || null,
+    episodeCode: `S${String(ep.season_number ?? seasonNumber).padStart(2, '0')}E${String(ep.episode_number).padStart(2, '0')}`,
+  };
+}
+
+/** Normalise TV season */
+export function normaliseSeason(seasonData, tvId = null) {
+  return {
+    id: seasonData.id,
+    tvId,
+    seasonNumber: seasonData.season_number,
+    name: seasonData.name || `Season ${seasonData.season_number}`,
+    overview: seasonData.overview || '',
+    posterPath: seasonData.poster_path || null,
+    airDate: seasonData.air_date || null,
+    episodes: (seasonData.episodes || []).map(ep => normaliseEpisode(ep, tvId, seasonData.season_number)),
+  };
+}
+
 // --- Anime ---
 
 /**

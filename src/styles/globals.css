@@ -16,11 +16,11 @@ body {
   --bg-elevated:  #1a1a35;
   --bg-glass:     rgba(255, 255, 255, 0.05);
 
-  /* Brand - Updated to sleek 'blacky/silver' shade */
-  --brand-primary:   #ffffff;
-  --brand-secondary: #a1a1aa;
-  --brand-accent:    #d4d4d8;
-  --brand-gradient:  linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%);
+  /* Brand - Sleek dark cinema theme */
+  --brand-primary:   #6366f1;
+  --brand-secondary: #818cf8;
+  --brand-accent:    #a5b4fc;
+  --brand-gradient:  linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
 
   /* Text */
   --text-primary:   #f8fafc;
@@ -37,8 +37,8 @@ body {
   --border-glass:  rgba(255, 255, 255, 0.14);
 
   /* Glows */
-  --glow-primary: 0 0 40px rgba(255, 255, 255, 0.15);
-  --glow-accent:  0 0 20px rgba(255, 255, 255, 0.2);
+  --glow-primary: 0 0 25px rgba(99, 102, 241, 0.35);
+  --glow-accent:  0 0 20px rgba(99, 102, 241, 0.4);
 
   /* Spacing */
   --section-px: clamp(1rem, 5vw, 4rem);
@@ -132,7 +132,7 @@ a {
 
 /* ─── Gradient Text ─────────────────────────────────────────────── */
 .gradient-text {
-  background: var(--brand-gradient);
+  background: linear-gradient(135deg, #f8fafc 0%, #818cf8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -143,23 +143,25 @@ a {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: var(--brand-gradient);
-  color: #fff;
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  color: #f8fafc;
   font-family: 'Outfit', sans-serif;
   font-size: 1rem;
   font-weight: 600;
   padding: 0.875rem 2rem;
   border-radius: var(--radius-full);
-  border: none;
   cursor: pointer;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-  box-shadow: var(--glow-primary);
+  transition: all 0.25s ease;
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.25);
   white-space: nowrap;
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 0 60px rgba(99, 102, 241, 0.5);
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+  border-color: rgba(99, 102, 241, 0.8);
+  box-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
 }
 
 .btn-primary:active {
@@ -170,7 +172,7 @@ a {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: transparent;
+  background: rgba(15, 23, 42, 0.85);
   color: var(--text-primary);
   font-family: 'Outfit', sans-serif;
   font-size: 1rem;
@@ -179,14 +181,14 @@ a {
   border-radius: var(--radius-full);
   border: 1px solid var(--border-glass);
   cursor: pointer;
-  transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+  transition: all 0.25s ease;
   backdrop-filter: blur(8px);
   white-space: nowrap;
 }
 
 .btn-ghost:hover {
-  background: var(--bg-glass);
-  border-color: var(--brand-primary);
+  background: rgba(30, 41, 59, 0.95);
+  border-color: rgba(99, 102, 241, 0.5);
   transform: translateY(-1px);
 }
 

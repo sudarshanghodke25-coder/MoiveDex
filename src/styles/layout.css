@@ -306,12 +306,14 @@
   width: 46px;
   height: 46px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
-  color: #000;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(99, 102, 241, 0.5);
+  color: #f8fafc;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: transform 0.2s ease;
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
 }
 
 .card-play-btn:hover { transform: scale(1.1); }
@@ -579,9 +581,10 @@
 .tab-btn:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); }
 
 .tab-btn.active {
-  background: #fff;
-  color: #000;
-  border-color: #fff;
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+  color: #f8fafc;
+  border: 1px solid rgba(99, 102, 241, 0.6);
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
   font-weight: 700;
 }
 

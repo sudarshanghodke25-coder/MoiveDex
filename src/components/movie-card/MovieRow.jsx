@@ -101,13 +101,7 @@ export default function MovieRow({ title, items = [], loading = false, error = n
               ))
             : items.map(item => (
                 <div key={item.id} role="listitem" style={{ scrollSnapAlign: 'start', flexShrink: 0 }}>
-                  <MovieCard
-                    title={item.title}
-                    posterPath={item.posterPath}
-                    rating={item.rating}
-                    year={item.releaseDate ? item.releaseDate.slice(0, 4) : null}
-                    mediaType={item.mediaType}
-                  />
+                  <MovieCard movie={item} />
                 </div>
               ))
           }
