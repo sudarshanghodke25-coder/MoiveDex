@@ -1,9 +1,9 @@
 /* ─── Authenticated Layout (Grid System) ────────────────────────── */
 .auth-layout {
   display: flex;
-  min-height: 100dvh;
+  height: 100dvh;         /* Fixed height — content scrolls inside */
   background-color: var(--bg-deepspace);
-  overflow: hidden;
+  /* NO overflow: hidden here — that breaks sticky and traps scroll */
 }
 
 /* ─── Sidebar ────────────────────────────────────────────────────── */
@@ -16,9 +16,12 @@
   z-index: 50;
   backdrop-filter: blur(20px);
   flex-shrink: 0;
-  position: sticky;
-  top: 0;
-  height: 100dvh;
+  /* Sidebar fills its flex column — no sticky needed because
+     the layout itself is exactly 100dvh tall */
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
 }
 
 .sidebar-header {
@@ -109,8 +112,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  position: relative;
+  overflow: hidden;       /* Clip horizontally; content scrolls vertically below */
   min-width: 0;
 }
 
@@ -135,11 +137,10 @@
   justify-content: space-between;
   background: rgba(5, 5, 16, 0.9);
   border-bottom: 1px solid var(--border-subtle);
-  flex-shrink: 0;
-  position: sticky;
-  top: 0;
+  flex-shrink: 0;         /* TopBar stays at top of flex column naturally */
   z-index: 40;
   backdrop-filter: blur(16px);
+  position: relative;     /* Needed for search suggestions dropdown */
 }
 
 .topbar-left, .topbar-right {
@@ -291,8 +292,8 @@
 .scroll-arrow-btn:disabled { opacity: 0.3; cursor: default; }
 
 /* ─── Movie Card Variants ─────────────────────────────────────────── */
-.movie-card--md { width: 160px; }
-.movie-card--lg { width: 220px; }
+.movie-card--md { width: 200px; }   /* ↑ was 160px */
+.movie-card--lg { width: 260px; }   /* ↑ was 220px */
 
 .movie-card .card-poster {
   position: relative;
@@ -330,11 +331,35 @@
   backdrop-filter: blur(6px);
 }
 
+/* Card genre tags (shown in hover overlay) */
+.card-genres {
+  display: flex;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.card-genre-tag {
+  font-size: 0.62rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.9);
+  white-space: nowrap;
+}
+
+/* Card meta rating */
+.card-meta-rating {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
 /* ─── Hero Banner ────────────────────────────────────────────────── */
 .hero-banner {
   position: relative;
-  min-height: 500px;
-  height: 56vh;
+  min-height: 460px;
+  height: 52vh;
   display: flex;
   align-items: flex-end;
   overflow: hidden;
@@ -450,6 +475,65 @@
   background: #fff;
   width: 24px;
   border-radius: 4px;
+}
+
+/* Hero controls (prev/next + dots row) */
+.hero-controls {
+  position: absolute;
+  bottom: 1.5rem;
+  right: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  z-index: 2;
+}
+
+.hero-nav-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  font-family: inherit;
+}
+
+.hero-nav-btn:hover { background: rgba(255,255,255,0.25); }
+
+/* Hero genre tags */
+.hero-genre-tag {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.8);
+}
+
+.hero-type-pill {
+  font-weight: 700;
+  background: rgba(255,255,255,0.15);
+  border-color: rgba(255,255,255,0.25);
+}
+
+/* Hero skeleton content */
+.hero-banner--skeleton {
+  min-height: 500px;
+  display: flex;
+  align-items: flex-end;
+  background: var(--bg-elevated);
+}
+
+.hero-skeleton-content {
+  padding: 2.5rem 2rem 3rem;
+  width: 100%;
+  max-width: 520px;
 }
 
 /* ─── Page Layout ────────────────────────────────────────────────── */
