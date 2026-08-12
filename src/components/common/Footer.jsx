@@ -88,7 +88,7 @@ export default function Footer() {
                 fontWeight: 900,
                 fontSize: '1.25rem',
                 letterSpacing: '-0.02em',
-                background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+                background: 'linear-gradient(135deg, #ffffff 0%, #fbbf24 60%, #e11d48 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',

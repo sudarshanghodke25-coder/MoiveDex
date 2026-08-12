@@ -86,14 +86,14 @@ export default function Navbar() {
                 to="/home"
                 style={{
                   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                  background: 'rgba(99,102,241,0.15)',
-                  border: '1px solid rgba(99,102,241,0.3)',
+                  background: 'rgba(245, 158, 11, 0.15)',
+                  border: '1px solid rgba(245, 158, 11, 0.3)',
                   color: '#f8fafc', fontWeight: 600, fontSize: '0.92rem',
                   padding: '0.6rem 1.35rem', borderRadius: '999px',
                   transition: 'all 0.25s ease', textDecoration: 'none',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.25)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.15)'; }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(245, 158, 11, 0.25)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(245, 158, 11, 0.15)'; }}
               >
                 Dashboard
               </Link>
@@ -120,14 +120,14 @@ export default function Navbar() {
                 id="landing-nav-login"
                 style={{
                   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                  background: 'rgba(15, 23, 42, 0.85)',
+                  background: 'rgba(18, 18, 22, 0.85)',
                   border: '1px solid rgba(255, 255, 255, 0.15)',
                   color: '#f8fafc', fontWeight: 600, fontSize: '0.92rem',
                   padding: '0.6rem 1.35rem', borderRadius: '999px',
                   transition: 'all 0.25s ease', textDecoration: 'none',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(30, 41, 59, 0.95)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.5)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(15, 23, 42, 0.85)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(30, 30, 38, 0.95)'; e.currentTarget.style.borderColor = 'rgba(245, 158, 11, 0.5)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(18, 18, 22, 0.85)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; }}
               >
                 Log In
               </Link>
@@ -136,15 +136,15 @@ export default function Navbar() {
                 id="landing-nav-register"
                 style={{
                   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                  background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)',
-                  border: '1px solid rgba(99, 102, 241, 0.5)',
+                  background: 'linear-gradient(135deg, #e11d48 0%, #d97706 100%)',
+                  border: '1px solid rgba(245, 158, 11, 0.5)',
                   color: '#f8fafc', fontWeight: 700, fontSize: '0.92rem',
                   padding: '0.6rem 1.45rem', borderRadius: '999px',
-                  boxShadow: '0 0 20px rgba(99,102,241,0.3)',
+                  boxShadow: '0 0 20px rgba(225, 29, 72, 0.35)',
                   transition: 'all 0.25s ease', textDecoration: 'none',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)'; e.currentTarget.style.boxShadow = '0 0 30px rgba(99,102,241,0.5)'; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.background = 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)'; e.currentTarget.style.boxShadow = '0 0 20px rgba(99,102,241,0.3)'; }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = 'linear-gradient(135deg, #f43f5e 0%, #f59e0b 100%)'; e.currentTarget.style.boxShadow = '0 0 30px rgba(245, 158, 11, 0.55)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.background = 'linear-gradient(135deg, #e11d48 0%, #d97706 100%)'; e.currentTarget.style.boxShadow = '0 0 20px rgba(225, 29, 72, 0.35)'; }}
               >
                 Register
               </Link>

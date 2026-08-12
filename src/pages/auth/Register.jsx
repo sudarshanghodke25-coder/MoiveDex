@@ -145,15 +145,15 @@ export default function Register() {
 
                 <button disabled={loading} type="submit" className="auth-elem" style={{ 
                   width: '100%', padding: '1.125rem', marginTop: '0.5rem', borderRadius: '8px',
-                  background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)',
-                  border: '1px solid rgba(99, 102, 241, 0.5)',
+                  background: 'linear-gradient(135deg, #e11d48 0%, #d97706 100%)',
+                  border: '1px solid rgba(245, 158, 11, 0.5)',
                   color: '#f8fafc', fontWeight: 700, fontSize: '1rem',
                   cursor: 'pointer', transition: 'all 0.25s ease',
-                  boxShadow: '0 0 20px rgba(99,102,241,0.3)',
+                  boxShadow: '0 0 20px rgba(225,29,72,0.35)',
                   display: 'flex', justifyContent: 'center', alignItems: 'center'
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)'; e.currentTarget.style.boxShadow = '0 0 30px rgba(99,102,241,0.5)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.background = 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)'; e.currentTarget.style.boxShadow = '0 0 20px rgba(99,102,241,0.3)'; }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = 'linear-gradient(135deg, #f43f5e 0%, #f59e0b 100%)'; e.currentTarget.style.boxShadow = '0 0 30px rgba(245,158,11,0.55)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.background = 'linear-gradient(135deg, #e11d48 0%, #d97706 100%)'; e.currentTarget.style.boxShadow = '0 0 20px rgba(225,29,72,0.35)'; }}
                 >
                   {loading ? 'Creating...' : 'Create Account'}
                 </button>

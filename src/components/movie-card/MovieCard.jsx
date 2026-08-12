@@ -8,7 +8,7 @@ function PosterPlaceholder({ title }) {
     <div style={{
       width: '100%',
       height: '100%',
-      background: 'linear-gradient(135deg, rgba(30, 27, 75, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%)',
+      background: 'linear-gradient(135deg, #181820 0%, #08080a 100%)',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -17,17 +17,17 @@ function PosterPlaceholder({ title }) {
       textAlign: 'center',
       gap: '0.625rem',
       color: 'var(--text-muted)',
-      border: '1px solid rgba(99, 102, 241, 0.2)',
+      border: '1px solid rgba(245, 158, 11, 0.2)',
     }}>
       <div style={{
         width: '2.5rem',
         height: '2.5rem',
         borderRadius: '50%',
-        background: 'rgba(99, 102, 241, 0.15)',
+        background: 'rgba(245, 158, 11, 0.15)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        color: '#a5b4fc',
+        color: '#fbbf24',
       }}>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
           <rect width="18" height="18" x="3" y="3" rx="2"/>

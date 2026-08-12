@@ -182,16 +182,16 @@ export default function LandingPage() {
                       fontSize: '0.85rem', fontWeight: 600,
                       cursor: 'pointer', transition: 'all 0.2s ease',
                       background: isSelected
-                        ? 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)'
-                        : 'rgba(15, 23, 42, 0.75)',
+                        ? 'linear-gradient(135deg, #e11d48 0%, #d97706 100%)'
+                        : 'rgba(18, 18, 22, 0.85)',
                       color: isSelected ? '#f8fafc' : 'rgba(148,163,184,0.85)',
-                      border: isSelected ? '1px solid rgba(99, 102, 241, 0.6)' : '1px solid rgba(255, 255, 255, 0.08)',
-                      boxShadow: isSelected ? '0 0 20px rgba(99,102,241,0.4)' : 'none',
+                      border: isSelected ? '1px solid rgba(245, 158, 11, 0.6)' : '1px solid rgba(255, 255, 255, 0.08)',
+                      boxShadow: isSelected ? '0 0 20px rgba(245, 158, 11, 0.4)' : 'none',
                       outline: 'none',
                       backdropFilter: 'blur(8px)',
                     }}
-                    onMouseEnter={e => { if (!isSelected) { e.currentTarget.style.background = 'rgba(30, 41, 59, 0.9)'; e.currentTarget.style.color = '#f8fafc'; } }}
-                    onMouseLeave={e => { if (!isSelected) { e.currentTarget.style.background = 'rgba(15, 23, 42, 0.75)'; e.currentTarget.style.color = 'rgba(148,163,184,0.85)'; } }}
+                    onMouseEnter={e => { if (!isSelected) { e.currentTarget.style.background = 'rgba(30, 30, 38, 0.9)'; e.currentTarget.style.color = '#f8fafc'; } }}
+                    onMouseLeave={e => { if (!isSelected) { e.currentTarget.style.background = 'rgba(18, 18, 22, 0.75)'; e.currentTarget.style.color = 'rgba(148,163,184,0.85)'; } }}
                   >
                     <span>{genre.emoji}</span>
                     {genre.label}
@@ -234,14 +234,14 @@ export default function LandingPage() {
             aria-labelledby="features-heading"
             style={{
               padding: 'clamp(3rem, 8vh, 5rem) clamp(1rem, 5vw, 4rem)',
-              background: 'linear-gradient(180deg, rgba(99,102,241,0.04) 0%, transparent 100%)',
+              background: 'linear-gradient(180deg, rgba(225,29,72,0.04) 0%, transparent 100%)',
               marginTop: '1rem',
             }}
           >
             <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
               <div className="section-header" style={{ textAlign: 'center', marginBottom: '4rem' }}>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.875rem', background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: '999px', padding: '0.35rem 1rem' }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#a5b4fc', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Why MovieDex</span>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.875rem', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', borderRadius: '999px', padding: '0.35rem 1rem' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#fbbf24', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Why MovieDex</span>
                 </div>
                 <h2 id="features-heading" style={{ fontSize: 'clamp(1.75rem, 5vw, 3rem)', fontWeight: 900, color: '#f8fafc', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
                   Everything you need to{' '}
@@ -317,14 +317,14 @@ export default function LandingPage() {
             <div aria-hidden="true" style={{
               position: 'absolute', inset: 0, pointerEvents: 'none',
               background: `
-                radial-gradient(ellipse 60% 80% at 50% 50%, rgba(99,102,241,0.12) 0%, transparent 70%),
-                radial-gradient(ellipse 40% 60% at 80% 30%, rgba(168,85,247,0.08) 0%, transparent 60%)
+                radial-gradient(ellipse 60% 80% at 50% 50%, rgba(225,29,72,0.12) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 60% at 80% 30%, rgba(245,158,11,0.08) 0%, transparent 60%)
               `,
             }} />
             {/* Animated border glow */}
             <div aria-hidden="true" style={{
               position: 'absolute', inset: '0 10%', top: 0, height: '1px',
-              background: 'linear-gradient(90deg, transparent, rgba(99,102,241,0.6), rgba(168,85,247,0.6), transparent)',
+              background: 'linear-gradient(90deg, transparent, rgba(225,29,72,0.6), rgba(245,158,11,0.6), transparent)',
             }} />
 
             <div style={{ position: 'relative', zIndex: 1, maxWidth: '680px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -342,15 +342,15 @@ export default function LandingPage() {
                   id="cta-banner-signup"
                   style={{
                     display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                    background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)',
-                    border: '1px solid rgba(99, 102, 241, 0.5)',
+                    background: 'linear-gradient(135deg, #e11d48 0%, #d97706 100%)',
+                    border: '1px solid rgba(245, 158, 11, 0.5)',
                     color: '#f8fafc', fontWeight: 700, fontSize: '1rem',
                     padding: '1.1rem 2.5rem', borderRadius: '999px',
-                    boxShadow: '0 0 30px rgba(99,102,241,0.35)', textDecoration: 'none',
+                    boxShadow: '0 0 30px rgba(225,29,72,0.35)', textDecoration: 'none',
                     transition: 'all 0.25s ease',
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.background = 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)'; e.currentTarget.style.boxShadow = '0 0 50px rgba(99,102,241,0.55)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.background = 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)'; e.currentTarget.style.boxShadow = '0 0 30px rgba(99,102,241,0.35)'; }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.background = 'linear-gradient(135deg, #f43f5e 0%, #f59e0b 100%)'; e.currentTarget.style.boxShadow = '0 0 50px rgba(245,158,11,0.55)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.background = 'linear-gradient(135deg, #e11d48 0%, #d97706 100%)'; e.currentTarget.style.boxShadow = '0 0 30px rgba(225,29,72,0.35)'; }}
                 >
                   🚀 Create Free Account
                 </a>
@@ -358,15 +358,15 @@ export default function LandingPage() {
                   href="/movies"
                   style={{
                     display: 'inline-flex', alignItems: 'center',
-                    background: 'rgba(15, 23, 42, 0.85)', color: '#f8fafc',
+                    background: 'rgba(18, 18, 22, 0.85)', color: '#f8fafc',
                     fontWeight: 600, fontSize: '1rem',
                     padding: '1.1rem 2.5rem', borderRadius: '999px',
                     border: '1px solid rgba(255,255,255,0.15)',
                     backdropFilter: 'blur(8px)', textDecoration: 'none',
                     transition: 'all 0.25s ease',
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(30, 41, 59, 0.95)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.5)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(15, 23, 42, 0.85)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(30, 30, 38, 0.95)'; e.currentTarget.style.borderColor = 'rgba(245,158,11,0.5)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(18, 18, 22, 0.85)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; }}
                 >
                   Browse First
                 </a>

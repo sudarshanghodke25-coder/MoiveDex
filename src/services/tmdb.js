@@ -176,6 +176,8 @@ export function normalise(item, overrideMediaType = null) {
     voteCount:       item.vote_count      ?? 0,
     popularity:      item.popularity      ?? 0,
     releaseDate:     item.release_date    || item.first_air_date || null,
+    firstAirDate:    item.first_air_date  || null,
+    lastAirDate:     item.last_air_date   || null,
     mediaType,
     genreIds,
     genreNames,
@@ -183,17 +185,25 @@ export function normalise(item, overrideMediaType = null) {
     runtime:         item.runtime                  || null,
     seasons:         item.number_of_seasons        || null,
     episodes:        item.number_of_episodes       || null,
+    numberOfSeasons: item.number_of_seasons        || null,
+    numberOfEpisodes: item.number_of_episodes      || null,
     tagline:         item.tagline                  || '',
     status:          item.status                   || '',
     originalLanguage: item.original_language       || '',
+    spokenLanguages: item.spoken_languages?.map(l => l.english_name || l.name) || [],
+    productionCountries: item.production_countries?.map(c => c.name) || [],
     adult:           item.adult                    || false,
     // Appended responses (only present on detail calls)
     credits:         item.credits          || null,
     videos:          item.videos           || null,
     similar:         item.similar          || null,
     recommendations: item.recommendations  || null,
+    providers:       item['watch/providers']?.results || null,
     // Network info (TV)
     networks:        item.networks         || null,
+    // TV season summary list — array of {id, name, poster_path, season_number, episode_count, air_date}
+    // Preserved so the detail page can build a real season dropdown with actual names
+    seasonsList:     item.seasons          || null,
     // Production (movies)
     productionCompanies: item.production_companies || null,
     budget:          item.budget           || null,
@@ -270,9 +280,34 @@ export async function getUpcoming(page = 1, signal = null) {
 /** Movie details + appended responses */
 export async function getMovieDetails(id, signal = null) {
   const data = await get(`/movie/${id}`, {
-    append_to_response: 'credits,videos,similar,recommendations,keywords',
+    append_to_response: 'credits,videos,similar,recommendations,keywords,watch/providers',
   }, signal);
   return normalise(data, 'movie');
+}
+
+export async function getMovieCredits(id, signal = null) {
+  const data = await get(`/movie/${id}/credits`, {}, signal);
+  return data;
+}
+
+export async function getMovieVideos(id, signal = null) {
+  const data = await get(`/movie/${id}/videos`, {}, signal);
+  return data.results || [];
+}
+
+export async function getMovieRecommendations(id, page = 1, signal = null) {
+  const data = await get(`/movie/${id}/recommendations`, { page }, signal);
+  return paginated(data, 'movie');
+}
+
+export async function getMovieSimilar(id, page = 1, signal = null) {
+  const data = await get(`/movie/${id}/similar`, { page }, signal);
+  return paginated(data, 'movie');
+}
+
+export async function getMovieProviders(id, signal = null) {
+  const data = await get(`/movie/${id}/watch/providers`, {}, signal);
+  return data.results || {};
 }
 
 /** Discover movies by genre */
@@ -302,9 +337,34 @@ export async function getTopRatedTV(page = 1, signal = null) {
 /** TV show details + appended responses */
 export async function getTVDetails(id, signal = null) {
   const data = await get(`/tv/${id}`, {
-    append_to_response: 'credits,videos,similar,recommendations,keywords',
+    append_to_response: 'credits,videos,similar,recommendations,keywords,watch/providers',
   }, signal);
   return normalise(data, 'tv');
+}
+
+export async function getTVCredits(id, signal = null) {
+  const data = await get(`/tv/${id}/credits`, {}, signal);
+  return data;
+}
+
+export async function getTVVideos(id, signal = null) {
+  const data = await get(`/tv/${id}/videos`, {}, signal);
+  return data.results || [];
+}
+
+export async function getTVRecommendations(id, page = 1, signal = null) {
+  const data = await get(`/tv/${id}/recommendations`, { page }, signal);
+  return paginated(data, 'tv');
+}
+
+export async function getTVSimilar(id, page = 1, signal = null) {
+  const data = await get(`/tv/${id}/similar`, { page }, signal);
+  return paginated(data, 'tv');
+}
+
+export async function getTVProviders(id, signal = null) {
+  const data = await get(`/tv/${id}/watch/providers`, {}, signal);
+  return data.results || {};
 }
 
 /** TV season details with episode list */

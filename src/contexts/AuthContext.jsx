@@ -7,9 +7,13 @@ import {
   sendPasswordResetEmail,
   sendEmailVerification,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  updateProfile,
+  updatePassword,
+  deleteUser,
 } from "firebase/auth";
 import { auth } from "../services/firebase";
+import { createUserProfileIfMissing } from "../services/userProfile";
 
 const AuthContext = createContext();
 
@@ -49,9 +53,33 @@ export function AuthProvider({ children }) {
     return sendEmailVerification(auth.currentUser);
   }
 
+  function updateProfileInfo(displayName, photoURL) {
+    if (!auth.currentUser) return Promise.reject(new Error("No active user"));
+    return updateProfile(auth.currentUser, {
+      displayName: displayName ?? auth.currentUser.displayName,
+      photoURL: photoURL ?? auth.currentUser.photoURL,
+    }).then(() => {
+      // Force update local state
+      setCurrentUser({ ...auth.currentUser });
+    });
+  }
+
+  function updateUserPassword(newPassword) {
+    if (!auth.currentUser) return Promise.reject(new Error("No active user"));
+    return updatePassword(auth.currentUser, newPassword);
+  }
+
+  function deleteAccount() {
+    if (!auth.currentUser) return Promise.reject(new Error("No active user"));
+    return deleteUser(auth.currentUser);
+  }
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
+      if (user) {
+        createUserProfileIfMissing(user);
+      }
       setLoading(false);
     });
 
@@ -65,7 +93,10 @@ export function AuthProvider({ children }) {
     logout,
     resetPassword,
     verifyEmail,
-    loginWithGoogle
+    loginWithGoogle,
+    updateProfileInfo,
+    updateUserPassword,
+    deleteAccount,
   };
 
   return (

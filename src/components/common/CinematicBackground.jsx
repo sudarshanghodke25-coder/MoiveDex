@@ -30,7 +30,7 @@ export default function CinematicBackground() {
       targetRef.current.y = (e.clientY / window.innerHeight - 0.5) * 2;
       
       // Add sparkling particles at mouse position
-      const colors = ['#6366f1', '#a855f7', '#f8fafc', '#f59e0b'];
+      const colors = ['#e11d48', '#f59e0b', '#fbbf24', '#f8fafc'];
       for (let i = 0; i < 3; i++) {
         trailRef.current.push({
           x: e.clientX,

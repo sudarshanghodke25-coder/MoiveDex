@@ -87,12 +87,12 @@ export default function MyListPage() {
               style={{
                 padding: '0.85rem 1.75rem',
                 borderRadius: '999px',
-                background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)',
-                border: '1px solid rgba(99, 102, 241, 0.5)',
+                background: 'linear-gradient(135deg, #e11d48 0%, #d97706 100%)',
+                border: '1px solid rgba(245, 158, 11, 0.5)',
                 color: '#f8fafc',
                 fontWeight: 700,
                 textDecoration: 'none',
-                boxShadow: '0 0 20px rgba(99,102,241,0.35)',
+                boxShadow: '0 0 20px rgba(225,29,72,0.35)',
               }}
             >
               Explore Movies

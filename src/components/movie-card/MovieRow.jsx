@@ -62,8 +62,8 @@ export default function MovieRow({ title, items = [], loading = false, error = n
               display: 'flex', alignItems: 'center', gap: '0.3rem',
               textDecoration: 'none', transition: 'color 0.2s, gap 0.2s',
             }}
-            onMouseEnter={e => { e.currentTarget.style.color = '#a855f7'; e.currentTarget.style.gap = '0.6rem'; }}
-            onMouseLeave={e => { e.currentTarget.style.color = '#6366f1'; e.currentTarget.style.gap = '0.3rem'; }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#fbbf24'; e.currentTarget.style.gap = '0.6rem'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#e11d48'; e.currentTarget.style.gap = '0.3rem'; }}
           >
             View all
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">

@@ -280,7 +280,7 @@ export default function VideoPlayer({
           top: '5rem',
           left: '50%',
           transform: 'translateX(-50%)',
-          background: 'rgba(99,102,241,0.9)',
+          background: 'rgba(225,29,72,0.95)',
           color: '#fff',
           padding: '0.5rem 1.25rem',
           borderRadius: '999px',
@@ -350,7 +350,7 @@ export default function VideoPlayer({
                 background: 'var(--brand-primary)', border: 'none', color: '#fff',
                 padding: '0.45rem 1.1rem', borderRadius: '999px', fontSize: '0.85rem', fontWeight: 700,
                 cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.35rem',
-                boxShadow: '0 0 15px rgba(99,102,241,0.4)',
+                boxShadow: '0 0 15px rgba(225,29,72,0.5)',
               }}
             >
               Next Ep ⏭️
@@ -366,11 +366,11 @@ export default function VideoPlayer({
           style={{
             position: 'absolute',
             width: '5rem', height: '5rem', borderRadius: '50%',
-            background: 'rgba(99,102,241,0.85)',
+            background: 'linear-gradient(135deg, #e11d48 0%, #d97706 100%)',
             color: '#fff',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             cursor: 'pointer',
-            boxShadow: '0 0 40px rgba(99,102,241,0.6)',
+            boxShadow: '0 0 40px rgba(225,29,72,0.6)',
             transition: 'transform 0.2s ease',
             zIndex: 4,
           }}

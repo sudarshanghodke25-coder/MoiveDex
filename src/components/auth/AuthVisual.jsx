@@ -24,11 +24,11 @@ export default function AuthVisual() {
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
     scene.add(ambientLight);
 
-    const pointLight = new THREE.PointLight(0xa855f7, 2, 50); // Muted accent purple
+    const pointLight = new THREE.PointLight(0xe11d48, 2, 50); // Luxe crimson
     pointLight.position.set(5, 5, 5);
     scene.add(pointLight);
 
-    const pointLight2 = new THREE.PointLight(0x6366f1, 2, 50); // Muted blue
+    const pointLight2 = new THREE.PointLight(0xf59e0b, 2, 50); // Radiant gold
     pointLight2.position.set(-5, -5, 5);
     scene.add(pointLight2);
 

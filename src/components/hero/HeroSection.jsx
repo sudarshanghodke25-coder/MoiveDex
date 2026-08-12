@@ -123,16 +123,16 @@ export default function HeroSection() {
             id="hero-cta-primary"
             style={{
               display: 'inline-flex', alignItems: 'center', gap: '0.625rem',
-              background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)',
-              border: '1px solid rgba(99, 102, 241, 0.5)',
+              background: 'linear-gradient(135deg, #e11d48 0%, #d97706 100%)',
+              border: '1px solid rgba(245, 158, 11, 0.5)',
               color: '#f8fafc', fontWeight: 700, fontSize: '1.05rem',
               padding: '1rem 2.5rem', borderRadius: '999px',
-              boxShadow: '0 0 30px rgba(99,102,241,0.35)',
+              boxShadow: '0 0 30px rgba(225, 29, 72, 0.4)',
               transition: 'all 0.25s ease',
               textDecoration: 'none',
             }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.background = 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)'; e.currentTarget.style.boxShadow = '0 0 50px rgba(99,102,241,0.55)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.background = 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)'; e.currentTarget.style.boxShadow = '0 0 30px rgba(99,102,241,0.35)'; }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.background = 'linear-gradient(135deg, #f43f5e 0%, #f59e0b 100%)'; e.currentTarget.style.boxShadow = '0 0 50px rgba(245, 158, 11, 0.6)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.background = 'linear-gradient(135deg, #e11d48 0%, #d97706 100%)'; e.currentTarget.style.boxShadow = '0 0 30px rgba(225, 29, 72, 0.4)'; }}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <polygon points="5 3 19 12 5 21 5 3" />
