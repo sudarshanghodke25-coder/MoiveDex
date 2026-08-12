@@ -1,8 +1,39 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+/**
+ * WatchlistContext.jsx
+ *
+ * Provides My List state to the entire app.
+ *
+ * DATA SOURCE: Firestore  users/{uid}/myList
+ * IDENTITY:   Firebase Auth UID (via AuthContext)
+ *
+ * Behaviour:
+ *  - Subscribes to the current user's Firestore myList collection in real-time.
+ *  - Clears local state and unsubscribes when the user logs out (uid → null).
+ *  - Exposes the same public API as before so all consumers continue to work
+ *    without modification:
+ *      watchlist, addToWatchlist, removeFromWatchlist,
+ *      isInWatchlist, toggleWatchlist, clearWatchlist, loading
+ *
+ * ⚠️  localStorage is NOT used for My List. Firestore is the single source of truth.
+ */
+
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+} from 'react';
+import { useAuth } from './AuthContext';
+import {
+  subscribeToMyList,
+  addToMyList,
+  removeFromMyList,
+  clearMyList,
+} from '../services/myList';
 
 const WatchlistContext = createContext();
-
-const STORAGE_KEY = 'moviedex_watchlist';
 
 export function useWatchlist() {
   const context = useContext(WatchlistContext);
@@ -13,76 +44,127 @@ export function useWatchlist() {
 }
 
 export function WatchlistProvider({ children }) {
-  const [watchlist, setWatchlist] = useState(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      return saved ? JSON.parse(saved) : [];
-    } catch (e) {
-      console.error('Failed to load watchlist from localStorage', e);
-      return [];
-    }
-  });
+  const { currentUser } = useAuth();
+  const uid = currentUser?.uid ?? null;
+
+  // The active watchlist for the current user
+  const [watchlist, setWatchlist] = useState([]);
+  // True while waiting for the first Firestore snapshot
+  const [loading, setLoading] = useState(false);
+
+  // Keep a ref to the active Firestore unsubscribe function so we can
+  // tear it down when the user changes or unmounts.
+  const unsubscribeRef = useRef(null);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(watchlist));
-    } catch (e) {
-      console.error('Failed to save watchlist to localStorage', e);
+    // Unsubscribe any previous listener and clear stale data immediately
+    if (unsubscribeRef.current) {
+      unsubscribeRef.current();
+      unsubscribeRef.current = null;
     }
-  }, [watchlist]);
-
-  const isInWatchlist = (id, mediaType = 'movie') => {
-    if (!id) return false;
-    return watchlist.some(item => String(item.id) === String(id) && (item.mediaType || 'movie') === (mediaType || 'movie'));
-  };
-
-  const addToWatchlist = (item) => {
-    if (!item || !item.id) return;
-    const mediaType = item.mediaType || 'movie';
-    if (isInWatchlist(item.id, mediaType)) return;
-
-    // Normalised stored item
-    const newItem = {
-      id: item.id,
-      title: item.title || item.name || 'Untitled',
-      posterPath: item.posterPath || item.poster_path || null,
-      backdropPath: item.backdropPath || item.backdrop_path || null,
-      rating: item.rating ?? item.vote_average ?? null,
-      releaseDate: item.releaseDate || item.release_date || item.first_air_date || null,
-      mediaType: mediaType,
-      overview: item.overview || '',
-      genreNames: item.genreNames || [],
-      addedAt: new Date().toISOString(),
-    };
-
-    setWatchlist(prev => [newItem, ...prev]);
-  };
-
-  const removeFromWatchlist = (id, mediaType = 'movie') => {
-    if (!id) return;
-    setWatchlist(prev =>
-      prev.filter(item => !(String(item.id) === String(id) && (item.mediaType || 'movie') === (mediaType || 'movie')))
-    );
-  };
-
-  const toggleWatchlist = (item) => {
-    if (!item || !item.id) return;
-    const mediaType = item.mediaType || 'movie';
-    if (isInWatchlist(item.id, mediaType)) {
-      removeFromWatchlist(item.id, mediaType);
-      return false; // removed
-    } else {
-      addToWatchlist(item);
-      return true; // added
-    }
-  };
-
-  const clearWatchlist = () => {
     setWatchlist([]);
-  };
+
+    if (!uid) {
+      // No user — nothing to load
+      setLoading(false);
+      return;
+    }
+
+    // Start loading indicator before first snapshot arrives
+    setLoading(true);
+
+    const unsubscribe = subscribeToMyList(uid, (items) => {
+      setWatchlist(items);
+      setLoading(false);
+    });
+
+    unsubscribeRef.current = unsubscribe;
+
+    // Cleanup on unmount or uid change
+    return () => {
+      unsubscribe();
+      unsubscribeRef.current = null;
+    };
+  }, [uid]);
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+
+  const isInWatchlist = useCallback(
+    (id, mediaType = 'movie') => {
+      if (!id) return false;
+      return watchlist.some(
+        (item) =>
+          String(item.id) === String(id) &&
+          (item.mediaType || 'movie') === (mediaType || 'movie')
+      );
+    },
+    [watchlist]
+  );
+
+  // ── Mutations ──────────────────────────────────────────────────────────────
+
+  const addToWatchlist = useCallback(
+    async (item) => {
+      if (!uid) {
+        console.warn('[myList] No authenticated user. Cannot add to My List.');
+        return;
+      }
+      if (!item?.id) return;
+
+      const mediaType = item.mediaType || 'movie';
+      if (isInWatchlist(item.id, mediaType)) return; // already in list
+
+      try {
+        await addToMyList(uid, item);
+        // Optimistic UI is not needed — onSnapshot will update watchlist
+      } catch (err) {
+        console.error('[myList] addToWatchlist error:', err);
+      }
+    },
+    [uid, isInWatchlist]
+  );
+
+  const removeFromWatchlist = useCallback(
+    async (id, mediaType = 'movie') => {
+      if (!uid || !id) return;
+      try {
+        await removeFromMyList(uid, id, mediaType);
+      } catch (err) {
+        console.error('[myList] removeFromWatchlist error:', err);
+      }
+    },
+    [uid]
+  );
+
+  const toggleWatchlist = useCallback(
+    async (item) => {
+      if (!item?.id) return false;
+      const mediaType = item.mediaType || 'movie';
+      if (isInWatchlist(item.id, mediaType)) {
+        await removeFromWatchlist(item.id, mediaType);
+        return false; // removed
+      } else {
+        await addToWatchlist(item);
+        return true; // added
+      }
+    },
+    [isInWatchlist, addToWatchlist, removeFromWatchlist]
+  );
+
+  const clearWatchlist = useCallback(async () => {
+    if (!uid) return;
+    try {
+      await clearMyList(uid);
+    } catch (err) {
+      console.error('[myList] clearWatchlist error:', err);
+    }
+  }, [uid]);
+
+  // ── Context Value ──────────────────────────────────────────────────────────
 
   const value = {
     watchlist,
+    loading,
     addToWatchlist,
     removeFromWatchlist,
     isInWatchlist,

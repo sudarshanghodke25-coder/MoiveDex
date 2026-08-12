@@ -5,6 +5,11 @@ service cloud.firestore {
       // User can read and write only their own profile document
       allow read, write: if request.auth != null && request.auth.uid == userId;
 
+      // User My List subcollection — each item belongs only to its owner
+      match /myList/{itemId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
       // User notifications subcollection
       match /notifications/{notificationId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;

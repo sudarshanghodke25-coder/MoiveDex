@@ -1,12 +1,20 @@
 import { doc, setDoc, getDoc, getDocs, collection, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
 
-const LOCAL_HISTORY_KEY = 'moviedex_watch_history';
+/**
+ * Returns a UID-scoped localStorage key so that different users
+ * on the same browser NEVER share cached history data.
+ */
+function getLocalHistoryKey(uid) {
+  if (uid) return `moviedex_watch_history_${uid}`;
+  // Unauthenticated fallback — isolated per session, not persisted across logins
+  return 'moviedex_watch_history_guest';
+}
 
-// Helper to access local storage watch history
-function getLocalHistory() {
+// Helper to access local storage watch history for a specific user
+function getLocalHistory(uid) {
   try {
-    const raw = localStorage.getItem(LOCAL_HISTORY_KEY);
+    const raw = localStorage.getItem(getLocalHistoryKey(uid));
     return raw ? JSON.parse(raw) : {};
   } catch (e) {
     console.error('Failed to read local history', e);
@@ -14,11 +22,24 @@ function getLocalHistory() {
   }
 }
 
-function saveLocalHistory(historyObj) {
+function saveLocalHistory(uid, historyObj) {
   try {
-    localStorage.setItem(LOCAL_HISTORY_KEY, JSON.stringify(historyObj));
+    localStorage.setItem(getLocalHistoryKey(uid), JSON.stringify(historyObj));
   } catch (e) {
     console.error('Failed to save local history', e);
+  }
+}
+
+/**
+ * Clear the UID-scoped local history cache for a specific user.
+ * Call this on logout to prevent stale data lingering in the browser.
+ */
+export function clearLocalHistoryForUser(uid) {
+  if (!uid) return;
+  try {
+    localStorage.removeItem(getLocalHistoryKey(uid));
+  } catch (e) {
+    console.error('Failed to clear local history', e);
   }
 }
 
@@ -70,9 +91,9 @@ export async function saveWatchProgress(uid, progressData) {
   };
 
   // 1. Always save to LocalStorage for instant UI updates & offline fallback
-  const local = getLocalHistory();
+  const local = getLocalHistory(uid);
   local[contentId] = payload;
-  saveLocalHistory(local);
+  saveLocalHistory(uid, local);
 
   // 2. Save to Firestore if uid is logged in
   if (uid) {
@@ -93,7 +114,7 @@ export async function saveWatchProgress(uid, progressData) {
  */
 export async function getWatchProgress(uid, contentId) {
   // Check local first for speed
-  const local = getLocalHistory();
+  const local = getLocalHistory(uid);
   if (local[contentId]) return local[contentId];
 
   if (!uid) return null;
@@ -116,7 +137,7 @@ export async function getWatchProgress(uid, contentId) {
  * Returns array of unfinished items sorted by most recently watched.
  */
 export async function getContinueWatchingList(uid) {
-  let itemsMap = { ...getLocalHistory() };
+  let itemsMap = { ...getLocalHistory(uid) };
 
   if (uid) {
     try {
@@ -145,9 +166,9 @@ export async function getContinueWatchingList(uid) {
  * Remove an item from Watch History.
  */
 export async function removeFromHistory(uid, contentId) {
-  const local = getLocalHistory();
+  const local = getLocalHistory(uid);
   delete local[contentId];
-  saveLocalHistory(local);
+  saveLocalHistory(uid, local);
 
   if (uid) {
     try {
@@ -163,7 +184,7 @@ export async function removeFromHistory(uid, contentId) {
  * Clear all history for a user.
  */
 export async function clearAllHistory(uid) {
-  localStorage.removeItem(LOCAL_HISTORY_KEY);
+  localStorage.removeItem(getLocalHistoryKey(uid));
 
   if (uid) {
     try {
