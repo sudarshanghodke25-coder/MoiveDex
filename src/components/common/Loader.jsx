@@ -23,26 +23,26 @@ export default function Loader({ onComplete }) {
         }
       });
 
-      // Netflix style dramatic cinematic zoom intro
+      // Netflix style dramatic cinematic zoom intro - approx 2 sec
       tl.fromTo(letterRef.current,
         { scale: 0, opacity: 0, rotationX: 90 },
-        { scale: 1, opacity: 1, rotationX: 0, duration: 1.1, ease: 'expo.out' }
+        { scale: 1, opacity: 1, rotationX: 0, duration: 0.7, ease: 'expo.out' }
       )
         .to(letterRef.current, {
-          scale: 1.2,
-          textShadow: '0 0 40px #3b82f6, 0 0 80px #a855f7',
-          duration: 0.8,
+          scale: 1.15,
+          textShadow: '0 0 30px rgba(255, 255, 255, 0.4), 0 0 60px rgba(255, 255, 255, 0.2)',
+          duration: 0.6,
           ease: 'power1.inOut'
         })
         .to(letterRef.current, {
-          scale: 100, // Massive zoom in to fill screen
+          scale: 80, // Massive zoom in to fill screen
           opacity: 0,
-          duration: 0.7,
+          duration: 0.5,
           ease: 'expo.in'
         }, '+=0.1')
         .to(containerRef.current, {
           opacity: 0,
-          duration: 0.4,
+          duration: 0.3,
           ease: 'power2.inOut'
         }, '-=0.2');
 
@@ -61,7 +61,7 @@ export default function Loader({ onComplete }) {
         position: 'fixed',
         inset: 0,
         zIndex: 9999,
-        background: '#020205',
+        background: '#030304',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -72,11 +72,11 @@ export default function Loader({ onComplete }) {
         ref={letterRef}
         style={{
           fontSize: 'clamp(6rem, 15vw, 12rem)',
-          fontWeight: 900,
-          fontFamily: '"Outfit", sans-serif',
+          fontWeight: 400,
+          fontFamily: '"Playfair Display", "Cinzel", "Bodoni MT", "Didot", "Georgia", serif',
           lineHeight: 1,
           transformOrigin: 'center center',
-          background: 'linear-gradient(135deg, #38bdf8 0%, #3b82f6 50%, #a855f7 100%)',
+          background: 'linear-gradient(135deg, #ffffff 0%, #d4d4d8 100%)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text',
