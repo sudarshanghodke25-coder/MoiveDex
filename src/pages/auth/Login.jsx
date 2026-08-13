@@ -52,7 +52,7 @@ export default function Login() {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100dvh', background: 'var(--bg-deepspace)' }}>
+    <div style={{ display: 'flex', height: '100dvh', background: 'var(--bg-deepspace)' }}>
       {/* Left: 3D Visual */}
       <div style={{ flex: 1, position: 'relative', display: 'none' }} className="auth-visual-container">
         <AuthVisual />
@@ -72,8 +72,9 @@ export default function Login() {
       {/* Right: Form Area */}
       <div style={{ 
         flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', 
-        padding: 'clamp(2rem, 8vw, 6rem)', position: 'relative', zIndex: 10,
-        background: 'var(--bg-dark)', borderLeft: '1px solid var(--border-subtle)'
+        padding: 'clamp(1.5rem, 5vw, 4rem)', position: 'relative', zIndex: 10,
+        background: 'var(--bg-dark)', borderLeft: '1px solid var(--border-subtle)',
+        overflowY: 'auto'
       }}>
         <div ref={formRef} style={{ width: '100%', maxWidth: '440px', margin: '0 auto' }}>
           
@@ -82,8 +83,8 @@ export default function Login() {
           </Link>
 
           <div className="auth-elem" style={{ marginBottom: '2rem' }}>
-            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#fff', marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>Welcome Back</h2>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '1rem' }}>
+            <h2 style={{ fontSize: '2rem', fontWeight: 800, color: '#fff', marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>Welcome Back</h2>
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem' }}>
               Log in to your MovieDex account to continue.
             </p>
           </div>
@@ -101,9 +102,9 @@ export default function Login() {
                   <input 
                     type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="auth-input"
                     style={{
-                      width: '100%', padding: '1rem 1.25rem', borderRadius: '8px',
+                      width: '100%', padding: '0.75rem 1rem', borderRadius: '8px',
                       background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)',
-                      color: '#fff', outline: 'none', transition: 'all 0.3s ease', fontSize: '1rem'
+                      color: '#fff', outline: 'none', transition: 'all 0.3s ease', fontSize: '0.9rem'
                     }}
                     onFocus={(e) => { e.target.style.background = 'rgba(255,255,255,0.06)'; e.target.style.borderColor = 'rgba(255,255,255,0.3)'; }}
                     onBlur={(e) => { e.target.style.background = 'rgba(255,255,255,0.03)'; e.target.style.borderColor = 'rgba(255,255,255,0.1)'; }}
@@ -118,9 +119,9 @@ export default function Login() {
                   <input 
                     type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="auth-input"
                     style={{
-                      width: '100%', padding: '1rem 1.25rem', borderRadius: '8px',
+                      width: '100%', padding: '0.75rem 1rem', borderRadius: '8px',
                       background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)',
-                      color: '#fff', outline: 'none', transition: 'all 0.3s ease', fontSize: '1rem'
+                      color: '#fff', outline: 'none', transition: 'all 0.3s ease', fontSize: '0.9rem'
                     }}
                     onFocus={(e) => { e.target.style.background = 'rgba(255,255,255,0.06)'; e.target.style.borderColor = 'rgba(255,255,255,0.3)'; }}
                     onBlur={(e) => { e.target.style.background = 'rgba(255,255,255,0.03)'; e.target.style.borderColor = 'rgba(255,255,255,0.1)'; }}
@@ -128,10 +129,10 @@ export default function Login() {
                 </div>
 
                 <button disabled={loading} type="submit" className="auth-elem" style={{ 
-                  width: '100%', padding: '1.125rem', marginTop: '0.5rem', borderRadius: '8px',
+                  width: '100%', padding: '0.875rem 1rem', marginTop: '0.5rem', borderRadius: '8px',
                   background: 'var(--brand-gradient)',
                   border: '1px solid rgba(245, 158, 11, 0.5)',
-                  color: '#f8fafc', fontWeight: 700, fontSize: '1rem',
+                  color: '#f8fafc', fontWeight: 700, fontSize: '0.95rem',
                   cursor: 'pointer', transition: 'all 0.25s ease',
                   boxShadow: '0 0 20px rgba(225,29,72,0.35)',
                   display: 'flex', justifyContent: 'center', alignItems: 'center'
@@ -151,8 +152,8 @@ export default function Login() {
 
               <div className="auth-elem" style={{ display: 'flex', gap: '1rem' }}>
                 <button disabled={loading} onClick={handleGoogleLogin} style={{ 
-                  flex: 1, padding: '1rem', borderRadius: '8px',
-                  background: 'rgba(255,255,255,0.05)', color: '#fff', fontWeight: 600, fontSize: '0.95rem',
+                  flex: 1, padding: '0.75rem 1rem', borderRadius: '8px',
+                  background: 'rgba(255,255,255,0.05)', color: '#fff', fontWeight: 600, fontSize: '0.9rem',
                   border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', transition: 'all 0.2s ease',
                   display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.75rem'
                 }}

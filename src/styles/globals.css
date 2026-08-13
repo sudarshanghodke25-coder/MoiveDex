@@ -62,9 +62,10 @@ body {
   padding: 0;
 }
 
-html {
-  scroll-behavior: smooth;
-}
+/* Note: no global `scroll-behavior: smooth` here — it makes every route change
+   animate the scroll from the previous page's position (new pages visibly
+   scroll up from the bottom). Scroll resets are handled by ScrollToTop
+   (instant); intentional smooth scrolls pass behavior: 'smooth' explicitly. */
 
 body {
   background-color: var(--bg-deepspace);

@@ -215,7 +215,7 @@ export default function DetailPage({ mediaType = 'movie' }) {
         setLoading(false);
       });
 
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo(0, 0);
   }, [id, mediaType]);
 
   // 2. Fetch Season details for TV/Anime when season selection changes
