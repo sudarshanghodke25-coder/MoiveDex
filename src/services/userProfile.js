@@ -50,7 +50,7 @@ export async function createUserProfileIfMissing(user) {
     if (!snap.exists()) {
       const defaultProfile = {
         uid: user.uid,
-        displayName: user.displayName || user.email?.split('@')[0] || 'MovieHub Fan',
+        displayName: user.displayName || user.email?.split('@')[0] || 'MovieDex Member',
         email: user.email,
         photoURL: user.photoURL || null,
         emailVerified: user.emailVerified || false,

@@ -224,7 +224,7 @@ export default function SettingsPage() {
 
             <div style={{ flex: '1 1 200px' }}>
               <h4 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', margin: '0 0 0.3rem' }}>
-                {currentUser?.displayName || 'MovieHub User'}
+                {currentUser?.displayName || 'MovieDex Member'}
               </h4>
               <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: '0 0 0.4rem', wordBreak: 'break-all' }}>
                 {currentUser?.email}
@@ -331,7 +331,7 @@ export default function SettingsPage() {
               style={{
                 padding: '0.6rem 1.25rem',
                 borderRadius: '999px',
-                background: '#121216',
+                background: 'var(--bg-elevated)',
                 border: '1px solid rgba(255,255,255,0.15)',
                 color: '#fff',
                 fontSize: '0.9rem',
@@ -341,7 +341,7 @@ export default function SettingsPage() {
               }}
             >
               {LANGUAGES.map((l) => (
-                <option key={l.code} value={l.code} style={{ background: '#121216', color: '#fff' }}>
+                <option key={l.code} value={l.code} style={{ background: 'var(--bg-elevated)', color: '#fff' }}>
                   {l.label}
                 </option>
               ))}
@@ -364,7 +364,7 @@ export default function SettingsPage() {
               style={{
                 padding: '0.6rem 1.25rem',
                 borderRadius: '999px',
-                background: '#121216',
+                background: 'var(--bg-elevated)',
                 border: '1px solid rgba(255,255,255,0.15)',
                 color: '#fff',
                 fontSize: '0.9rem',
@@ -374,7 +374,7 @@ export default function SettingsPage() {
               }}
             >
               {SUBTITLES.map((s) => (
-                <option key={s.code} value={s.code} style={{ background: '#121216', color: '#fff' }}>
+                <option key={s.code} value={s.code} style={{ background: 'var(--bg-elevated)', color: '#fff' }}>
                   {s.label}
                 </option>
               ))}
@@ -422,7 +422,7 @@ export default function SettingsPage() {
             { key: 'newMoviesNotifications', label: 'New Movies', desc: 'Notify when major new movies are added.' },
             { key: 'newTVNotifications', label: 'New TV Shows', desc: 'Notify when new TV series become available.' },
             { key: 'newAnimeNotifications', label: 'New Anime', desc: 'Notify when new anime series or seasons release.' },
-            { key: 'upcomingNotifications', label: 'Upcoming Releases', desc: 'Notify about upcoming release dates on MovieHub.' },
+            { key: 'upcomingNotifications', label: 'Upcoming Releases', desc: 'Notify about upcoming release dates on MovieDex.' },
             { key: 'newEpisodesNotifications', label: 'New Episodes', desc: 'Notify when new episodes of your followed shows drop.' },
           ].map((item, idx) => (
             <div key={item.key}>
@@ -509,7 +509,7 @@ export default function SettingsPage() {
               ⚠️ Danger Zone — Delete Account
             </h3>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1.25rem', maxWidth: '600px' }}>
-              Permanently delete your MovieHub account and all associated profile settings and history. This action cannot be undone.
+              Permanently delete your MovieDex account and all associated profile settings and history. This action cannot be undone.
             </p>
             <button
               onClick={() => setShowDeleteModal(true)}
@@ -551,7 +551,7 @@ export default function SettingsPage() {
           <form
             onSubmit={handleChangePasswordSubmit}
             className="glass-card"
-            style={{ width: 'min(420px, 92vw)', padding: 'clamp(1.25rem, 4vw, 2rem)', background: '#0e0e12' }}
+            style={{ width: 'min(420px, 92vw)', padding: 'clamp(1.25rem, 4vw, 2rem)', background: 'var(--bg-dark)' }}
           >
             <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', marginBottom: '1.25rem' }}>
               Change Password
@@ -623,7 +623,7 @@ export default function SettingsPage() {
             padding: '1rem',
           }}
         >
-          <div className="glass-card" style={{ width: 'min(400px, 92vw)', padding: 'clamp(1.25rem, 4vw, 2rem)', textAlign: 'center', background: '#0e0e12' }}>
+          <div className="glass-card" style={{ width: 'min(400px, 92vw)', padding: 'clamp(1.25rem, 4vw, 2rem)', textAlign: 'center', background: 'var(--bg-dark)' }}>
             <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: '0.5rem' }}>🗑️</span>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', marginBottom: '0.5rem' }}>Clear Watch History?</h3>
             <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
@@ -656,7 +656,7 @@ export default function SettingsPage() {
             padding: '1rem',
           }}
         >
-          <div className="glass-card" style={{ width: 'min(400px, 92vw)', padding: 'clamp(1.25rem, 4vw, 2rem)', textAlign: 'center', background: '#0e0e12' }}>
+          <div className="glass-card" style={{ width: 'min(400px, 92vw)', padding: 'clamp(1.25rem, 4vw, 2rem)', textAlign: 'center', background: 'var(--bg-dark)' }}>
             <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: '0.5rem' }}>📑</span>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', marginBottom: '0.5rem' }}>Clear My List?</h3>
             <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
@@ -689,7 +689,7 @@ export default function SettingsPage() {
             padding: '1rem',
           }}
         >
-          <div className="glass-card" style={{ width: 'min(420px, 92vw)', padding: 'clamp(1.25rem, 4vw, 2rem)', background: '#0e0e12' }}>
+          <div className="glass-card" style={{ width: 'min(420px, 92vw)', padding: 'clamp(1.25rem, 4vw, 2rem)', background: 'var(--bg-dark)' }}>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--danger)', marginBottom: '0.5rem' }}>
               Confirm Account Deletion
             </h3>

@@ -20,8 +20,8 @@ const FOOTER_LINKS = [
     links: [
       { label: 'Sign Up', to: '/register' },
       { label: 'Login', to: '/login' },
-      { label: 'Watchlist', to: '/watchlist' },
-      { label: 'Favorites', to: '/favorites' },
+      { label: 'My List', to: '/mylist' },
+      { label: 'Settings', to: '/settings' },
     ],
   },
   {

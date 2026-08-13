@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import HeroSection from '../components/hero/HeroSection';
@@ -182,7 +183,7 @@ export default function LandingPage() {
                       fontSize: '0.85rem', fontWeight: 600,
                       cursor: 'pointer', transition: 'all 0.2s ease',
                       background: isSelected
-                        ? 'linear-gradient(135deg, #e11d48 0%, #d97706 100%)'
+                        ? 'var(--brand-gradient)'
                         : 'rgba(18, 18, 22, 0.85)',
                       color: isSelected ? '#f8fafc' : 'rgba(148,163,184,0.85)',
                       border: isSelected ? '1px solid rgba(245, 158, 11, 0.6)' : '1px solid rgba(255, 255, 255, 0.08)',
@@ -234,7 +235,7 @@ export default function LandingPage() {
             aria-labelledby="features-heading"
             style={{
               padding: 'clamp(3rem, 8vh, 5rem) clamp(1rem, 5vw, 4rem)',
-              background: 'linear-gradient(180deg, rgba(225,29,72,0.04) 0%, transparent 100%)',
+              background: 'linear-gradient(180deg, rgba(0,0,0,0.45) 0%, transparent 100%)',
               marginTop: '1rem',
             }}
           >
@@ -246,7 +247,7 @@ export default function LandingPage() {
                   </div>
                   <h2 id="features-heading" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 900, color: '#f8fafc', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
                     Everything you need to <br/>
-                    <span style={{ background: 'linear-gradient(135deg, #e11d48 0%, #f59e0b 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'inline-block', paddingBottom: '0.2em' }}>
+                    <span style={{                    background: 'var(--brand-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'inline-block', paddingBottom: '0.2em' }}>
                       discover more
                     </span>
                   </h2>
@@ -319,14 +320,14 @@ export default function LandingPage() {
             <div aria-hidden="true" style={{
               position: 'absolute', inset: 0, pointerEvents: 'none',
               background: `
-                radial-gradient(ellipse 60% 80% at 50% 50%, rgba(225,29,72,0.12) 0%, transparent 70%),
-                radial-gradient(ellipse 40% 60% at 80% 30%, rgba(245,158,11,0.08) 0%, transparent 60%)
+                radial-gradient(ellipse 60% 80% at 50% 50%, rgba(0,0,0,0.55) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 60% at 80% 30%, rgba(0,0,0,0.4) 0%, transparent 60%)
               `,
             }} />
-            {/* Animated border glow */}
+            {/* Animated hairline accent */}
             <div aria-hidden="true" style={{
               position: 'absolute', inset: '0 10%', top: 0, height: '1px',
-              background: 'linear-gradient(90deg, transparent, rgba(225,29,72,0.6), rgba(245,158,11,0.6), transparent)',
+              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.28), transparent)',
             }} />
 
             <div style={{ position: 'relative', zIndex: 1, maxWidth: '680px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -339,12 +340,12 @@ export default function LandingPage() {
                 never run out of something great to watch.
               </p>
               <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-                <a
-                  href="/register"
+                <Link
+                  to="/register"
                   id="cta-banner-signup"
                   style={{
                     display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                    background: 'linear-gradient(135deg, #e11d48 0%, #d97706 100%)',
+                    background: 'var(--brand-gradient)',
                     border: '1px solid rgba(245, 158, 11, 0.5)',
                     color: '#f8fafc', fontWeight: 700, fontSize: '1rem',
                     padding: '1.1rem 2.5rem', borderRadius: '999px',
@@ -352,12 +353,12 @@ export default function LandingPage() {
                     transition: 'all 0.25s ease',
                   }}
                   onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.background = 'linear-gradient(135deg, #f43f5e 0%, #f59e0b 100%)'; e.currentTarget.style.boxShadow = '0 0 50px rgba(245,158,11,0.55)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.background = 'linear-gradient(135deg, #e11d48 0%, #d97706 100%)'; e.currentTarget.style.boxShadow = '0 0 30px rgba(225,29,72,0.35)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.background = 'var(--brand-gradient)'; e.currentTarget.style.boxShadow = '0 0 30px rgba(225,29,72,0.35)'; }}
                 >
                   🚀 Create Free Account
-                </a>
-                <a
-                  href="/movies"
+                </Link>
+                <Link
+                  to="/movies"
                   style={{
                     display: 'inline-flex', alignItems: 'center',
                     background: 'rgba(18, 18, 22, 0.85)', color: '#f8fafc',
@@ -371,7 +372,7 @@ export default function LandingPage() {
                   onMouseLeave={e => { e.currentTarget.style.background = 'rgba(18, 18, 22, 0.85)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; }}
                 >
                   Browse First
-                </a>
+                </Link>
               </div>
             </div>
           </section>

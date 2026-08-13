@@ -9,6 +9,9 @@ import {
   posterUrl,
   normalise,
   pickTrailer,
+  pickWatchRegion,
+  getTopStreamingProvider,
+  buildProviderWatchUrl,
 } from '../services/tmdb';
 import MovieCard from '../components/movie-card/MovieCard';
 import { useWatchlist } from '../contexts/WatchlistContext';
@@ -343,8 +346,14 @@ export default function DetailPage({ mediaType = 'movie' }) {
   // Avoid duplicate sections: show recommendations if available, similar only if no/few recommendations
   const showBothSections = recommendations.length >= 4 && similar.length >= 4;
 
-  // Watch providers
+  // Watch providers — real streaming happens outbound via TMDB per-provider links;
+  // the in-app player is always a clearly-labeled preview.
   const providers = detail.providers || {};
+  const { countryCode: regionCode } = pickWatchRegion(providers);
+  const topProvider = getTopStreamingProvider(providers);
+  const providerWatchUrl = topProvider && detail.id
+    ? buildProviderWatchUrl({ mediaType, id: detail.id, countryCode: regionCode || 'US', providerId: topProvider.provider_id })
+    : null;
 
   // Season list for dropdown — use real TMDB season objects if available
   const seasonsList = detail.seasonsList?.filter(s => s.season_number >= 0) || [];
@@ -514,19 +523,48 @@ export default function DetailPage({ mediaType = 'movie' }) {
             </div>
           )}
 
-          {/* Primary Action Buttons */}
+          {/* Primary Action Buttons — real provider link + in-app preview */}
           <div className="detail-actions" style={{ flexWrap: 'wrap', gap: '0.875rem', marginTop: '1.5rem' }}>
+            {providerWatchUrl && topProvider && (
+              <a
+                href={providerWatchUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-primary"
+                style={{
+                  background: 'var(--brand-gradient)',
+                  color: '#fff',
+                  padding: '0.875rem 2rem',
+                  borderRadius: '999px',
+                  fontWeight: 800,
+                  fontSize: '1rem',
+                  boxShadow: '0 0 25px rgba(245,158,11,0.45)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.625rem',
+                  textDecoration: 'none',
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+                Watch on {topProvider.provider_name}
+              </a>
+            )}
+
             <button
-              className="btn-primary"
+              className={providerWatchUrl ? 'btn-ghost' : 'btn-primary'}
               onClick={() => handleStartPlayback(seasonData?.episodes?.[0] || null)}
               style={{
-                background: 'var(--brand-gradient)',
+                ...(providerWatchUrl ? {} : {
+                  background: 'var(--brand-gradient)',
+                  boxShadow: '0 0 25px rgba(245,158,11,0.45)',
+                }),
                 color: '#fff',
                 padding: '0.875rem 2rem',
                 borderRadius: '999px',
                 fontWeight: 800,
                 fontSize: '1rem',
-                boxShadow: '0 0 25px rgba(99,102,241,0.5)',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '0.625rem',
@@ -536,7 +574,7 @@ export default function DetailPage({ mediaType = 'movie' }) {
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                 <polygon points="5 3 19 12 5 21 5 3"/>
               </svg>
-              {isTV ? 'Watch Episode 1' : 'Watch Movie'}
+              {isTV ? 'Preview Episode 1' : 'Preview Movie'}
             </button>
 
             {mainTrailer && (
@@ -557,12 +595,12 @@ export default function DetailPage({ mediaType = 'movie' }) {
                 padding: '0.875rem 1.75rem',
                 fontWeight: 600,
                 borderColor: inList ? 'var(--brand-secondary)' : undefined,
-                background: inList ? 'rgba(168, 85, 247, 0.15)' : undefined,
-                color: inList ? '#a855f7' : undefined,
+                background: inList ? 'rgba(245, 158, 11, 0.15)' : undefined,
+                color: inList ? 'var(--brand-accent)' : undefined,
                 transition: 'all 0.25s ease',
               }}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill={inList ? '#a855f7' : 'none'} stroke="currentColor" strokeWidth="2">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill={inList ? 'var(--brand-accent)' : 'none'} stroke="currentColor" strokeWidth="2">
                 <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
               </svg>
               {inList ? 'In My List' : 'Add to List'}
@@ -746,7 +784,7 @@ export default function DetailPage({ mediaType = 'movie' }) {
                       {ep.voteAverage > 0 && (
                         <span style={{
                           position: 'absolute', bottom: '0.5rem', right: '0.625rem',
-                          background: 'rgba(5,5,16,0.85)', color: '#fbbf24',
+                          background: 'rgba(6,6,13,0.85)', color: '#fbbf24',
                           fontSize: '0.72rem', fontWeight: 700, padding: '0.2rem 0.5rem',
                           borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '0.2rem',
                         }}>
@@ -757,7 +795,7 @@ export default function DetailPage({ mediaType = 'movie' }) {
 
                     {/* Episode text */}
                     <div style={{ padding: '1rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                      <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: isSelected ? '#c7d2fe' : '#f8fafc', marginBottom: '0.4rem', lineHeight: 1.3 }}>
+                      <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: isSelected ? '#fbbf24' : '#f8fafc', marginBottom: '0.4rem', lineHeight: 1.3 }}>
                         {ep.name}
                       </h3>
                       {ep.overview && (
@@ -948,7 +986,7 @@ export default function DetailPage({ mediaType = 'movie' }) {
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                           <polygon points="5 3 19 12 5 21 5 3"/>
                         </svg>
-                        Watch Episode
+                        Preview Episode
                       </button>
 
                       {hasPrev && (
@@ -1006,7 +1044,7 @@ export default function DetailPage({ mediaType = 'movie' }) {
                   borderRadius: '12px',
                   overflow: 'hidden',
                   border: '1px solid rgba(255,255,255,0.08)',
-                  background: '#121216',
+                  background: 'var(--bg-elevated)',
                   transition: 'all 0.2s ease',
                 }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(245,158,11,0.5)'; e.currentTarget.style.transform = 'translateY(-3px)'; }}
@@ -1051,7 +1089,7 @@ export default function DetailPage({ mediaType = 'movie' }) {
       )}
 
       {/* ── Where to Watch ─────────────────────────────────────────── */}
-      <WatchProviders providers={providers} />
+      <WatchProviders providers={providers} mediaType={mediaType} id={detail.id} />
 
       {/* ── Recommendations ────────────────────────────────────────── */}
       {recommendations.length > 0 && (

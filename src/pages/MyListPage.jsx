@@ -87,7 +87,7 @@ export default function MyListPage() {
               style={{
                 padding: '0.85rem 1.75rem',
                 borderRadius: '999px',
-                background: 'linear-gradient(135deg, #e11d48 0%, #d97706 100%)',
+                background: 'var(--brand-gradient)',
                 border: '1px solid rgba(245, 158, 11, 0.5)',
                 color: '#f8fafc',
                 fontWeight: 700,

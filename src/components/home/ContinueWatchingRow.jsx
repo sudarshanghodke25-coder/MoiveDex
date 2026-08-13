@@ -82,7 +82,7 @@ export default function ContinueWatchingRow() {
       {/* Row Grid */}
       <div style={{
         display: 'flex', gap: '1.25rem', overflowX: 'auto', paddingBottom: '1rem',
-        scrollbarWidth: 'thin', scrollbarColor: 'rgba(99,102,241,0.3) transparent',
+        scrollbarWidth: 'thin', scrollbarColor: 'rgba(245,158,11,0.35) transparent',
       }}>
         {items.map(item => {
           const posterUrl = item.posterPath ? `https://image.tmdb.org/t/p/w342${item.posterPath}` : null;
@@ -106,7 +106,7 @@ export default function ContinueWatchingRow() {
               }}
               onMouseEnter={e => {
                 e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.borderColor = 'rgba(99,102,241,0.4)';
+                e.currentTarget.style.borderColor = 'rgba(245,158,11,0.5)';
                 e.currentTarget.style.boxShadow = '0 12px 30px rgba(0,0,0,0.4)';
               }}
               onMouseLeave={e => {
@@ -126,14 +126,14 @@ export default function ContinueWatchingRow() {
                 {/* Dark Overlay with Play Icon */}
                 <div style={{
                   position: 'absolute', inset: 0,
-                  background: 'linear-gradient(to top, rgba(5,5,16,0.95) 0%, rgba(5,5,16,0.3) 60%, transparent 100%)',
+                  background: 'linear-gradient(to top, rgba(6,6,13,0.95) 0%, rgba(6,6,13,0.3) 60%, transparent 100%)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
                   <div style={{
                     width: '3rem', height: '3rem', borderRadius: '50%',
                     background: 'var(--brand-primary)', color: '#fff',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    boxShadow: '0 0 20px rgba(99,102,241,0.6)',
+                    boxShadow: '0 0 20px rgba(225,29,72,0.4)',
                   }}>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                       <polygon points="5 3 19 12 5 21 5 3"/>
@@ -160,7 +160,7 @@ export default function ContinueWatchingRow() {
                 {isTV && (
                   <span style={{
                     position: 'absolute', bottom: '0.5rem', left: '0.5rem',
-                    background: 'rgba(99,102,241,0.85)', color: '#fff',
+                    background: 'var(--brand-gradient)', color: '#fff',
                     fontSize: '0.7rem', fontWeight: 800, padding: '0.25rem 0.6rem',
                     borderRadius: '6px', backdropFilter: 'blur(4px)',
                   }}>

@@ -232,7 +232,7 @@ export default function TopBar() {
                 border: '1px solid rgba(255,255,255,0.14)',
                 borderRadius: '16px',
                 overflow: 'hidden',
-                background: '#0e0e12',
+                background: 'var(--bg-dark)',
               }}
             >
               <div
@@ -491,7 +491,7 @@ export default function TopBar() {
                 right: 0,
                 minWidth: '230px',
                 zIndex: 100,
-                background: '#0e0e12',
+                background: 'var(--bg-dark)',
                 border: '1px solid rgba(255,255,255,0.14)',
                 borderRadius: '16px',
                 boxShadow: '0 20px 40px rgba(0,0,0,0.8)',
@@ -500,7 +500,7 @@ export default function TopBar() {
             >
               <div className="dropdown-header" style={{ padding: '1rem' }}>
                 <span className="dropdown-name" style={{ fontWeight: 800, fontSize: '0.95rem', color: '#f8fafc', display: 'block' }}>
-                  {currentUser?.displayName || 'MovieHub Fan'}
+                  {currentUser?.displayName || 'MovieDex Member'}
                 </span>
                 <span className="dropdown-email" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', wordBreak: 'break-all' }}>
                   {currentUser?.email}

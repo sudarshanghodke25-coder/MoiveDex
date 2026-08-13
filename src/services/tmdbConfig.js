@@ -3,8 +3,16 @@
  * Single source of truth for all TMDB API configuration.
  */
 
+const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
+
+if (!API_KEY) {
+  console.error(
+    '[TMDB] Missing VITE_TMDB_API_KEY. Copy .env.example to .env and add your TMDB API key — see https://www.themoviedb.org/settings/api'
+  );
+}
+
 export const TMDB_CONFIG = {
-  API_KEY:  import.meta.env.VITE_TMDB_API_KEY  || 'bb6b566f15405bd7df69eefd0eec52b7',
+  API_KEY,
   BASE_URL: import.meta.env.VITE_TMDB_BASE_URL || 'https://api.themoviedb.org/3',
   IMG_BASE: import.meta.env.VITE_TMDB_IMAGE_BASE || 'https://image.tmdb.org/t/p',
   LANGUAGE: 'en-US',

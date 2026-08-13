@@ -43,7 +43,7 @@ export default function Navbar() {
       style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
         transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-        background: scrolled ? 'rgba(5,5,16,0.92)' : 'linear-gradient(to bottom, rgba(5,5,16,0.85) 0%, transparent 100%)',
+        background: scrolled ? 'rgba(6,6,13,0.92)' : 'linear-gradient(to bottom, rgba(6,6,13,0.85) 0%, transparent 100%)',
         backdropFilter: scrolled ? 'blur(20px)' : 'none',
         WebkitBackdropFilter: scrolled ? 'blur(20px)' : 'none',
         borderBottom: scrolled ? '1px solid rgba(255,255,255,0.06)' : '1px solid transparent',
@@ -67,7 +67,7 @@ export default function Navbar() {
           <img
             src={logoImg}
             alt="MovieDex logo"
-            style={{ width: '38px', height: '38px', borderRadius: '10px', objectFit: 'cover', boxShadow: '0 0 15px rgba(168,85,247,0.4)' }}
+            style={{ width: '38px', height: '38px', borderRadius: '10px', objectFit: 'cover', boxShadow: '0 0 15px rgba(225,29,72,0.4)' }}
           />
           <span style={{
             fontSize: '1.35rem', fontWeight: 900, letterSpacing: '-0.02em',
@@ -136,7 +136,7 @@ export default function Navbar() {
                 id="landing-nav-register"
                 style={{
                   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                  background: 'linear-gradient(135deg, #e11d48 0%, #d97706 100%)',
+                  background: 'var(--brand-gradient)',
                   border: '1px solid rgba(245, 158, 11, 0.5)',
                   color: '#f8fafc', fontWeight: 700, fontSize: '0.92rem',
                   padding: '0.6rem 1.45rem', borderRadius: '999px',
@@ -144,7 +144,7 @@ export default function Navbar() {
                   transition: 'all 0.25s ease', textDecoration: 'none',
                 }}
                 onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = 'linear-gradient(135deg, #f43f5e 0%, #f59e0b 100%)'; e.currentTarget.style.boxShadow = '0 0 30px rgba(245, 158, 11, 0.55)'; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.background = 'linear-gradient(135deg, #e11d48 0%, #d97706 100%)'; e.currentTarget.style.boxShadow = '0 0 20px rgba(225, 29, 72, 0.35)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.background = 'var(--brand-gradient)'; e.currentTarget.style.boxShadow = '0 0 20px rgba(225, 29, 72, 0.35)'; }}
               >
                 Register
               </Link>

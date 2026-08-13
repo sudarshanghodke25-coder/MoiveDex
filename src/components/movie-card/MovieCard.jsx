@@ -144,7 +144,7 @@ export default function MovieCard({ movie, size = 'md', ...directProps }) {
               width: '2.25rem',
               height: '2.25rem',
               borderRadius: '50%',
-              background: inWatchlist ? 'var(--brand-primary)' : 'rgba(5, 5, 16, 0.75)',
+              background: inWatchlist ? 'var(--brand-primary)' : 'rgba(6, 6, 13, 0.75)',
               border: '1px solid rgba(255, 255, 255, 0.2)',
               color: '#fff',
               display: 'flex',

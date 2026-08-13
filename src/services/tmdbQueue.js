@@ -32,13 +32,13 @@ export async function queuedFetch(url, cacheKey, signal = null) {
     return inflight.get(cacheKey);
   }
 
-  const promise = executeWithRetry(url, cacheKey, signal, 0);
+  const promise = executeWithRetry(url, signal, 0);
   inflight.set(cacheKey, promise);
   promise.finally(() => inflight.delete(cacheKey));
   return promise;
 }
 
-async function executeWithRetry(url, cacheKey, signal, attempt) {
+async function executeWithRetry(url, signal, attempt) {
   const endpoint = new URL(url).pathname;
 
   try {
@@ -52,7 +52,7 @@ async function executeWithRetry(url, cacheKey, signal, attempt) {
       const delay = err.retryAfter * 1000;
       console.warn(`[TMDB] Rate limited. Retrying in ${err.retryAfter}s… (attempt ${attempt + 1}/${MAX_RETRIES})`);
       await sleep(delay);
-      return executeWithRetry(url, cacheKey, signal, attempt + 1);
+      return executeWithRetry(url, signal, attempt + 1);
     }
 
     // 5xx transient error — exponential backoff
@@ -60,7 +60,7 @@ async function executeWithRetry(url, cacheKey, signal, attempt) {
       const delay = BASE_DELAY_MS * Math.pow(2, attempt);
       console.warn(`[TMDB] Server error ${res.status}. Retrying in ${delay}ms… (attempt ${attempt + 1}/${MAX_RETRIES})`);
       await sleep(delay);
-      return executeWithRetry(url, cacheKey, signal, attempt + 1);
+      return executeWithRetry(url, signal, attempt + 1);
     }
 
     throw err;
@@ -72,7 +72,7 @@ async function executeWithRetry(url, cacheKey, signal, attempt) {
       const delay = BASE_DELAY_MS * Math.pow(2, attempt);
       console.warn(`[TMDB] Network error. Retrying in ${delay}ms… (attempt ${attempt + 1}/${MAX_RETRIES})`);
       await sleep(delay);
-      return executeWithRetry(url, cacheKey, signal, attempt + 1);
+      return executeWithRetry(url, signal, attempt + 1);
     }
 
     throw err;

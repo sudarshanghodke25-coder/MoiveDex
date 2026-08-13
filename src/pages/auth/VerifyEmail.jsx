@@ -43,7 +43,7 @@ export default function VerifyEmail() {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100dvh', background: '#050508' }}>
+    <div style={{ display: 'flex', minHeight: '100dvh', background: 'var(--bg-deepspace)' }}>
       {/* Left: 3D Visual */}
       <div style={{ flex: 1, position: 'relative', display: 'none' }} className="auth-visual-container">
         <AuthVisual />
@@ -64,7 +64,7 @@ export default function VerifyEmail() {
       <div style={{ 
         flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', 
         padding: 'clamp(2rem, 8vw, 6rem)', position: 'relative', zIndex: 10,
-        background: '#0a0a0c', borderLeft: '1px solid rgba(255,255,255,0.05)'
+        background: 'var(--bg-dark)', borderLeft: '1px solid var(--border-subtle)'
       }}>
         <div ref={formRef} style={{ width: '100%', maxWidth: '440px', margin: '0 auto' }}>
           
@@ -91,7 +91,7 @@ export default function VerifyEmail() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <button onClick={handleVerify} disabled={loading} className="auth-elem" style={{ 
               width: '100%', padding: '1.125rem', borderRadius: '8px',
-              background: 'linear-gradient(135deg, #e11d48 0%, #d97706 100%)',
+              background: 'var(--brand-gradient)',
               border: '1px solid rgba(245, 158, 11, 0.5)',
               color: '#f8fafc', fontWeight: 700, fontSize: '1rem',
               cursor: 'pointer', transition: 'all 0.25s ease',
@@ -99,7 +99,7 @@ export default function VerifyEmail() {
               display: 'flex', justifyContent: 'center', alignItems: 'center'
             }}
             onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = 'linear-gradient(135deg, #f43f5e 0%, #f59e0b 100%)'; e.currentTarget.style.boxShadow = '0 0 30px rgba(245,158,11,0.55)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.background = 'linear-gradient(135deg, #e11d48 0%, #d97706 100%)'; e.currentTarget.style.boxShadow = '0 0 20px rgba(225,29,72,0.35)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.background = 'var(--brand-gradient)'; e.currentTarget.style.boxShadow = '0 0 20px rgba(225,29,72,0.35)'; }}
             >
               {loading ? 'Sending...' : 'Send Verification Email'}
             </button>

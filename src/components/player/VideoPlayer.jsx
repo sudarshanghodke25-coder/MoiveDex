@@ -324,8 +324,24 @@ export default function VideoPlayer({
             ✕
           </button>
           <div>
-            <h2 style={{ color: '#fff', fontSize: '1.15rem', fontWeight: 800 }}>{playbackSource.title}</h2>
-            <span style={{ color: 'rgba(148,163,184,0.8)', fontSize: '0.8rem', fontWeight: 600 }}>MovieHub Streaming POC</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <h2 style={{ color: '#fff', fontSize: '1.15rem', fontWeight: 800 }}>{playbackSource.title}</h2>
+              {playbackSource.isPreview && (
+                <span style={{
+                  background: 'rgba(245,158,11,0.2)',
+                  border: '1px solid rgba(245,158,11,0.5)',
+                  color: '#fbbf24',
+                  fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.08em',
+                  textTransform: 'uppercase', padding: '0.15rem 0.5rem',
+                  borderRadius: '999px', flexShrink: 0,
+                }}>
+                  Preview
+                </span>
+              )}
+            </div>
+            <span style={{ color: 'rgba(148,163,184,0.8)', fontSize: '0.8rem', fontWeight: 600 }}>
+              {playbackSource.isPreview ? 'MovieDex Preview' : 'MovieDex Streaming'}
+            </span>
           </div>
         </div>
 
@@ -366,7 +382,7 @@ export default function VideoPlayer({
           style={{
             position: 'absolute',
             width: '5rem', height: '5rem', borderRadius: '50%',
-            background: 'linear-gradient(135deg, #e11d48 0%, #d97706 100%)',
+            background: 'var(--brand-gradient)',
             color: '#fff',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             cursor: 'pointer',

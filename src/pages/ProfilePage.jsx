@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 const AVATAR_PRESETS = [
   { id: 'crimson', label: 'Cinema Crimson', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=Crimson&backgroundColor=e11d48', gradient: 'linear-gradient(135deg, #e11d48 0%, #f59e0b 100%)', emoji: '🎬' },
   { id: 'gold', label: 'Radiant Gold', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=Gold&backgroundColor=f59e0b', gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', emoji: '🍿' },
-  { id: 'rose', label: 'Velvet Rose', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=Rose&backgroundColor=f43f5e', gradient: 'linear-gradient(135deg, #f43f5e 0%, #8b5cf6 100%)', emoji: '⚡' },
+  { id: 'rose', label: 'Velvet Rose', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=Rose&backgroundColor=f43f5e', gradient: 'linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)', emoji: '⚡' },
   { id: 'emerald', label: 'Matrix Emerald', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=Emerald&backgroundColor=10b981', gradient: 'linear-gradient(135deg, #10b981 0%, #3b82f6 100%)', emoji: '🌌' },
   { id: 'slate', label: 'Obsidian Black', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=Slate&backgroundColor=181820', gradient: 'linear-gradient(135deg, #181820 0%, #08080a 100%)', emoji: '🎭' },
 ];
@@ -105,8 +105,8 @@ export default function ProfilePage() {
         position: 'relative',
         borderRadius: '24px',
         padding: '2.5rem 2rem',
-        background: 'linear-gradient(135deg, rgba(30,27,75,0.8) 0%, rgba(15,23,42,0.95) 100%)',
-        border: '1px solid rgba(99,102,241,0.25)',
+        background: 'linear-gradient(135deg, rgba(30,10,22,0.85) 0%, rgba(12,10,20,0.95) 100%)',
+        border: '1px solid rgba(245,158,11,0.25)',
         boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
         marginBottom: '2rem',
         overflow: 'hidden',
@@ -114,7 +114,7 @@ export default function ProfilePage() {
         {/* Glow backdrop */}
         <div style={{
           position: 'absolute', top: '-50%', left: '20%', width: '300px', height: '300px',
-          borderRadius: '50%', background: 'rgba(225,29,72,0.15)', filter: 'blur(80px)', pointerEvents: 'none',
+          borderRadius: '50%', background: 'rgba(225,29,72,0.18)', filter: 'blur(80px)', pointerEvents: 'none',
         }} />
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap', position: 'relative', zIndex: 2 }}>
@@ -139,7 +139,7 @@ export default function ProfilePage() {
           <div style={{ flex: 1, minWidth: '220px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '0.4rem' }}>
               <h1 className="text-hero" style={{ margin: 0, fontSize: '2rem' }}>
-                {currentUser?.displayName || 'MovieHub User'}
+                {currentUser?.displayName || 'MovieDex Member'}
               </h1>
               {currentUser?.emailVerified ? (
                 <span className="pill" style={{ background: 'rgba(16,185,129,0.15)', borderColor: 'rgba(16,185,129,0.4)', color: '#10b981', fontWeight: 700 }}>
@@ -359,7 +359,7 @@ export default function ProfilePage() {
           className="glass-card"
           style={{ padding: '1.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1.25rem' }}
         >
-          <div style={{ width: '50px', height: '50px', borderRadius: '12px', background: 'rgba(99,102,241,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>
+          <div style={{ width: '50px', height: '50px', borderRadius: '12px', background: 'rgba(225,29,72,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>
             📑
           </div>
           <div>
@@ -373,7 +373,7 @@ export default function ProfilePage() {
           className="glass-card"
           style={{ padding: '1.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1.25rem' }}
         >
-          <div style={{ width: '50px', height: '50px', borderRadius: '12px', background: 'rgba(168,85,247,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>
+          <div style={{ width: '50px', height: '50px', borderRadius: '12px', background: 'rgba(245,158,11,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>
             ⚙️
           </div>
           <div>

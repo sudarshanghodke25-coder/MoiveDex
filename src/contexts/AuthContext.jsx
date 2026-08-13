@@ -25,19 +25,29 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Email/Password
+  // Email/Password — set currentUser synchronously so ProtectedRoute
+  // doesn't bounce the user back to /login before onAuthStateChanged fires.
   function signup(email, password) {
-    return createUserWithEmailAndPassword(auth, email, password);
+    return createUserWithEmailAndPassword(auth, email, password).then((cred) => {
+      setCurrentUser(cred.user);
+      return cred;
+    });
   }
 
   function login(email, password) {
-    return signInWithEmailAndPassword(auth, email, password);
+    return signInWithEmailAndPassword(auth, email, password).then((cred) => {
+      setCurrentUser(cred.user);
+      return cred;
+    });
   }
 
   // Google
   function loginWithGoogle() {
     const provider = new GoogleAuthProvider();
-    return signInWithPopup(auth, provider);
+    return signInWithPopup(auth, provider).then((cred) => {
+      setCurrentUser(cred.user);
+      return cred;
+    });
   }
 
   // Session

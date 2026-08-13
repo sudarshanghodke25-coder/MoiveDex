@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import MovieCard from './MovieCard';
@@ -46,7 +47,7 @@ export default function MovieRow({ title, items = [], loading = false, error = n
           <div style={{
             width: '0.3rem', height: '1.5rem', borderRadius: '2px',
             background: 'var(--brand-gradient)',
-            boxShadow: '0 0 12px rgba(99,102,241,0.6)',
+            boxShadow: '0 0 12px rgba(245,158,11,0.5)',
             flexShrink: 0,
           }} />
           <h2 id={`row-${title.replace(/\s+/g, '-').toLowerCase()}`} style={{ fontSize: 'clamp(1rem, 2.5vw, 1.35rem)', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.01em' }}>
@@ -54,8 +55,8 @@ export default function MovieRow({ title, items = [], loading = false, error = n
           </h2>
         </div>
         {viewAllTo && (
-          <a
-            href={viewAllTo}
+          <Link
+            to={viewAllTo}
             aria-label={`View all ${title}`}
             style={{
               fontSize: '0.82rem', fontWeight: 700, color: 'var(--brand-primary)',
@@ -69,7 +70,7 @@ export default function MovieRow({ title, items = [], loading = false, error = n
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
               <path d="M5 12h14M12 5l7 7-7 7" />
             </svg>
-          </a>
+          </Link>
         )}
       </div>
 
@@ -89,7 +90,7 @@ export default function MovieRow({ title, items = [], loading = false, error = n
           style={{
             display: 'flex', gap: '1rem', overflowX: 'auto', overflowY: 'visible',
             paddingBottom: '1rem', paddingTop: '0.25rem',
-            scrollbarWidth: 'thin', scrollbarColor: 'rgba(99,102,241,0.3) transparent',
+            scrollbarWidth: 'thin', scrollbarColor: 'rgba(245,158,11,0.35) transparent',
             scrollSnapType: 'x mandatory',
           }}
         >

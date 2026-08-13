@@ -55,8 +55,8 @@ export default function HeroSection() {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '0.5rem',
-            background: 'rgba(99,102,241,0.1)',
-            border: '1px solid rgba(99,102,241,0.3)',
+            background: 'rgba(225, 29, 72, 0.12)',
+            border: '1px solid rgba(245, 158, 11, 0.35)',
             borderRadius: '999px',
             padding: '0.4rem 1.1rem',
             marginBottom: '2rem',
@@ -71,7 +71,7 @@ export default function HeroSection() {
           <span style={{
             width: 7, height: 7, borderRadius: '50%',
             background: 'var(--brand-primary)',
-            boxShadow: '0 0 10px rgba(99,102,241,0.9)',
+            boxShadow: '0 0 10px rgba(245, 158, 11, 0.9)',
             animation: 'pulse-dot 2s ease-in-out infinite',
             flexShrink: 0,
           }} />
@@ -93,7 +93,7 @@ export default function HeroSection() {
             fontWeight: 900,
             color: '#f8fafc',
             letterSpacing: '-0.02em',
-            textShadow: '0 4px 40px rgba(99,102,241,0.3)',
+            textShadow: '0 4px 40px rgba(0, 0, 0, 0.65)',
           }}>
             Endless Movies, Shows & Anime.
           </span>
@@ -123,7 +123,7 @@ export default function HeroSection() {
             id="hero-cta-primary"
             style={{
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.625rem',
-              background: 'linear-gradient(135deg, #e11d48 0%, #d97706 100%)',
+              background: 'var(--brand-gradient)',
               border: '1px solid rgba(245, 158, 11, 0.5)',
               color: '#f8fafc', fontWeight: 700, fontSize: '1.05rem',
               padding: '1rem 2rem', borderRadius: '999px',
@@ -134,7 +134,7 @@ export default function HeroSection() {
               flex: '1 1 auto', maxWidth: '280px',
             }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.background = 'linear-gradient(135deg, #f43f5e 0%, #f59e0b 100%)'; e.currentTarget.style.boxShadow = '0 0 50px rgba(245, 158, 11, 0.6)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.background = 'linear-gradient(135deg, #e11d48 0%, #d97706 100%)'; e.currentTarget.style.boxShadow = '0 0 30px rgba(225, 29, 72, 0.4)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.background = 'var(--brand-gradient)'; e.currentTarget.style.boxShadow = '0 0 30px rgba(225, 29, 72, 0.4)'; }}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <polygon points="5 3 19 12 5 21 5 3" />
@@ -146,15 +146,15 @@ export default function HeroSection() {
             id="hero-cta-secondary"
             style={{
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.625rem',
-              background: 'rgba(15, 23, 42, 0.85)', color: '#f8fafc', fontWeight: 600,
+              background: 'rgba(8, 8, 12, 0.85)', color: '#f8fafc', fontWeight: 600,
               fontSize: '1.05rem', padding: '1rem 2rem', borderRadius: '999px',
               border: '1px solid rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)',
               transition: 'all 0.25s ease', textDecoration: 'none',
               opacity: 1, visibility: 'visible',
               flex: '1 1 auto', maxWidth: '280px',
             }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(30, 41, 59, 0.95)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.5)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(15, 23, 42, 0.85)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; e.currentTarget.style.transform = ''; }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(22, 22, 28, 0.95)'; e.currentTarget.style.borderColor = 'rgba(245, 158, 11, 0.5)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(8, 8, 12, 0.85)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; e.currentTarget.style.transform = ''; }}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
               <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
@@ -182,7 +182,7 @@ export default function HeroSection() {
             <div key={label} role="listitem" style={{ textAlign: 'center' }}>
               <div style={{
                 fontSize: 'clamp(1.3rem, 3.5vw, 2rem)', fontWeight: 900,
-                background: 'linear-gradient(135deg, #e0e7ff, #a5b4fc)',
+                background: 'linear-gradient(135deg, #ffffff, #fbbf24)',
                 WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text', lineHeight: 1,
               }}>
@@ -201,8 +201,8 @@ export default function HeroSection() {
 
       <style>{`
         @keyframes pulse-dot {
-          0%,100% { opacity:1; box-shadow:0 0 10px rgba(99,102,241,0.9); }
-          50%      { opacity:0.5; box-shadow:0 0 20px rgba(99,102,241,0.4); }
+          0%,100% { opacity:1; box-shadow:0 0 10px rgba(245,158,11,0.9); }
+          50%      { opacity:0.5; box-shadow:0 0 20px rgba(225,29,72,0.5); }
         }
       `}</style>
     </section>

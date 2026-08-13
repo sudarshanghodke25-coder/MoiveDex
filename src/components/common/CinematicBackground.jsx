@@ -65,7 +65,7 @@ export default function CinematicBackground() {
       r:     Math.random() * 3 + 1,
       speed: Math.random() * 0.0003 + 0.0001,
       hue:   Math.random() > 0.5
-        ? `rgba(99,102,241,${Math.random() * 0.2 + 0.05})`
+        ? `rgba(245,158,11,${Math.random() * 0.2 + 0.05})`
         : `rgba(245,158,11,${Math.random() * 0.15 + 0.04})`,
       phase: Math.random() * Math.PI * 2,
     }));
@@ -164,14 +164,15 @@ export default function CinematicBackground() {
         ref={layer2Ref}
         style={{
           position: 'absolute', inset: '-8% -8%', willChange: 'transform',
-          background: 'radial-gradient(ellipse 100% 80% at 50% 50%, rgba(5,5,16,0.55) 0%, rgba(5,5,16,0.85) 60%, rgba(5,5,16,0.95) 100%)',
+          background: 'radial-gradient(ellipse 100% 80% at 50% 50%, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.85) 60%, rgba(0,0,0,0.95) 100%)',
         }}
       />
+      {/* Black cinematic shade — keeps the photo visible while framing it in deep black */}
       <div
         ref={layer3Ref}
         style={{
           position: 'absolute', inset: '-15% -15%', willChange: 'transform',
-          background: 'radial-gradient(ellipse 40% 35% at 25% 40%, rgba(99,102,241,0.18) 0%, transparent 70%), radial-gradient(ellipse 35% 30% at 75% 65%, rgba(168,85,247,0.14) 0%, transparent 70%), radial-gradient(ellipse 30% 25% at 60% 25%, rgba(245,158,11,0.08) 0%, transparent 60%)',
+          background: 'radial-gradient(ellipse 120% 90% at 50% 38%, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.55) 65%, rgba(0,0,0,0.85) 100%)',
         }}
       />
       

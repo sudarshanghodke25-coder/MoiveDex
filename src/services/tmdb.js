@@ -102,7 +102,12 @@ async function get(endpoint, params = {}, signal = null) {
   const cached = cache.get(cacheKey);
   if (cached) return cached;
 
-  // 2. Build URL
+  // 2. Guard: a missing API key fails fast with a clear message
+  if (!API_KEY) {
+    throw new Error('TMDB API key is not configured. Add VITE_TMDB_API_KEY to your .env file.');
+  }
+
+  // 4. Build URL
   const url = new URL(`${BASE_URL}${endpoint}`);
   url.searchParams.set('api_key', API_KEY);
   url.searchParams.set('language', LANGUAGE);
@@ -110,7 +115,7 @@ async function get(endpoint, params = {}, signal = null) {
     if (v !== undefined && v !== null) url.searchParams.set(k, v);
   });
 
-  // 3. Fetch (with dedup + retry)
+  // 5. Fetch (with dedup + retry)
   let data;
   try {
     data = await queuedFetch(url.toString(), cacheKey, signal);
@@ -121,7 +126,7 @@ async function get(endpoint, params = {}, signal = null) {
     throw err;
   }
 
-  // 4. Store in cache
+  // 6. Store in cache
   cache.set(cacheKey, data);
   return data;
 }
@@ -527,6 +532,49 @@ export async function getMovieGenres(signal = null) {
 export async function getTVGenres(signal = null) {
   const data = await get('/genre/tv/list', {}, signal);
   return data.genres;
+}
+
+// ── Watch provider links ──────────────────────────────────────────────────
+
+/**
+ * Pick the region block to use from a TMDB watch/providers response.
+ * Prefers common regions (US, IN, GB, CA, AU), falls back to the first
+ * region returned by TMDB.
+ * @param {Object} providers  — `providers` object from TMDB (keyed by country code)
+ * @returns {{ countryCode: string|null, region: Object|null }}
+ */
+export function pickWatchRegion(providers = {}) {
+  const codes = Object.keys(providers);
+  if (codes.length === 0) return { countryCode: null, region: null };
+  const countryCode = codes.find(c => ['US', 'IN', 'GB', 'CA', 'AU'].includes(c)) || codes[0];
+  return { countryCode, region: providers[countryCode] };
+}
+
+/**
+ * Build a per-provider TMDB watch URL for a title.
+ * TMDB's watch page redirects to the actual provider when opened.
+ *
+ * @param {Object} opts
+ * @param {string}        opts.mediaType    'movie' | 'tv' | 'anime'
+ * @param {number|string} opts.id           TMDB content ID
+ * @param {string}        [opts.countryCode='US']
+ * @param {number|string} [opts.providerId] Provider ID to deep-link to
+ * @returns {string}
+ */
+export function buildProviderWatchUrl({ mediaType, id, countryCode = 'US', providerId = null }) {
+  const type = mediaType === 'movie' ? 'movie' : 'tv'; // anime resolves to tv on TMDB
+  const params = new URLSearchParams({ locale: countryCode });
+  if (providerId) params.set('watch_provider', providerId);
+  return `https://www.themoviedb.org/${type}/${id}/watch?${params.toString()}`;
+}
+
+/**
+ * The top streaming (flatrate) provider for a title, if any.
+ * @returns {Object|null}
+ */
+export function getTopStreamingProvider(providers = {}) {
+  const { region } = pickWatchRegion(providers);
+  return region?.flatrate?.[0] || null;
 }
 
 // --- Images ---

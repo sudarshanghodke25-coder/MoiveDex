@@ -1,12 +1,16 @@
 /**
  * services/playback.js
  *
- * Single source of truth for MovieHub authorized video playback streams.
+ * Single source of truth for MovieDex in-app video playback.
  * Decouples video rendering and playback from metadata sources (TMDB).
- * Uses legal, open-source test content (Creative Commons CC BY) for streaming POC.
+ *
+ * ⚠️  TMDB is metadata-only — it does not host or license movie/TV streams.
+ *  In-app playback therefore uses legal, open-source Creative Commons test
+ *  content and is ALWAYS labeled as a PREVIEW. Real streaming is handled by
+ *  outbound links to the actual watch providers (see `buildProviderWatchUrl`).
  */
 
-// Legal, public-domain / Creative Commons test video streams
+// Legal, public-domain / Creative Commons preview video streams
 const SAMPLE_VIDEOS = {
   default: {
     videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
@@ -76,6 +80,7 @@ export async function getPlaybackSource({
 
   return {
     playable: true,
+    isPreview: true, // In-app playback is always a demo preview — real streaming happens via provider links
     contentId,
     mediaType,
     seasonNumber,
