@@ -6,8 +6,9 @@ import { useEffect, useRef } from 'react';
  * Movie-production themed hero background with:
  * - Cinematic background image (parallax)
  * - Animated bokeh particles (ambient)
- * - Sparkling mouse trail (interactive)
  * - Film grain texture
+ *
+ * Note: the sparkling mouse trail lives in SparkleTrail (site-wide).
  */
 export default function CinematicBackground() {
   const layer1Ref  = useRef(null);
@@ -19,29 +20,12 @@ export default function CinematicBackground() {
   const targetRef  = useRef({ x: 0, y: 0 });
   const currentRef = useRef({ x: 0, y: 0 });
   
-  // Array for mouse trail particles
-  const trailRef   = useRef([]);
-
   useEffect(() => {
-    // ── Mouse tracking & Sparks ────────────────────────────────
+    // ── Mouse tracking (parallax) ──────────────────────────────
     const handleMouseMove = (e) => {
       // Normalise for parallax: -1 to +1
       targetRef.current.x = (e.clientX / window.innerWidth  - 0.5) * 2;
       targetRef.current.y = (e.clientY / window.innerHeight - 0.5) * 2;
-      
-      // Add sparkling particles at mouse position
-      const colors = ['#e11d48', '#f59e0b', '#fbbf24', '#f8fafc'];
-      for (let i = 0; i < 3; i++) {
-        trailRef.current.push({
-          x: e.clientX,
-          y: e.clientY,
-          vx: (Math.random() - 0.5) * 3,
-          vy: (Math.random() - 0.5) * 3 + 1.5, // slight gravity
-          life: 1, // fades from 1 to 0
-          size: Math.random() * 2.5 + 1,
-          color: colors[Math.floor(Math.random() * colors.length)],
-        });
-      }
     };
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
 
@@ -107,29 +91,6 @@ export default function CinematicBackground() {
           ctx.fill();
         });
 
-        // Draw interactive sparkling trail
-        const trail = trailRef.current;
-        for (let i = trail.length - 1; i >= 0; i--) {
-          const p = trail[i];
-          p.x += p.vx;
-          p.y += p.vy;
-          p.life -= 0.015; // decay
-
-          if (p.life <= 0) {
-            trail.splice(i, 1);
-            continue;
-          }
-
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
-          ctx.fillStyle = p.color;
-          ctx.globalAlpha = p.life;
-          ctx.shadowBlur = 10;
-          ctx.shadowColor = p.color;
-          ctx.fill();
-        }
-        ctx.globalAlpha = 1;
-        ctx.shadowBlur = 0;
       }
     };
     animate();

@@ -8,12 +8,13 @@
  *   4. Anime strategy: /discover/tv with genre=16 + origin_country=JP (broader than /search)
  */
 
-import { TMDB_CONFIG, POSTER_SIZES, BACKDROP_SIZES, PROFILE_SIZES, GENRE_MAP, ANIME_CONFIG } from './tmdbConfig';
+import { TMDB_CONFIG, TMDB_PROXY, POSTER_SIZES, BACKDROP_SIZES, PROFILE_SIZES, GENRE_MAP, ANIME_CONFIG } from './tmdbConfig';
 import { queuedFetch } from './tmdbQueue';
 import cache from './tmdbCache';
 import { TMDBNetworkError } from './tmdbErrors';
 
 const { API_KEY, BASE_URL, IMG_BASE, LANGUAGE } = TMDB_CONFIG;
+const USE_PROXY = TMDB_PROXY.ENABLED;
 
 // ── Image URL builders ─────────────────────────────────────────────────────
 
@@ -102,14 +103,20 @@ async function get(endpoint, params = {}, signal = null) {
   const cached = cache.get(cacheKey);
   if (cached) return cached;
 
-  // 2. Guard: a missing API key fails fast with a clear message
-  if (!API_KEY) {
-    throw new Error('TMDB API key is not configured. Add VITE_TMDB_API_KEY to your .env file.');
+  // 2. Build URL — through the serverless proxy when enabled (key stays server-side),
+  //    otherwise direct to TMDB (local dev / static hosts).
+  let url;
+  if (USE_PROXY) {
+    url = new URL(TMDB_PROXY.BASE_URL, window.location.origin);
+    url.searchParams.set('path', endpoint);
+  } else {
+    // Guard: a missing API key fails fast with a clear message
+    if (!API_KEY) {
+      throw new Error('TMDB API key is not configured. Add VITE_TMDB_API_KEY to your .env file.');
+    }
+    url = new URL(`${BASE_URL}${endpoint}`);
+    url.searchParams.set('api_key', API_KEY);
   }
-
-  // 4. Build URL
-  const url = new URL(`${BASE_URL}${endpoint}`);
-  url.searchParams.set('api_key', API_KEY);
   url.searchParams.set('language', LANGUAGE);
   Object.entries(params).forEach(([k, v]) => {
     if (v !== undefined && v !== null) url.searchParams.set(k, v);

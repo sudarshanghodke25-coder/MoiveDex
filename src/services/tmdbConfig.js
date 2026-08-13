@@ -19,6 +19,21 @@ export const TMDB_CONFIG = {
   REGION:   'US',
 };
 
+/**
+ * TMDB API-key proxy — hides the API key from the browser bundle.
+ *
+ * When ENABLED, all TMDB data requests go through the serverless function in
+ * `api/tmdb.js` (deployed on Vercel), which adds the key server-side. The
+ * browser never sees or sends the key.
+ *
+ * Set VITE_USE_TMDB_PROXY=true in production. Keep it false for local dev
+ * (Vite dev server does not serve serverless functions).
+ */
+export const TMDB_PROXY = {
+  ENABLED:  import.meta.env.VITE_USE_TMDB_PROXY === 'true',
+  BASE_URL: import.meta.env.VITE_TMDB_PROXY_URL || '/api/tmdb',
+};
+
 /** Supported TMDB image sizes for posters */
 export const POSTER_SIZES = {
   xs:     'w92',

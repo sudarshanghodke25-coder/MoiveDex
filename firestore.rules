@@ -1,24 +1,28 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // A user may only read/write documents under their own users/{uid} tree.
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    // ── User profile + settings (users/{uid}) ───────────────────────────
     match /users/{userId} {
-      // User can read and write only their own profile document
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isOwner(userId);
 
-      // User My List subcollection — each item belongs only to its owner
-      match /myList/{itemId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
+      // ── Per-user sub-collections: myList, history, notifications ──────
+      // users/{uid}/myList/{itemId}
+      // users/{uid}/history/{contentId}
+      // users/{uid}/notifications/{notifId}
+      match /{subcollection}/{document} {
+        allow read, write: if isOwner(userId);
       }
+    }
 
-      // User notifications subcollection
-      match /notifications/{notificationId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
-
-      // User watch history subcollection
-      match /history/{historyId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
+    // ── Deny everything else (Firestore already denies by default; this is
+    //    an explicit guard so no collection is ever opened up accidentally).
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
