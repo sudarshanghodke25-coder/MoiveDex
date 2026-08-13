@@ -927,3 +927,24 @@
   .detail-main { padding: 0 1rem; }
   .detail-section { padding: 1rem; }
 }
+
+/* ── Person page quick facts ─────────────────────────────────────── */
+.quick-fact-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 0.2rem;
+}
+
+/* ── Detail gallery hover zoom ───────────────────────────────────── */
+.gallery-grid button:hover .gallery-zoom {
+  opacity: 1;
+}
+
+/* ── Scrollable people / cast rows hide scrollbar on touch devices ── */
+@media (max-width: 768px) {
+  .gallery-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}

@@ -17,6 +17,7 @@ const TVPage = lazy(() => import('../pages/TVPage'));
 const AnimePage = lazy(() => import('../pages/AnimePage'));
 const SearchPage = lazy(() => import('../pages/SearchPage'));
 const DetailPage = lazy(() => import('../pages/DetailPage'));
+const PersonPage = lazy(() => import('../pages/PersonPage'));
 const MyListPage = lazy(() => import('../pages/MyListPage'));
 const ProfilePage = lazy(() => import('../pages/ProfilePage'));
 const SettingsPage = lazy(() => import('../pages/SettingsPage'));
@@ -52,6 +53,7 @@ export default function AppRouter() {
             <Route path="/movie/:id"   element={<DetailPage mediaType="movie" />} />
             <Route path="/tv/:id"      element={<DetailPage mediaType="tv" />} />
             <Route path="/anime/:id"   element={<DetailPage mediaType="anime" />} />
+            <Route path="/person/:id"  element={<PersonPage />} />
             <Route path="/mylist"      element={<MyListPage />} />
             <Route path="/profile"     element={<ProfilePage />} />
             <Route path="/settings"    element={<SettingsPage />} />

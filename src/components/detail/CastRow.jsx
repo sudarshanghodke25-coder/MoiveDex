@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { profileUrl } from '../../services/tmdb';
 
 export default function CastRow({ cast = [] }) {
@@ -22,14 +23,20 @@ export default function CastRow({ cast = [] }) {
         {topCast.map(person => {
           const img = profileUrl(person.profile_path, 'md');
           return (
-            <div
+            <Link
               key={person.id || person.credit_id}
+              to={`/person/${person.id}`}
               className="cast-card"
+              aria-label={`View profile of ${person.name}`}
               style={{
                 width: '120px',
                 flexShrink: 0,
                 textAlign: 'center',
+                textDecoration: 'none',
+                transition: 'transform 0.2s ease',
               }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = ''; }}
             >
               <div
                 className="cast-avatar"
@@ -75,7 +82,7 @@ export default function CastRow({ cast = [] }) {
                   {person.character}
                 </p>
               )}
-            </div>
+            </Link>
           );
         })}
       </div>

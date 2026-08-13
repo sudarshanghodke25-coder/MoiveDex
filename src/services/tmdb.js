@@ -213,6 +213,15 @@ export function normalise(item, overrideMediaType = null) {
     productionCompanies: item.production_companies || null,
     budget:          item.budget           || null,
     revenue:         item.revenue          || null,
+    // Identity / external (movies)
+    imdbId:          item.imdb_id          || null,
+    homepage:        item.homepage         || '',
+    // TV-only
+    createdBy:       item.created_by       || null,
+    originCountries: item.origin_country   || [],
+    // Appended extras (only present when requested via append_to_response)
+    images:          item.images           || null,
+    externalIds:     item.external_ids     || null,
   };
 }
 
@@ -285,7 +294,7 @@ export async function getUpcoming(page = 1, signal = null) {
 /** Movie details + appended responses */
 export async function getMovieDetails(id, signal = null) {
   const data = await get(`/movie/${id}`, {
-    append_to_response: 'credits,videos,similar,recommendations,keywords,watch/providers',
+    append_to_response: 'credits,videos,similar,recommendations,keywords,watch/providers,images,external_ids',
   }, signal);
   return normalise(data, 'movie');
 }
@@ -342,7 +351,7 @@ export async function getTopRatedTV(page = 1, signal = null) {
 /** TV show details + appended responses */
 export async function getTVDetails(id, signal = null) {
   const data = await get(`/tv/${id}`, {
-    append_to_response: 'credits,videos,similar,recommendations,keywords,watch/providers',
+    append_to_response: 'credits,videos,similar,recommendations,keywords,watch/providers,images,external_ids',
   }, signal);
   return normalise(data, 'tv');
 }
@@ -378,6 +387,122 @@ export async function getTVSeasonDetails(tvId, seasonNumber = 1, signal = null) 
   return normaliseSeason(data, tvId);
 }
 
+// --- Images ---
+
+/** Movie images — backdrops, posters, logos */
+export async function getMovieImages(id, signal = null) {
+  const data = await get(`/movie/${id}/images`, {}, signal);
+  return {
+    backdrops: data.backdrops || [],
+    posters:   data.posters   || [],
+    logos:     data.logos     || [],
+  };
+}
+
+/** TV show images — backdrops, posters, logos */
+export async function getTVImages(id, signal = null) {
+  const data = await get(`/tv/${id}/images`, {}, signal);
+  return {
+    backdrops: data.backdrops || [],
+    posters:   data.posters   || [],
+    logos:     data.logos     || [],
+  };
+}
+
+// --- Discover (filtered browsing) ---
+
+/**
+ * Discover movies with optional filters.
+ * @param {Object}   opts
+ * @param {number}   [opts.genreId]        TMDB genre id
+ * @param {number}   [opts.year]           Primary release year
+ * @param {string}   [opts.sortBy]         e.g. 'popularity.desc' | 'vote_average.desc' | 'primary_release_date.desc'
+ * @param {number}   [opts.minRating]      Minimum vote average (0-10)
+ * @param {number}   [opts.page=1]
+ */
+export async function discoverMovies({ genreId = null, year = null, sortBy = 'popularity.desc', minRating = null, page = 1, signal = null } = {}) {
+  const params = { sort_by: sortBy, page };
+  if (genreId)    params.with_genres = genreId;
+  if (year)       params.primary_release_year = year;
+  if (minRating)  params['vote_average.gte'] = minRating;
+  const data = await get('/discover/movie', params, signal);
+  return paginated(data, 'movie');
+}
+
+/**
+ * Discover TV shows with optional filters.
+ * @param {Object}   opts
+ * @param {number}   [opts.genreId]        TMDB genre id
+ * @param {number}   [opts.year]           First air year
+ * @param {string}   [opts.sortBy]         e.g. 'popularity.desc' | 'vote_average.desc' | 'first_air_date.desc'
+ * @param {number}   [opts.minRating]      Minimum vote average (0-10)
+ * @param {number}   [opts.page=1]
+ */
+export async function discoverTV({ genreId = null, year = null, sortBy = 'popularity.desc', minRating = null, page = 1, signal = null } = {}) {
+  const params = { sort_by: sortBy, page };
+  if (genreId)    params.with_genres = genreId;
+  if (year)       params.first_air_date_year = year;
+  if (minRating)  params['vote_average.gte'] = minRating;
+  const data = await get('/discover/tv', params, signal);
+  return paginated(data, 'tv');
+}
+
+// --- People ---
+
+/**
+ * Normalise a TMDB person (detail or search result) into a consistent shape.
+ */
+export function normalisePerson(p) {
+  const credits  = p.combined_credits || {};
+  const combined = (credits.cast || [])
+    .map(c => ({
+      id:         c.id,
+      title:      c.title || c.name || 'Unknown',
+      mediaType:  c.media_type === 'tv' ? 'tv' : 'movie',
+      character:  c.character || '',
+      posterPath: c.poster_path || null,
+      releaseDate: c.release_date || c.first_air_date || null,
+      rating:     typeof c.vote_average === 'number' ? c.vote_average : null,
+    }))
+    .filter(c => c.id)
+    .sort((a, b) => String(b.releaseDate || '').localeCompare(String(a.releaseDate || '')))
+    .slice(0, 40);
+
+  return {
+    id:                 p.id,
+    name:               p.name || 'Unknown',
+    profilePath:        p.profile_path || null,
+    biography:          p.biography || '',
+    birthday:           p.birthday || null,
+    deathday:           p.deathday || null,
+    placeOfBirth:       p.place_of_birth || null,
+    knownForDepartment: p.known_for_department || '',
+    popularity:         p.popularity || 0,
+    alsoKnownAs:        p.also_known_as || [],
+    homepage:           p.homepage || '',
+    imdbId:             p.imdb_id || null,
+    credits:            combined,
+  };
+}
+
+/** Full person details + combined credits */
+export async function getPersonDetails(id, signal = null) {
+  const data = await get(`/person/${id}`, { append_to_response: 'combined_credits' }, signal);
+  return normalisePerson(data);
+}
+
+/** Search people */
+export async function searchPeople(query, page = 1, signal = null) {
+  if (!query?.trim()) return { results: [], page: 1, totalPages: 0, totalResults: 0 };
+  const data = await get('/search/person', { query: query.trim(), page }, signal);
+  return {
+    results:    data.results.map(p => normalisePerson(p)),
+    page:       data.page,
+    totalPages: data.total_pages,
+    totalResults: data.total_results,
+  };
+}
+
 /** TV episode details */
 export async function getTVEpisodeDetails(tvId, seasonNumber = 1, episodeNumber = 1, signal = null) {
   const data = await get(`/tv/${tvId}/season/${seasonNumber}/episode/${episodeNumber}`, {}, signal);
@@ -404,6 +529,9 @@ export function normaliseEpisode(ep, tvId = null, seasonNumber = 1) {
     voteAverage: ep.vote_average ?? null,
     voteCount: ep.vote_count ?? 0,
     runtime: ep.runtime || null,
+    productionCode: ep.production_code || null,
+    guestStars: ep.guest_stars || [],
+    crew: ep.crew || [],
     episodeCode: `S${String(ep.season_number ?? seasonNumber).padStart(2, '0')}E${String(ep.episode_number).padStart(2, '0')}`,
   };
 }

@@ -1,9 +1,10 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   getMovieDetails,
   getTVDetails,
   getTVSeasonDetails,
+  getTVEpisodeDetails,
   getVideos,
   backdropUrl,
   posterUrl,
@@ -13,6 +14,7 @@ import {
   getTopStreamingProvider,
   buildProviderWatchUrl,
 } from '../services/tmdb';
+import { TMDB_CONFIG } from '../services/tmdbConfig';
 import MovieCard from '../components/movie-card/MovieCard';
 import { useWatchlist } from '../contexts/WatchlistContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -21,6 +23,10 @@ import { saveWatchProgress, getWatchProgress, getContentId } from '../services/h
 import VideoPlayer from '../components/player/VideoPlayer';
 import WatchProviders from '../components/detail/WatchProviders';
 import CastRow from '../components/detail/CastRow';
+import QuickStats from '../components/detail/QuickStats';
+import CrewSection from '../components/detail/CrewSection';
+import MediaGallery from '../components/detail/MediaGallery';
+import ExternalLinks from '../components/detail/ExternalLinks';
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -160,6 +166,8 @@ export default function DetailPage({ mediaType = 'movie' }) {
   // Selected episode detail panel
   const [selectedEpisode, setSelectedEpisode] = useState(null);
   const selectedEpisodeRef = useRef(null);
+  // Episode extras fetched from the dedicated episode endpoint (guest stars / crew / production code)
+  const [episodeExtras, setEpisodeExtras] = useState(null);
 
   // Playback state
   const [activePlayback, setActivePlayback] = useState(null);
@@ -217,6 +225,7 @@ export default function DetailPage({ mediaType = 'movie' }) {
     setSeasonLoading(true);
     setSeasonData(null);
     setSelectedEpisode(null); // clear selected episode when season changes
+    setEpisodeExtras(null);
     getTVSeasonDetails(id, selectedSeasonNum)
       .then(data => {
         setSeasonData(data);
@@ -286,10 +295,16 @@ export default function DetailPage({ mediaType = 'movie' }) {
     setShowTrailer(true);
   }
 
-  // Handle episode card click: select the episode and scroll to detail panel
+  // Handle episode card click: select the episode, fetch its richer metadata,
+  // and scroll to the detail panel
   function handleEpisodeSelect(ep) {
     setSelectedEpisode(ep);
-    // Scroll to the detail panel after state updates
+    setEpisodeExtras(null);
+    if (ep?.seasonNumber && ep?.episodeNumber) {
+      getTVEpisodeDetails(id, ep.seasonNumber, ep.episodeNumber)
+        .then(extra => setEpisodeExtras(extra))
+        .catch(() => setEpisodeExtras(null)); // panel still works with season-level data
+    }
     setTimeout(() => {
       selectedEpisodeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }, 50);
@@ -470,14 +485,29 @@ export default function DetailPage({ mediaType = 'movie' }) {
             )}
           </div>
 
-          {/* Genres */}
-          {detail.genreNames?.length > 0 && (
+          {/* Genres — clickable, link to filtered discovery pages */}
+          {detail.genreObjects?.length > 0 ? (
+            <div className="detail-genres">
+              {detail.genreObjects.map(g => (
+                <Link
+                  key={g.id}
+                  to={isTV ? `/tv?genre=${g.id}` : `/movies?genre=${g.id}`}
+                  className="pill"
+                  style={{ textDecoration: 'none', transition: 'all 0.2s ease' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'var(--brand-gradient)'; e.currentTarget.style.color = '#fff'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = ''; e.currentTarget.style.color = ''; }}
+                >
+                  {g.name}
+                </Link>
+              ))}
+            </div>
+          ) : detail.genreNames?.length > 0 ? (
             <div className="detail-genres">
               {detail.genreNames.map(g => (
                 <span key={g} className="pill">{g}</span>
               ))}
             </div>
-          )}
+          ) : null}
 
           {/* Overview */}
           {detail.overview && (
@@ -609,6 +639,9 @@ export default function DetailPage({ mediaType = 'movie' }) {
         </div>
       </div>
 
+      {/* ── Quick Stats Strip ─────────────────────────────────────── */}
+      <QuickStats detail={detail} isTV={isTV} />
+
       {/* ── Metadata Block ────────────────────────────────────────── */}
       {(detail.originalLanguage || langs || companies || networks || budgetFmt || revenueFmt || detail.productionCountries?.length > 0) && (
         <div className="detail-section" style={{ marginTop: '2.5rem' }}>
@@ -647,6 +680,51 @@ export default function DetailPage({ mediaType = 'movie' }) {
             )}
             {isTV && detail.lastAirDate && detail.lastAirDate !== detail.firstAirDate && (
               <MetaRow label="Last Aired" value={detail.lastAirDate} />
+            )}
+
+            {/* Production companies — logos when available, text fallback */}
+            {detail.productionCompanies?.length > 0 && (
+              <div style={{ paddingTop: '0.75rem' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)' }}>
+                  Production Companies
+                </span>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.625rem', marginTop: '0.625rem' }}>
+                  {detail.productionCompanies.slice(0, 6).map(c => (
+                    c.logo_path ? (
+                      <span
+                        key={c.id}
+                        title={c.name}
+                        style={{
+                          display: 'inline-flex', alignItems: 'center',
+                          padding: '0.4rem 0.85rem', borderRadius: '10px',
+                          background: 'rgba(255,255,255,0.05)',
+                          border: '1px solid rgba(255,255,255,0.08)',
+                          height: '2.5rem',
+                        }}
+                      >
+                        <img
+                          src={`${TMDB_CONFIG.IMG_BASE}/w92${c.logo_path}`}
+                          alt={c.name}
+                          loading="lazy"
+                          style={{ height: '24px', maxWidth: '90px', objectFit: 'contain', filter: 'brightness(0) invert(1)', opacity: 0.9 }}
+                        />
+                      </span>
+                    ) : (
+                      <span
+                        key={c.id}
+                        style={{
+                          fontSize: '0.8rem', color: 'var(--text-secondary)',
+                          padding: '0.4rem 0.85rem', borderRadius: '10px',
+                          background: 'rgba(255,255,255,0.05)',
+                          border: '1px solid rgba(255,255,255,0.08)',
+                        }}
+                      >
+                        {c.name}
+                      </span>
+                    )
+                  ))}
+                </div>
+              </div>
             )}
           </div>
         </div>
@@ -705,7 +783,12 @@ export default function DetailPage({ mediaType = 'movie' }) {
           ) : seasonData?.episodes?.length ? (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))', gap: '1.25rem' }}>
               {seasonData.episodes.map(ep => {
-                const stillUrl = ep.stillPath ? `https://image.tmdb.org/t/p/w300${ep.stillPath}` : null;
+                // Fallback chain: episode still → season poster → series backdrop
+                const stillUrl = ep.stillPath
+                  ? `https://image.tmdb.org/t/p/w300${ep.stillPath}`
+                  : (seasonData?.posterPath
+                    ? `https://image.tmdb.org/t/p/w300${seasonData.posterPath}`
+                    : (detail.backdropPath ? `https://image.tmdb.org/t/p/w300${detail.backdropPath}` : null));
                 const isSelected = selectedEpisode?.id === ep.id;
                 return (
                   <div
@@ -829,7 +912,12 @@ export default function DetailPage({ mediaType = 'movie' }) {
           {/* ── Selected Episode Detail Panel ── */}
           {selectedEpisode && (() => {
             const ep = selectedEpisode;
-            const stillLg = ep.stillPath ? `https://image.tmdb.org/t/p/w780${ep.stillPath}` : null;
+            // Fallback chain: episode still → season poster → series backdrop
+            const stillLg = ep.stillPath
+              ? `https://image.tmdb.org/t/p/w780${ep.stillPath}`
+              : (seasonData?.posterPath
+                ? `https://image.tmdb.org/t/p/w780${seasonData.posterPath}`
+                : (detail.backdropPath ? `https://image.tmdb.org/t/p/w780${detail.backdropPath}` : null));
             const episodes = seasonData?.episodes || [];
             const currentIdx = episodes.findIndex(e => e.id === ep.id);
             const hasPrev = currentIdx > 0;
@@ -964,6 +1052,61 @@ export default function DetailPage({ mediaType = 'movie' }) {
                       {ep.overview || 'No description is available for this episode.'}
                     </p>
 
+                    {/* Production code (from the dedicated episode endpoint) */}
+                    {(ep.productionCode || episodeExtras?.productionCode) && (
+                      <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.875rem' }}>
+                        Production Code: {ep.productionCode || episodeExtras.productionCode}
+                      </p>
+                    )}
+
+                    {/* Guest stars (from the dedicated episode endpoint) */}
+                    {episodeExtras?.guestStars?.length > 0 && (
+                      <div style={{ marginBottom: '1rem' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', display: 'block', marginBottom: '0.5rem' }}>
+                          Guest Stars
+                        </span>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                          {episodeExtras.guestStars.slice(0, 6).map(gs => (
+                            <Link
+                              key={gs.credit_id || gs.id}
+                              to={`/person/${gs.id}`}
+                              style={{
+                                fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)',
+                                padding: '0.3rem 0.75rem', borderRadius: '999px', textDecoration: 'none',
+                                background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                              }}
+                            >
+                              {gs.name}{gs.character ? ` · ${gs.character}` : ''}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Episode crew (from the dedicated episode endpoint) */}
+                    {episodeExtras?.crew?.length > 0 && (
+                      <div style={{ marginBottom: '1.25rem' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', display: 'block', marginBottom: '0.5rem' }}>
+                          Crew
+                        </span>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                          {episodeExtras.crew.slice(0, 6).map(c => (
+                            <Link
+                              key={c.credit_id || c.id}
+                              to={`/person/${c.id}`}
+                              style={{
+                                fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)',
+                                padding: '0.3rem 0.75rem', borderRadius: '999px', textDecoration: 'none',
+                                background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                              }}
+                            >
+                              {c.name} · {c.job}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Actions: Watch + Prev/Next */}
                     <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.75rem' }}>
                       <button
@@ -1023,9 +1166,14 @@ export default function DetailPage({ mediaType = 'movie' }) {
         </div>
       )}
 
-      {/* ── Cast & Crew ───────────────────────────────────────────── */}
+      {/* ── Cast ──────────────────────────────────────────────────── */}
       {cast.length > 0 && (
         <CastRow cast={cast} />
+      )}
+
+      {/* ── Crew (dedicated section) ──────────────────────────────── */}
+      {crew.length > 0 && (
+        <CrewSection crew={crew} />
       )}
 
       {/* ── Trailers / Videos ─────────────────────────────────────── */}
@@ -1088,6 +1236,11 @@ export default function DetailPage({ mediaType = 'movie' }) {
         </div>
       )}
 
+      {/* ── Gallery ────────────────────────────────────────────────── */}
+      {detail.images && (
+        <MediaGallery images={detail.images} />
+      )}
+
       {/* ── Where to Watch ─────────────────────────────────────────── */}
       <WatchProviders providers={providers} mediaType={mediaType} id={detail.id} />
 
@@ -1110,6 +1263,9 @@ export default function DetailPage({ mediaType = 'movie' }) {
           </div>
         </div>
       )}
+
+      {/* ── External Links ─────────────────────────────────────────── */}
+      <ExternalLinks detail={detail} mediaType={mediaType} />
 
       {/* ── Video Player Modal ─────────────────────────────────────── */}
       {activePlayback && (

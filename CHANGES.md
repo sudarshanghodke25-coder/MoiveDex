@@ -123,4 +123,44 @@ These files were referenced nowhere in the codebase and are safe to delete:
 
 ---
 
+## 7. 🎥 Cinematic Detail-Page Upgrade (TMDB)
+
+Extended the Movie / TV / Anime detail experience without touching the existing hero, auth, My List, search, seasons/episodes, trailer player, or navigation.
+
+### TMDB service (`src/services/tmdb.js`)
+- New normalised fields: `imdbId`, `homepage`, `createdBy`, `originCountries`, `images`, `externalIds`.
+- Movie & TV detail calls now append `images,external_ids` (fewer round-trips).
+- New endpoints: `getMovieImages`, `getTVImages`, `discoverMovies`, `discoverTV`, `getPersonDetails`, `searchPeople`, `normalisePerson`.
+- Episodes now carry `guestStars`, `crew`, `productionCode`.
+
+### New detail sections (`DetailPage.jsx`)
+- **Quick Stats** — compact stat strip (Rating, Votes, Popularity, Runtime, Release, Status).
+- **Crew** — dedicated section grouping important departments (Directing, Writing, Production, Camera, Editing, Sound…) with person links.
+- **Gallery** — backdrops / posters / logos with filter tabs, lazy loading, hover zoom, a "View All" toggle, and a full lightbox (Escape / arrows / backdrop click).
+- **External Links** — IMDb, Official Website, TMDB (opens safely in new tabs).
+- **Production logos** — company logo chips inside the Details block, with text fallback.
+- **Clickable genres** — pills now link to `/movies?genre=28` / `/tv?genre=…`.
+- **Episode stills** — fallback chain: episode still → season poster → series backdrop.
+- **Episode detail panel** — now also shows production code, guest stars, and episode crew (fetched from the dedicated episode endpoint).
+
+### People
+- **`/person/:id`** route + `PersonPage` — photo, biography (expandable), birthday, place of birth, known-for department, popularity, also-known-as, external links, and a "Known For" filmography grid.
+- Cast cards, crew cards, and episode guest-stars/crew chips all link to the person page.
+
+### Search (`SearchPage.jsx`)
+- Debounced search (400 ms) while typing.
+- **People results** with 👤 avatars linking to `/person/:id`.
+- Results header shows type counts: 🎬 movies · 📺 shows.
+
+### Browse (`MoviesPage.jsx`, `TVPage.jsx`)
+- Genre filter pills + sort dropdown (Most Popular / Top Rated / Newest / Biggest Grossing) backed by TMDB **discover**.
+- Genre deep-links from detail pages now land on a filtered grid.
+
+### Verified
+- `npm run lint` — 0 errors (2 pre-existing benign warnings).
+- `npm run build` — passes.
+- Dev server — all new modules compile (HTTP 200).
+
+---
+
 *Generated with Codebuff 🤖*
