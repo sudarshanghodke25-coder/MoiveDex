@@ -21,6 +21,12 @@ const PersonPage = lazy(() => import('../pages/PersonPage'));
 const MyListPage = lazy(() => import('../pages/MyListPage'));
 const ProfilePage = lazy(() => import('../pages/ProfilePage'));
 const SettingsPage = lazy(() => import('../pages/SettingsPage'));
+const AboutPage = lazy(() => import('../pages/AboutPage'));
+const HowItWorksPage = lazy(() => import('../pages/HowItWorksPage'));
+const ContactPage = lazy(() => import('../pages/ContactPage'));
+const FeedbackPage = lazy(() => import('../pages/FeedbackPage'));
+const PrivacyPolicyPage = lazy(() => import('../pages/PrivacyPolicyPage'));
+const TermsOfUsePage = lazy(() => import('../pages/TermsOfUsePage'));
 
 /**
  * AppRouter — full application routes.
@@ -58,6 +64,15 @@ export default function AppRouter() {
             <Route path="/profile"     element={<ProfilePage />} />
             <Route path="/settings"    element={<SettingsPage />} />
             <Route path="/trending"    element={<ComingSoon page="Trending" desc="See what's trending globally right now." emoji="🔥" />} />
+            <Route path="/genres"      element={<ComingSoon page="Genres" desc="Browse titles by genre. Coming soon." emoji="🎭" />} />
+
+            {/* Informational / Legal Pages */}
+            <Route path="/about"        element={<AboutPage />} />
+            <Route path="/how-it-works" element={<HowItWorksPage />} />
+            <Route path="/contact"      element={<ContactPage />} />
+            <Route path="/feedback"     element={<FeedbackPage />} />
+            <Route path="/privacy"      element={<PrivacyPolicyPage />} />
+            <Route path="/terms"        element={<TermsOfUsePage />} />
           </Route>
 
           {/* 404 Catch All */}
@@ -67,6 +82,7 @@ export default function AppRouter() {
     </>
   );
 }
+
 
 /** Minimal branded loading state while a route chunk loads. */
 function RouteFallback() {
