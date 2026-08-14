@@ -4,6 +4,7 @@ import { useWatchlist } from '../contexts/WatchlistContext';
 import { getUserProfile, updateUserProfile } from '../services/userProfile';
 import { getContinueWatchingList } from '../services/history';
 import { useNavigate } from 'react-router-dom';
+import { getDefaultAvatarUrl, getUserInitial } from '../utils/userAvatar';
 
 const AVATAR_PRESETS = [
   { id: 'crimson', label: 'Cinema Crimson', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=Crimson&backgroundColor=e11d48', gradient: 'linear-gradient(135deg, #e11d48 0%, #f59e0b 100%)', emoji: '🎬' },
@@ -18,7 +19,7 @@ export default function ProfilePage() {
   const { watchlist } = useWatchlist();
   const navigate = useNavigate();
 
-  const [_dbProfile, setDbProfile] = useState(null);
+  const [dbProfile, setDbProfile] = useState(null);
   const [historyCount, setHistoryCount] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
   const [displayNameInput, setDisplayNameInput] = useState('');
@@ -32,10 +33,16 @@ export default function ProfilePage() {
     if (!currentUser?.uid) return;
 
     setDisplayNameInput(currentUser.displayName || '');
-    setSelectedAvatarUrl(currentUser.photoURL || '');
+    const defaultAvatarUrl = getDefaultAvatarUrl(currentUser);
+    setSelectedAvatarUrl(defaultAvatarUrl);
 
     getUserProfile(currentUser.uid).then(prof => {
-      if (prof) setDbProfile(prof);
+      if (prof) {
+        setDbProfile(prof);
+        if (!defaultAvatarUrl && prof.photoURL) {
+          setSelectedAvatarUrl(prof.photoURL);
+        }
+      }
     });
 
     getContinueWatchingList(currentUser.uid).then(list => {
@@ -94,8 +101,11 @@ export default function ProfilePage() {
       })
     : 'Member';
 
-  const userInitial = (currentUser?.displayName || currentUser?.email || 'U').charAt(0).toUpperCase();
-  const currentAvatar = isEditing ? (selectedAvatarUrl || currentUser?.photoURL) : (currentUser?.photoURL);
+  const defaultAvatarUrl = getDefaultAvatarUrl(currentUser);
+  const userInitial = getUserInitial(currentUser);
+  const currentAvatar = isEditing
+    ? (selectedAvatarUrl || dbProfile?.photoURL || defaultAvatarUrl)
+    : (dbProfile?.photoURL || defaultAvatarUrl);
 
   return (
     <div className="page-content" style={{ maxWidth: '1000px', margin: '0 auto' }}>
@@ -167,7 +177,7 @@ export default function ProfilePage() {
             onClick={() => {
               if (isEditing) {
                 setDisplayNameInput(currentUser?.displayName || '');
-                setSelectedAvatarUrl(currentUser?.photoURL || '');
+                setSelectedAvatarUrl(dbProfile?.photoURL || defaultAvatarUrl);
                 setCustomAvatarInput('');
               }
               setIsEditing(!isEditing);
@@ -296,7 +306,7 @@ export default function ProfilePage() {
               className="btn-ghost"
               onClick={() => {
                 setDisplayNameInput(currentUser?.displayName || '');
-                setSelectedAvatarUrl(currentUser?.photoURL || '');
+                setSelectedAvatarUrl(dbProfile?.photoURL || defaultAvatarUrl);
                 setCustomAvatarInput('');
                 setIsEditing(false);
               }}

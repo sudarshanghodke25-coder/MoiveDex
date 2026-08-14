@@ -14,6 +14,7 @@ import {
 } from "firebase/auth";
 import { auth } from "../services/firebase";
 import { createUserProfileIfMissing } from "../services/userProfile";
+import { getGoogleAvatarUrl } from "../utils/userAvatar";
 
 const AuthContext = createContext();
 
@@ -24,6 +25,21 @@ export function useAuth() {
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  async function applyDefaultGoogleAvatar(user) {
+    if (!user || user.photoURL) return user;
+
+    const googleAvatarUrl = getGoogleAvatarUrl(user);
+    if (!googleAvatarUrl) return user;
+
+    try {
+      await updateProfile(user, { photoURL: googleAvatarUrl });
+      return { ...user, photoURL: googleAvatarUrl };
+    } catch (err) {
+      console.warn("[auth] Could not apply Google avatar:", err);
+      return user;
+    }
+  }
 
   // Email/Password — set currentUser synchronously so ProtectedRoute
   // doesn't bounce the user back to /login before onAuthStateChanged fires.
@@ -44,9 +60,11 @@ export function AuthProvider({ children }) {
   // Google
   function loginWithGoogle() {
     const provider = new GoogleAuthProvider();
-    return signInWithPopup(auth, provider).then((cred) => {
-      setCurrentUser(cred.user);
-      return cred;
+    return signInWithPopup(auth, provider).then(async (cred) => {
+      const user = await applyDefaultGoogleAvatar(cred.user);
+      await createUserProfileIfMissing(user);
+      setCurrentUser(user);
+      return { ...cred, user };
     });
   }
 
@@ -85,15 +103,31 @@ export function AuthProvider({ children }) {
   }
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
+    let active = true;
+
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        if (active) {
+          setCurrentUser(null);
+          setLoading(false);
+        }
+        return;
+      }
+
+      const userWithAvatar = await applyDefaultGoogleAvatar(user);
+      if (!active) return;
+
+      setCurrentUser(userWithAvatar);
       if (user) {
-        createUserProfileIfMissing(user);
+        createUserProfileIfMissing(userWithAvatar);
       }
       setLoading(false);
     });
 
-    return unsubscribe;
+    return () => {
+      active = false;
+      unsubscribe();
+    };
   }, []);
 
   const value = {

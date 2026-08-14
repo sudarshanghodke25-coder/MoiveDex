@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import gsap from 'gsap';
 import logoImg from '../../assets/MovieDex.jpg';
+import { getDefaultAvatarUrl, getUserInitial } from '../../utils/userAvatar';
 import {
   subscribeToNotifications,
   markNotificationAsRead,
@@ -117,6 +118,7 @@ export default function Navbar() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const [avatarFailed, setAvatarFailed] = useState(false);
 
   const notifRef = useRef(null);
   const profileRef = useRef(null);
@@ -230,10 +232,13 @@ export default function Navbar() {
     return () => target.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const userInitial =
-    currentUser?.displayName?.charAt(0).toUpperCase() ||
-    currentUser?.email?.charAt(0).toUpperCase() ||
-    'U';
+  const rawAvatarUrl = getDefaultAvatarUrl(currentUser);
+  const avatarUrl = avatarFailed ? '' : rawAvatarUrl;
+  const userInitial = getUserInitial(currentUser);
+
+  useEffect(() => {
+    setAvatarFailed(false);
+  }, [rawAvatarUrl]);
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
@@ -411,7 +416,13 @@ export default function Navbar() {
                 aria-expanded={profileOpen}
                 onClick={(e) => { e.stopPropagation(); setProfileOpen(!profileOpen); }}
               >
-                <span className="navbar-avatar">{userInitial}</span>
+                <span className="navbar-avatar">
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="" onError={() => setAvatarFailed(true)} />
+                  ) : (
+                    userInitial
+                  )}
+                </span>
                 <svg
                   className={`navbar-chevron ${profileOpen ? 'open' : ''}`}
                   width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"

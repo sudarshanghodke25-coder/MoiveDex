@@ -1,5 +1,6 @@
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
+import { getDefaultAvatarUrl } from '../utils/userAvatar';
 
 /**
  * Fetch Firestore user profile for a given uid.
@@ -47,12 +48,14 @@ export async function createUserProfileIfMissing(user) {
   try {
     const docRef = doc(db, 'users', user.uid);
     const snap = await getDoc(docRef);
+    const defaultPhotoURL = getDefaultAvatarUrl(user) || null;
+
     if (!snap.exists()) {
       const defaultProfile = {
         uid: user.uid,
         displayName: user.displayName || user.email?.split('@')[0] || 'MovieDex Member',
         email: user.email,
-        photoURL: user.photoURL || null,
+        photoURL: defaultPhotoURL,
         emailVerified: user.emailVerified || false,
         preferredLanguage: 'en',
         preferredSubtitleLanguage: 'en',
@@ -65,6 +68,19 @@ export async function createUserProfileIfMissing(user) {
         updatedAt: serverTimestamp(),
       };
       await setDoc(docRef, defaultProfile);
+      return;
+    }
+
+    const profile = snap.data();
+    if (!profile.photoURL && defaultPhotoURL) {
+      await setDoc(
+        docRef,
+        {
+          photoURL: defaultPhotoURL,
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
     }
   } catch (err) {
     console.error('[userProfile] Failed to initialize profile:', err);

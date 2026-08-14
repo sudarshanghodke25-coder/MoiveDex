@@ -4,6 +4,7 @@ import { useWatchlist } from '../contexts/WatchlistContext';
 import { getUserSettings, updateUserSettings } from '../services/settings';
 import { clearAllHistory } from '../services/history';
 import { useNavigate } from 'react-router-dom';
+import { getDefaultAvatarUrl, getUserInitial } from '../utils/userAvatar';
 
 const LANGUAGES = [
   { code: 'en', label: 'English' },
@@ -36,6 +37,8 @@ export default function SettingsPage() {
   const { currentUser, resetPassword, updateUserPassword, logout, deleteAccount } = useAuth();
   const { clearWatchlist } = useWatchlist();
   const navigate = useNavigate();
+  const avatarUrl = getDefaultAvatarUrl(currentUser);
+  const userInitial = getUserInitial(currentUser);
 
   const [settings, setSettings] = useState({
     preferredLanguage: 'en',
@@ -227,10 +230,10 @@ export default function SettingsPage() {
                 flexShrink: 0,
               }}
             >
-              {currentUser?.photoURL ? (
-                <img src={currentUser.photoURL} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
-                <span>{(currentUser?.displayName || currentUser?.email || 'U').charAt(0).toUpperCase()}</span>
+                <span>{userInitial}</span>
               )}
             </div>
 
