@@ -21,6 +21,17 @@ const SUBTITLES = [
   { code: 'es', label: 'Spanish' },
 ];
 
+const WATCH_REGIONS = [
+  { code: 'US', label: 'United States' },
+  { code: 'IN', label: 'India' },
+  { code: 'GB', label: 'United Kingdom' },
+  { code: 'CA', label: 'Canada' },
+  { code: 'AU', label: 'Australia' },
+  { code: 'DE', label: 'Germany' },
+  { code: 'FR', label: 'France' },
+  { code: 'JP', label: 'Japan' },
+];
+
 export default function SettingsPage() {
   const { currentUser, resetPassword, updateUserPassword, logout, deleteAccount } = useAuth();
   const { clearWatchlist } = useWatchlist();
@@ -30,6 +41,7 @@ export default function SettingsPage() {
     preferredLanguage: 'en',
     preferredContentLanguage: 'en',
     preferredSubtitleLanguage: 'en',
+    watchProviderRegion: 'IN',
     autoplay: true,
     notificationsEnabled: true,
     newMoviesNotifications: true,
@@ -343,6 +355,39 @@ export default function SettingsPage() {
               {LANGUAGES.map((l) => (
                 <option key={l.code} value={l.code} style={{ background: 'var(--bg-elevated)', color: '#fff' }}>
                   {l.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="divider" style={{ margin: '1rem 0' }} />
+
+          {/* Watch provider region */}
+          <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+            <div style={{ flex: '1 1 200px' }}>
+              <label style={{ display: 'block', fontSize: '0.95rem', fontWeight: 700, color: '#f8fafc' }}>
+                Streaming Region
+              </label>
+              <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Preferred country for &quot;Where to Watch&quot; providers.</span>
+            </div>
+            <select
+              value={settings.watchProviderRegion || 'IN'}
+              onChange={(e) => handleSettingChange('watchProviderRegion', e.target.value)}
+              style={{
+                padding: '0.6rem 1.25rem',
+                borderRadius: '999px',
+                background: 'var(--bg-elevated)',
+                border: '1px solid rgba(255,255,255,0.15)',
+                color: '#fff',
+                fontSize: '0.9rem',
+                fontWeight: 700,
+                outline: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              {WATCH_REGIONS.map((r) => (
+                <option key={r.code} value={r.code} style={{ background: 'var(--bg-elevated)', color: '#fff' }}>
+                  {r.label}
                 </option>
               ))}
             </select>

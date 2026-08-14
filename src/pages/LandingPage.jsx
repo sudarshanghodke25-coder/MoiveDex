@@ -4,7 +4,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import HeroSection from '../components/hero/HeroSection';
 import MovieRow from '../components/movie-card/MovieRow';
-import Footer from '../components/common/Footer';
+import Footer from '../components/layout/Footer';
 import useTMDB from '../hooks/useTMDB';
 import { getTrending, getPopularMovies, getPopularTV, getAnime, discoverMoviesByGenre } from '../services/tmdb';
 import CinematicBackground from '../components/common/CinematicBackground';
@@ -377,7 +377,7 @@ export default function LandingPage() {
             </div>
           </section>
 
-          <Footer />
+          <Footer animated />
         </div>
       </main>
     </>

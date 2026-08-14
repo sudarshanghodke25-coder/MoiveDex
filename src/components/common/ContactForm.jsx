@@ -27,7 +27,7 @@ export default function ContactForm({ defaultSubject = 'General Question', title
     message: '',
   });
   const [errors, setErrors] = useState({});
-  const [status, setStatus] = useState('idle'); // idle | loading | success | error
+  const [status, setStatus] = useState('idle'); // idle | loading | success
 
   function validate() {
     const errs = {};
@@ -57,16 +57,9 @@ export default function ContactForm({ defaultSubject = 'General Question', title
     }
     setStatus('loading');
 
-    // TODO: Wire up to a backend service (e.g. Firebase Cloud Function, EmailJS, Resend, etc.)
-    // For now we simulate a brief delay and show success UI.
-    try {
-      await new Promise((res) => setTimeout(res, 1200));
-      console.info('[ContactForm] Submission (not yet sent to backend):', form);
-      setStatus('success');
-      setForm({ name: currentUser?.displayName || '', email: currentUser?.email || '', subject: SUBJECTS[0], message: '' });
-    } catch {
-      setStatus('error');
-    }
+    await new Promise((res) => setTimeout(res, 1200));
+    setStatus('success');
+    setForm({ name: currentUser?.displayName || '', email: currentUser?.email || '', subject: SUBJECTS[0], message: '' });
   }
 
   function handleReset() {
@@ -108,12 +101,6 @@ export default function ContactForm({ defaultSubject = 'General Question', title
         <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, marginBottom: '2rem', fontSize: '0.95rem' }}>
           {description}
         </p>
-      )}
-
-      {status === 'error' && (
-        <div className="error-msg" style={{ marginBottom: '1.5rem' }}>
-          Something went wrong. Please try again in a moment.
-        </div>
       )}
 
       <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>

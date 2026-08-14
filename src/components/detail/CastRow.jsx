@@ -1,26 +1,38 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { profileUrl } from '../../services/tmdb';
 
+const INITIAL_LIMIT = 12;
+
 export default function CastRow({ cast = [] }) {
+  const [showAll, setShowAll] = useState(false);
   if (!cast || cast.length === 0) return null;
 
-  const topCast = cast.slice(0, 12);
+  const visibleCast = showAll ? cast : cast.slice(0, INITIAL_LIMIT);
 
   return (
     <div className="detail-section" style={{ marginTop: '2.5rem' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', marginBottom: '1.25rem' }}>
-        <div style={{ width: '0.3rem', height: '1.5rem', borderRadius: '2px', background: 'var(--brand-gradient)', flexShrink: 0 }} />
-        <h2 className="text-section" style={{ margin: 0 }}>Cast & Crew</h2>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '1.25rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+          <div style={{ width: '0.3rem', height: '1.5rem', borderRadius: '2px', background: 'var(--brand-gradient)', flexShrink: 0 }} />
+          <h2 className="text-section" style={{ margin: 0 }}>Cast</h2>
+        </div>
+        {cast.length > INITIAL_LIMIT && (
+          <button type="button" className="btn-ghost" style={{ padding: '0.4rem 1rem', fontSize: '0.8rem' }} onClick={() => setShowAll(s => !s)}>
+            {showAll ? 'Show Less' : `View Full Cast (${cast.length})`}
+          </button>
+        )}
       </div>
 
       <div className="cast-row" style={{
         display: 'flex',
+        flexWrap: showAll ? 'wrap' : 'nowrap',
         gap: '1rem',
-        overflowX: 'auto',
+        overflowX: showAll ? 'visible' : 'auto',
         paddingBottom: '0.75rem',
         scrollbarWidth: 'thin',
       }}>
-        {topCast.map(person => {
+        {visibleCast.map(person => {
           const img = profileUrl(person.profile_path, 'md');
           return (
             <Link

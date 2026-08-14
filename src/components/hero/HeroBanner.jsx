@@ -20,6 +20,7 @@ const MAX_SLIDES     = 6;
 
 export default function HeroBanner({ items = [], loading = false }) {
   const [activeIdx,  setActiveIdx]  = useState(0);
+  const [startX, setStartX] = useState(null);
   const contentRef = useRef(null);
   const navigate   = useNavigate();
 
@@ -62,6 +63,23 @@ export default function HeroBanner({ items = [], loading = false }) {
   // ── Reset index when items change ─────────────────────────────────
   useEffect(() => { setActiveIdx(0); }, [items]);
 
+  // ── Drag / Swipe handlers ─────────────────────────────────────────
+  const handleDragStart = (e) => {
+    setStartX(e.type.includes('mouse') ? e.pageX : e.touches[0].clientX);
+  };
+
+  const handleDragEnd = (e) => {
+    if (startX === null) return;
+    const endX = e.type.includes('mouse') ? e.pageX : e.changedTouches[0].clientX;
+    const diff = startX - endX;
+    if (diff > 50) {
+      goTo(activeIdx + 1, 1);
+    } else if (diff < -50) {
+      goTo(activeIdx - 1, -1);
+    }
+    setStartX(null);
+  };
+
   // ── Loading skeleton ──────────────────────────────────────────────
   if (loading) {
     return (
@@ -90,11 +108,26 @@ export default function HeroBanner({ items = [], loading = false }) {
 
   function handleDetail() {
     if (!movie) return;
-    navigate(movie.mediaType === 'tv' ? `/tv/${movie.id}` : `/movie/${movie.id}`);
+    if (movie.mediaType === 'anime') navigate(`/anime/${movie.id}`);
+    else if (movie.mediaType === 'tv') navigate(`/tv/${movie.id}`);
+    else navigate(`/movie/${movie.id}`);
   }
 
   return (
-    <div className="hero-banner" role="region" aria-label="Featured content">
+    <div 
+      className="hero-banner" 
+      role="region" 
+      aria-label="Featured content"
+      onMouseDown={handleDragStart}
+      onMouseUp={handleDragEnd}
+      onTouchStart={handleDragStart}
+      onTouchEnd={handleDragEnd}
+      style={{ 
+        cursor: startX !== null ? 'grabbing' : 'grab',
+        userSelect: 'none',
+        touchAction: 'pan-y'
+      }}
+    >
       {/* Backdrop layer — key forces React to replace, triggering CSS animation */}
       <div className="hero-bg" key={`bg-${movie.id}`} aria-hidden="true">
         {backdrop && (
@@ -104,7 +137,7 @@ export default function HeroBanner({ items = [], loading = false }) {
             sizes="100vw"
             alt=""
             className="hero-bg-img"
-            fetchpriority="high"
+            fetchPriority="high"
           />
         )}
         <div className="hero-gradient-overlay" />
@@ -114,7 +147,7 @@ export default function HeroBanner({ items = [], loading = false }) {
       <div className="hero-content" ref={contentRef}>
         <div className="hero-meta">
           <span className="pill hero-type-pill">
-            {movie.mediaType === 'tv' ? '📺 Series' : '🎬 Film'}
+            {movie.mediaType === 'anime' ? '⚡ Anime' : movie.mediaType === 'tv' ? '📺 Series' : '🎬 Film'}
           </span>
           {year && <span className="hero-year">{year}</span>}
           {movie.rating > 0 && (
@@ -139,11 +172,11 @@ export default function HeroBanner({ items = [], loading = false }) {
         )}
 
         <div className="hero-actions">
-          <button className="btn-primary hero-play-btn" onClick={handleDetail} aria-label={`Play ${movie.title}`}>
+          <button className="btn-primary hero-play-btn" onClick={handleDetail} aria-label={`View details for ${movie.title}`}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
               <polygon points="5 3 19 12 5 21 5 3"/>
             </svg>
-            Play
+            View Details
           </button>
           <button className="btn-ghost" onClick={handleDetail} aria-label={`More info about ${movie.title}`}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
@@ -154,40 +187,23 @@ export default function HeroBanner({ items = [], loading = false }) {
         </div>
       </div>
 
-      {/* Navigation dots + arrows */}
+      {/* Navigation dots */}
       <div className="hero-controls" aria-label="Slide controls">
-        <button
-          className="hero-nav-btn hero-prev"
-          onClick={() => goTo(activeIdx - 1, -1)}
-          aria-label="Previous slide"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-            <polyline points="15 18 9 12 15 6"/>
-          </svg>
-        </button>
-
         <div className="hero-dots" role="tablist" aria-label="Slides">
           {slides.map((_, i) => (
             <button
               key={i}
               role="tab"
               className={`hero-dot ${i === activeIdx ? 'active' : ''}`}
-              onClick={() => goTo(i, i > activeIdx ? 1 : -1)}
+              onClick={(e) => {
+                e.stopPropagation();
+                goTo(i, i > activeIdx ? 1 : -1);
+              }}
               aria-selected={i === activeIdx}
               aria-label={`Slide ${i + 1}: ${slides[i]?.title}`}
             />
           ))}
         </div>
-
-        <button
-          className="hero-nav-btn hero-next"
-          onClick={() => goTo(activeIdx + 1, 1)}
-          aria-label="Next slide"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-            <polyline points="9 18 15 12 9 6"/>
-          </svg>
-        </button>
       </div>
     </div>
   );

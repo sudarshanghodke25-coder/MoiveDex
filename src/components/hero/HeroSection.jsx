@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 
 export default function HeroSection() {
-  const badgeRef = useRef(null);
   const titleRef = useRef(null);
   const subtitleRef = useRef(null);
   const ctaRef = useRef(null);
@@ -13,8 +12,7 @@ export default function HeroSection() {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' }, delay: 0.2 });
 
-      tl.from(badgeRef.current, { y: 30, opacity: 0, duration: 0.7 })
-        .from(titleRef.current.children, { y: 80, opacity: 0, rotateX: 20, duration: 1, stagger: 0.15 }, '-=0.4')
+      tl.from(titleRef.current.children, { y: 80, opacity: 0, rotateX: 20, duration: 1, stagger: 0.15 })
         .from(subtitleRef.current, { y: 30, opacity: 0, duration: 0.7 }, '-=0.5')
         .from(ctaRef.current.children, { y: 30, opacity: 0, scale: 0.92, duration: 0.6, stagger: 0.12 }, '-=0.45')
         .from(statsRef.current.children, { y: 20, opacity: 0, duration: 0.5, stagger: 0.08 }, '-=0.3');
@@ -38,6 +36,54 @@ export default function HeroSection() {
         padding: '6rem clamp(1rem, 6vw, 5rem) 5rem',
       }}
     >
+      {/* Auth buttons — top right (navbar was removed, keep login/signup reachable) */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 'clamp(1.25rem, 3vw, 2rem)',
+          right: 'clamp(1rem, 4vw, 3rem)',
+          zIndex: 5,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.75rem',
+        }}
+      >
+        <Link
+          to="/login"
+          id="landing-auth-login"
+          style={{
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            background: 'rgba(18, 18, 22, 0.85)',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            color: '#f8fafc', fontWeight: 600, fontSize: '0.92rem',
+            padding: '0.6rem 1.35rem', borderRadius: '999px',
+            backdropFilter: 'blur(8px)',
+            transition: 'all 0.25s ease', textDecoration: 'none',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(30, 30, 38, 0.95)'; e.currentTarget.style.borderColor = 'rgba(245, 158, 11, 0.5)'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(18, 18, 22, 0.85)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; }}
+        >
+          Log In
+        </Link>
+        <Link
+          to="/register"
+          id="landing-auth-register"
+          style={{
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            background: 'var(--brand-gradient)',
+            border: '1px solid rgba(245, 158, 11, 0.5)',
+            color: '#f8fafc', fontWeight: 700, fontSize: '0.92rem',
+            padding: '0.6rem 1.45rem', borderRadius: '999px',
+            boxShadow: '0 0 20px rgba(225, 29, 72, 0.35)',
+            transition: 'all 0.25s ease', textDecoration: 'none',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = 'linear-gradient(135deg, #f43f5e 0%, #f59e0b 100%)'; e.currentTarget.style.boxShadow = '0 0 30px rgba(245, 158, 11, 0.55)'; }}
+          onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.background = 'var(--brand-gradient)'; e.currentTarget.style.boxShadow = '0 0 20px rgba(225, 29, 72, 0.35)'; }}
+        >
+          Sign Up
+        </Link>
+      </div>
+
       {/* Content */}
       <div
         style={{
@@ -48,36 +94,6 @@ export default function HeroSection() {
           width: '100%',
         }}
       >
-        {/* Badge */}
-        <div
-          ref={badgeRef}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            background: 'rgba(225, 29, 72, 0.12)',
-            border: '1px solid rgba(245, 158, 11, 0.35)',
-            borderRadius: '999px',
-            padding: '0.4rem 1.1rem',
-            marginBottom: '2rem',
-            fontSize: '0.78rem',
-            fontWeight: 700,
-            color: 'var(--brand-primary)',
-            letterSpacing: '0.06em',
-            textTransform: 'uppercase',
-            backdropFilter: 'blur(8px)',
-          }}
-        >
-          <span style={{
-            width: 7, height: 7, borderRadius: '50%',
-            background: 'var(--brand-primary)',
-            boxShadow: '0 0 10px rgba(245, 158, 11, 0.9)',
-            animation: 'pulse-dot 2s ease-in-out infinite',
-            flexShrink: 0,
-          }} />
-          ⚡ YOUR ULTIMATE CINEMATIC ESCAPE
-        </div>
-
         {/* Main title */}
         <h1
           ref={titleRef}
@@ -198,13 +214,6 @@ export default function HeroSection() {
           ))}
         </div>
       </div>
-
-      <style>{`
-        @keyframes pulse-dot {
-          0%,100% { opacity:1; box-shadow:0 0 10px rgba(245,158,11,0.9); }
-          50%      { opacity:0.5; box-shadow:0 0 20px rgba(225,29,72,0.5); }
-        }
-      `}</style>
     </section>
   );
 }

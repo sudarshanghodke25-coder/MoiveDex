@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { getContinueWatchingList, removeFromHistory } from '../../services/history';
 import { getPlaybackSource } from '../../services/playback';
+import { useToast } from '../../contexts/ToastContext';
 import VideoPlayer from '../player/VideoPlayer';
 
 function formatProgressTime(seconds) {
@@ -13,6 +14,7 @@ function formatProgressTime(seconds) {
 
 export default function ContinueWatchingRow() {
   const { currentUser } = useAuth();
+  const { showToast } = useToast();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activePlayback, setActivePlayback] = useState(null);
@@ -49,11 +51,11 @@ export default function ContinueWatchingRow() {
         setResumeTime(item.progressSeconds || 0);
         setActivePlayback(playback);
       } else {
-        alert(playback.reason || 'Playback is currently unavailable.');
+        showToast(playback.reason || 'Playback is currently unavailable.', 'error');
       }
     } catch (e) {
       console.error('Playback error:', e);
-      alert('Could not start playback. Please try again.');
+      showToast('Could not start playback. Please try again.', 'error');
     }
   };
 
@@ -63,7 +65,20 @@ export default function ContinueWatchingRow() {
     setItems(prev => prev.filter(i => i.contentId !== item.contentId));
   };
 
-  if (loading || items.length === 0) return null;
+  if (loading) {
+    return (
+      <section style={{ padding: 'clamp(1.5rem, 4vh, 2.5rem) clamp(1rem, 5vw, 4rem)' }}>
+        <div className="skeleton" style={{ height: '1.35rem', width: '220px', marginBottom: '1.25rem', borderRadius: '6px' }} />
+        <div style={{ display: 'flex', gap: '1.25rem', overflowX: 'auto' }}>
+          {[1, 2, 3].map(i => (
+            <div key={i} className="skeleton" style={{ width: '260px', height: '220px', flexShrink: 0, borderRadius: '16px' }} />
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  if (items.length === 0) return null;
 
   return (
     <section style={{ padding: 'clamp(1.5rem, 4vh, 2.5rem) clamp(1rem, 5vw, 4rem)' }}>

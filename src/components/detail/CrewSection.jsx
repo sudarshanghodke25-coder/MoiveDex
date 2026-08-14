@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { profileUrl } from '../../services/tmdb';
 
@@ -18,8 +19,11 @@ const DEPT_PRIORITY = [
   'Visual Effects',
 ];
 
+const INITIAL_DEPT_LIMIT = 6;
+const INITIAL_PEOPLE_PER_DEPT = 3;
+
 /** Group crew by department, ordered by importance. */
-function groupCrew(crew = []) {
+function groupCrew(crew = [], { showAll = false } = {}) {
   const groups = new Map();
   crew.forEach(person => {
     const dept = person.department || 'Other';
@@ -33,12 +37,13 @@ function groupCrew(crew = []) {
     return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
   });
 
-  return ordered
-    .map(([dept, people]) => ({
-      dept,
-      people: people.slice(0, 3), // max 3 per department
-    }))
-    .slice(0, 6); // max 6 departments
+  const limited = showAll ? ordered : ordered.slice(0, INITIAL_DEPT_LIMIT);
+
+  return limited.map(([dept, people]) => ({
+    dept,
+    people: showAll ? people : people.slice(0, INITIAL_PEOPLE_PER_DEPT),
+    total: people.length,
+  }));
 }
 
 function Avatar({ path, name }) {
@@ -61,16 +66,30 @@ function Avatar({ path, name }) {
 }
 
 export default function CrewSection({ crew = [] }) {
+  const [showAll, setShowAll] = useState(false);
   if (!crew || crew.length === 0) return null;
 
-  const grouped = groupCrew(crew);
+  const grouped = groupCrew(crew, { showAll });
   if (grouped.length === 0) return null;
+
+  const fullGrouped = groupCrew(crew, { showAll: true });
+  const hasMore = !showAll && (
+    fullGrouped.length > INITIAL_DEPT_LIMIT
+    || fullGrouped.some(g => g.total > INITIAL_PEOPLE_PER_DEPT)
+  );
 
   return (
     <div className="detail-section" style={{ marginTop: '2.5rem' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', marginBottom: '1.5rem' }}>
-        <div style={{ width: '0.3rem', height: '1.5rem', borderRadius: '2px', background: 'var(--brand-gradient)', flexShrink: 0 }} />
-        <h2 className="text-section" style={{ margin: 0 }}>Crew</h2>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '1.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+          <div style={{ width: '0.3rem', height: '1.5rem', borderRadius: '2px', background: 'var(--brand-gradient)', flexShrink: 0 }} />
+          <h2 className="text-section" style={{ margin: 0 }}>Crew</h2>
+        </div>
+        {hasMore && (
+          <button type="button" className="btn-ghost" style={{ padding: '0.4rem 1rem', fontSize: '0.8rem' }} onClick={() => setShowAll(s => !s)}>
+            {showAll ? 'Show Less' : `View Full Crew (${crew.length})`}
+          </button>
+        )}
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 210px), 1fr))', gap: '1rem' }}>

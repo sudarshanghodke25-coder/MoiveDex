@@ -164,7 +164,7 @@ moviedex/
 │   │   ├── detail/          # Cast, Crew, Gallery, WatchProviders…
 │   │   ├── hero/            # Landing / home hero banners
 │   │   ├── home/            # Continue Watching row
-│   │   ├── layout/          # AuthLayout, Sidebar, TopBar, Footer
+│   │   ├── layout/          # AuthLayout, Footer
 │   │   ├── movie-card/      # MovieCard + skeleton + scroll row
 │   │   ├── navbar/          # Public navbar
 │   │   └── player/          # In-app preview video player

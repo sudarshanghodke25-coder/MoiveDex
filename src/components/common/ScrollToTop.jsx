@@ -16,9 +16,13 @@ export default function ScrollToTop() {
     if ('scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual';
     }
-    // Instant jump — never 'smooth', otherwise the browser animates the new
-    // page from the previous scroll position (the "opens from the bottom" bug).
-    window.scrollTo(0, 0);
+    // Inner app scrolls inside .auth-content; landing page uses window.
+    const authContent = document.getElementById('app-scroll');
+    if (authContent) {
+      authContent.scrollTo(0, 0);
+    } else {
+      window.scrollTo(0, 0);
+    }
   }, [pathname]);
 
   return null;

@@ -5,6 +5,7 @@ const DEFAULT_SETTINGS = {
   preferredLanguage: 'en',
   preferredContentLanguage: 'en',
   preferredSubtitleLanguage: 'en',
+  watchProviderRegion: 'IN',
   autoplay: true,
   notificationsEnabled: true,
   newMoviesNotifications: true,

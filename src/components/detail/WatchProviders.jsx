@@ -1,4 +1,5 @@
 import { TMDB_CONFIG } from '../../services/tmdbConfig';
+import useUserSettings from '../../hooks/useUserSettings';
 import { pickWatchRegion, buildProviderWatchUrl } from '../../services/tmdb';
 
 function ProviderChip({ provider, mediaType, id, countryCode, style = {}, imgSize = 22 }) {
@@ -46,7 +47,8 @@ function ProviderChip({ provider, mediaType, id, countryCode, style = {}, imgSiz
 }
 
 export default function WatchProviders({ providers = {}, mediaType = 'movie', id = null }) {
-  const { countryCode, region } = pickWatchRegion(providers);
+  const { watchProviderRegion } = useUserSettings();
+  const { countryCode, region } = pickWatchRegion(providers, watchProviderRegion);
 
   if (!region) {
     return (

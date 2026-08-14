@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { getAuthErrorMessage } from '../../utils/authErrors';
 import gsap from 'gsap';
 import AuthVisual from '../../components/auth/AuthVisual';
 
@@ -14,7 +15,10 @@ export default function Login() {
 
   const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const formRef = useRef(null);
+
+  const redirectTo = location.state?.from?.pathname ?? '/home';
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -32,9 +36,9 @@ export default function Login() {
       setError('');
       setLoading(true);
       await login(email, password);
-      navigate('/home');
-    } catch {
-      setError('Failed to log in. Check your email and password.');
+      navigate(redirectTo, { replace: true });
+    } catch (err) {
+      setError(getAuthErrorMessage(err, 'Failed to log in. Check your email and password.'));
       setLoading(false);
     }
   }
@@ -44,9 +48,9 @@ export default function Login() {
       setError('');
       setLoading(true);
       await loginWithGoogle();
-      navigate('/home');
-    } catch {
-      setError('Failed to log in with Google.');
+      navigate(redirectTo, { replace: true });
+    } catch (err) {
+      setError(getAuthErrorMessage(err, 'Failed to log in with Google.'));
       setLoading(false);
     }
   }

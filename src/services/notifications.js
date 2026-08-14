@@ -84,31 +84,6 @@ export async function markAllNotificationsAsRead(uid, notifications = []) {
   }
 }
 
-/**
- * Create a new notification for user.
- */
-export async function createNotification(uid, notificationData) {
-  if (!uid) return;
-  try {
-    const colRef = collection(db, 'users', uid, 'notifications');
-    const newDocRef = doc(colRef);
-    await setDoc(newDocRef, {
-      id: newDocRef.id,
-      type: notificationData.type || 'system',
-      title: notificationData.title || 'MovieDex Update',
-      message: notificationData.message || '',
-      imageUrl: notificationData.imageUrl || null,
-      contentId: notificationData.contentId || null,
-      contentType: notificationData.contentType || 'movie',
-      route: notificationData.route || '/home',
-      isRead: false,
-      createdAt: serverTimestamp(),
-    });
-  } catch (err) {
-    console.error('[notifications] Failed to create notification:', err);
-  }
-}
-
 import { getTrending, posterUrl } from './tmdb';
 
 /**
@@ -126,7 +101,7 @@ export async function seedInitialNotifications(uid) {
 
     // Attempt to pull live trending items from TMDB
     try {
-      const trending = await getTrending('all');
+      const trending = await getTrending('week');
       if (Array.isArray(trending) && trending.length >= 3) {
         const item1 = trending[0];
         const item2 = trending[1];

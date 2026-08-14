@@ -1,6 +1,5 @@
 import { Suspense, lazy } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
-import Navbar from '../components/navbar/Navbar';
+import { Routes, Route } from 'react-router-dom';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
 import AuthLayout from '../components/layout/AuthLayout';
 
@@ -21,6 +20,10 @@ const PersonPage = lazy(() => import('../pages/PersonPage'));
 const MyListPage = lazy(() => import('../pages/MyListPage'));
 const ProfilePage = lazy(() => import('../pages/ProfilePage'));
 const SettingsPage = lazy(() => import('../pages/SettingsPage'));
+const TrendingPage = lazy(() => import('../pages/TrendingPage'));
+const GenresPage = lazy(() => import('../pages/GenresPage'));
+const DiscoverPage = lazy(() => import('../pages/DiscoverPage'));
+const CollectionPage = lazy(() => import('../pages/CollectionPage'));
 const AboutPage = lazy(() => import('../pages/AboutPage'));
 const HowItWorksPage = lazy(() => import('../pages/HowItWorksPage'));
 const ContactPage = lazy(() => import('../pages/ContactPage'));
@@ -32,13 +35,8 @@ const TermsOfUsePage = lazy(() => import('../pages/TermsOfUsePage'));
  * AppRouter — full application routes.
  */
 export default function AppRouter() {
-  const location = useLocation();
-  const showPublicNavbar = location.pathname === '/';
-
   return (
-    <>
-      {showPublicNavbar && <Navbar />}
-      <Suspense fallback={<RouteFallback />}>
+    <Suspense fallback={<RouteFallback />}>
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />
@@ -63,8 +61,10 @@ export default function AppRouter() {
             <Route path="/mylist"      element={<MyListPage />} />
             <Route path="/profile"     element={<ProfilePage />} />
             <Route path="/settings"    element={<SettingsPage />} />
-            <Route path="/trending"    element={<ComingSoon page="Trending" desc="See what's trending globally right now." emoji="🔥" />} />
-            <Route path="/genres"      element={<ComingSoon page="Genres" desc="Browse titles by genre. Coming soon." emoji="🎭" />} />
+            <Route path="/trending"    element={<TrendingPage />} />
+            <Route path="/genres"      element={<GenresPage />} />
+            <Route path="/discover"    element={<DiscoverPage />} />
+            <Route path="/collection/:id" element={<CollectionPage />} />
 
             {/* Informational / Legal Pages */}
             <Route path="/about"        element={<AboutPage />} />
@@ -75,11 +75,10 @@ export default function AppRouter() {
             <Route path="/terms"        element={<TermsOfUsePage />} />
           </Route>
 
-          {/* 404 Catch All */}
+          {/* Public 404 */}
           <Route path="*" element={<ComingSoon page="Page Not Found" desc="Looks like this page doesn't exist." emoji="🎬" />} />
         </Routes>
       </Suspense>
-    </>
   );
 }
 

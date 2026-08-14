@@ -8,12 +8,25 @@
  *   4. Anime strategy: /discover/tv with genre=16 + origin_country=JP (broader than /search)
  */
 
-import { TMDB_CONFIG, TMDB_PROXY, POSTER_SIZES, BACKDROP_SIZES, PROFILE_SIZES, GENRE_MAP, ANIME_CONFIG } from './tmdbConfig';
+import { TMDB_CONFIG, TMDB_PROXY, POSTER_SIZES, BACKDROP_SIZES, PROFILE_SIZES, LOGO_SIZES, STILL_SIZES, GENRE_MAP, ANIME_CONFIG } from './tmdbConfig';
 import { queuedFetch } from './tmdbQueue';
 import cache from './tmdbCache';
 import { TMDBNetworkError } from './tmdbErrors';
 
-const { API_KEY, BASE_URL, IMG_BASE, LANGUAGE } = TMDB_CONFIG;
+const { API_KEY, BASE_URL, IMG_BASE } = TMDB_CONFIG;
+
+/** Runtime locale — updated from user settings via configureTMDB() */
+let _language = TMDB_CONFIG.LANGUAGE;
+let _region   = TMDB_CONFIG.REGION;
+
+/** Override TMDB language/region at runtime (e.g. from Firestore settings). */
+export function configureTMDB({ language, region } = {}) {
+  if (language) _language = language;
+  if (region) _region = region;
+}
+
+export function getTMDBLanguage() { return _language; }
+export function getTMDBRegion()   { return _region; }
 const USE_PROXY = TMDB_PROXY.ENABLED;
 
 // ── Image URL builders ─────────────────────────────────────────────────────
@@ -46,6 +59,20 @@ export function backdropUrl(path, size = 'lg') {
 export function profileUrl(path, size = 'md') {
   if (!path) return null;
   const sizeCode = PROFILE_SIZES[size] ?? size;
+  return `${IMG_BASE}/${sizeCode}${path}`;
+}
+
+/** Build a logo URL (providers, companies, networks). */
+export function logoUrl(path, size = 'md') {
+  if (!path) return null;
+  const sizeCode = LOGO_SIZES[size] ?? size;
+  return `${IMG_BASE}/${sizeCode}${path}`;
+}
+
+/** Build an episode still image URL. */
+export function stillUrl(path, size = 'md') {
+  if (!path) return null;
+  const sizeCode = STILL_SIZES[size] ?? size;
   return `${IMG_BASE}/${sizeCode}${path}`;
 }
 
@@ -117,7 +144,7 @@ async function get(endpoint, params = {}, signal = null) {
     url = new URL(`${BASE_URL}${endpoint}`);
     url.searchParams.set('api_key', API_KEY);
   }
-  url.searchParams.set('language', LANGUAGE);
+  url.searchParams.set('language', _language);
   Object.entries(params).forEach(([k, v]) => {
     if (v !== undefined && v !== null) url.searchParams.set(k, v);
   });
@@ -226,21 +253,33 @@ export function normalise(item, overrideMediaType = null) {
     // TV-only
     createdBy:       item.created_by       || null,
     originCountries: item.origin_country   || [],
+    tvType:          item.type             || '',
+    episodeRunTime:  item.episode_run_time?.length ? item.episode_run_time : null,
+    nextEpisodeToAir: item.next_episode_to_air || null,
+    lastEpisodeToAir: item.last_episode_to_air || null,
+    // Keywords (appended) — movies: keywords.keywords[], tv: keywords.results[]
+    keywords:        item.keywords?.keywords || item.keywords?.results || null,
     // Appended extras (only present when requested via append_to_response)
     images:          item.images           || null,
     externalIds:     item.external_ids     || null,
+    belongsToCollection: item.belongs_to_collection || null,
   };
 }
 
 // ── Pagination helper ─────────────────────────────────────────────────────
 
+/** Safely extract results array from a TMDB response. */
+function safeResults(data) {
+  return Array.isArray(data?.results) ? data.results : [];
+}
+
 /** Wrap a paginated TMDB response consistently. */
 function paginated(data, mediaType) {
   return {
-    results:    data.results.map(item => normalise(item, mediaType)),
-    page:       data.page,
-    totalPages: data.total_pages,
-    totalResults: data.total_results,
+    results:      safeResults(data).map(item => normalise(item, mediaType)),
+    page:         data?.page ?? 1,
+    totalPages:   data?.total_pages ?? 0,
+    totalResults: data?.total_results ?? 0,
   };
 }
 
@@ -251,25 +290,31 @@ function paginated(data, mediaType) {
 /** Trending this week — mixed movies + TV (used for Hero Banner) */
 export async function getTrending(timeWindow = 'week', signal = null) {
   const data = await get(`/trending/all/${timeWindow}`, {}, signal);
-  return data.results.map(item => normalise(item));
+  return safeResults(data).map(item => normalise(item));
 }
 
 /** Trending today */
 export async function getTrendingToday(signal = null) {
   const data = await get('/trending/all/day', {}, signal);
-  return data.results.map(item => normalise(item));
+  return safeResults(data).map(item => normalise(item));
 }
 
 /** Trending movies only */
 export async function getTrendingMovies(timeWindow = 'week', signal = null) {
   const data = await get(`/trending/movie/${timeWindow}`, {}, signal);
-  return data.results.map(item => normalise(item, 'movie'));
+  return safeResults(data).map(item => normalise(item, 'movie'));
 }
 
 /** Trending TV only */
 export async function getTrendingTV(timeWindow = 'week', signal = null) {
   const data = await get(`/trending/tv/${timeWindow}`, {}, signal);
-  return data.results.map(item => normalise(item, 'tv'));
+  return safeResults(data).map(item => normalise(item, 'tv'));
+}
+
+/** Trending people */
+export async function getTrendingPeople(timeWindow = 'week', signal = null) {
+  const data = await get(`/trending/person/${timeWindow}`, {}, signal);
+  return safeResults(data).map(p => normalisePerson(p));
 }
 
 // --- Movies ---
@@ -286,15 +331,15 @@ export async function getTopRatedMovies(page = 1, signal = null) {
   return paginated(data, 'movie');
 }
 
-/** Now playing in cinemas (paginated) */
+/** Now playing in cinemas (paginated, region-aware) */
 export async function getNowPlaying(page = 1, signal = null) {
-  const data = await get('/movie/now_playing', { page }, signal);
+  const data = await get('/movie/now_playing', { page, region: _region }, signal);
   return paginated(data, 'movie');
 }
 
-/** Upcoming movies (paginated) */
+/** Upcoming movies (paginated, region-aware) */
 export async function getUpcoming(page = 1, signal = null) {
-  const data = await get('/movie/upcoming', { page }, signal);
+  const data = await get('/movie/upcoming', { page, region: _region }, signal);
   return paginated(data, 'movie');
 }
 
@@ -355,6 +400,18 @@ export async function getTopRatedTV(page = 1, signal = null) {
   return paginated(data, 'tv');
 }
 
+/** TV shows airing today */
+export async function getTVAiringToday(page = 1, signal = null) {
+  const data = await get('/tv/airing_today', { page }, signal);
+  return paginated(data, 'tv');
+}
+
+/** TV shows currently on the air */
+export async function getTVOnTheAir(page = 1, signal = null) {
+  const data = await get('/tv/on_the_air', { page }, signal);
+  return paginated(data, 'tv');
+}
+
 /** TV show details + appended responses */
 export async function getTVDetails(id, signal = null) {
   const data = await get(`/tv/${id}`, {
@@ -392,6 +449,61 @@ export async function getTVProviders(id, signal = null) {
 export async function getTVSeasonDetails(tvId, seasonNumber = 1, signal = null) {
   const data = await get(`/tv/${tvId}/season/${seasonNumber}`, {}, signal);
   return normaliseSeason(data, tvId);
+}
+
+// --- Certifications / Content Ratings ---
+
+/**
+ * Fetch age certification for a movie (prefers user's region, then IN, then first available).
+ */
+export async function getMovieCertification(id, preferredRegion = _region, signal = null) {
+  const data = await get(`/movie/${id}/release_dates`, {}, signal);
+  const results = data.results || [];
+  const country = results.find(r => r.iso_3166_1 === preferredRegion)
+    || results.find(r => r.iso_3166_1 === 'IN')
+    || results.find(r => r.iso_3166_1 === 'US')
+    || results[0];
+  const cert = (country?.release_dates || [])
+    .map(r => r.certification)
+    .find(c => c && c.trim() !== '');
+  return cert || null;
+}
+
+/** Full movie release dates by country. */
+export async function getMovieReleaseDates(id, signal = null) {
+  const data = await get(`/movie/${id}/release_dates`, {}, signal);
+  return (data.results || []).map(country => ({
+    countryCode: country.iso_3166_1,
+    releases: (country.release_dates || []).map(r => ({
+      certification: r.certification || '',
+      releaseDate: r.release_date || null,
+      type: r.type,
+      note: r.note || '',
+    })),
+  }));
+}
+
+/**
+ * Fetch content rating for TV (prefers user's region, then IN, then first available).
+ */
+export async function getTVCertification(id, preferredRegion = _region, signal = null) {
+  const data = await get(`/tv/${id}/content_ratings`, {}, signal);
+  const results = data.results || [];
+  const country = results.find(r => r.iso_3166_1 === preferredRegion)
+    || results.find(r => r.iso_3166_1 === 'IN')
+    || results.find(r => r.iso_3166_1 === 'US')
+    || results[0];
+  const rating = country?.rating;
+  return rating && rating.trim() !== '' ? rating : null;
+}
+
+/** Full TV content ratings by country. */
+export async function getTVContentRatings(id, signal = null) {
+  const data = await get(`/tv/${id}/content_ratings`, {}, signal);
+  return (data.results || []).map(r => ({
+    countryCode: r.iso_3166_1,
+    rating: r.rating || '',
+  }));
 }
 
 // --- Images ---
@@ -461,19 +573,29 @@ export async function discoverTV({ genreId = null, year = null, sortBy = 'popula
  */
 export function normalisePerson(p) {
   const credits  = p.combined_credits || {};
-  const combined = (credits.cast || [])
-    .map(c => ({
-      id:         c.id,
-      title:      c.title || c.name || 'Unknown',
-      mediaType:  c.media_type === 'tv' ? 'tv' : 'movie',
-      character:  c.character || '',
-      posterPath: c.poster_path || null,
-      releaseDate: c.release_date || c.first_air_date || null,
-      rating:     typeof c.vote_average === 'number' ? c.vote_average : null,
-    }))
+  const mapCredit = (c, role = '') => ({
+    id:         c.id,
+    title:      c.title || c.name || 'Unknown',
+    mediaType:  c.media_type === 'tv' ? 'tv' : 'movie',
+    character:  c.character || '',
+    job:        c.job || role,
+    department: c.department || '',
+    posterPath: c.poster_path || null,
+    releaseDate: c.release_date || c.first_air_date || null,
+    rating:     typeof c.vote_average === 'number' ? c.vote_average : null,
+  });
+
+  const castCredits = (credits.cast || [])
+    .map(c => mapCredit(c))
     .filter(c => c.id)
-    .sort((a, b) => String(b.releaseDate || '').localeCompare(String(a.releaseDate || '')))
-    .slice(0, 40);
+    .sort((a, b) => String(b.releaseDate || '').localeCompare(String(a.releaseDate || '')));
+
+  const crewCredits = (credits.crew || [])
+    .map(c => mapCredit(c, c.job))
+    .filter(c => c.id)
+    .sort((a, b) => String(b.releaseDate || '').localeCompare(String(a.releaseDate || '')));
+
+  const combined = castCredits.slice(0, 40);
 
   return {
     id:                 p.id,
@@ -485,10 +607,14 @@ export function normalisePerson(p) {
     placeOfBirth:       p.place_of_birth || null,
     knownForDepartment: p.known_for_department || '',
     popularity:         p.popularity || 0,
+    gender:             p.gender ?? null,
     alsoKnownAs:        p.also_known_as || [],
     homepage:           p.homepage || '',
-    imdbId:             p.imdb_id || null,
+    imdbId:             p.imdb_id || p.external_ids?.imdb_id || null,
+    externalIds:        p.external_ids || null,
     credits:            combined,
+    castCredits,
+    crewCredits,
   };
 }
 
@@ -503,10 +629,10 @@ export async function searchPeople(query, page = 1, signal = null) {
   if (!query?.trim()) return { results: [], page: 1, totalPages: 0, totalResults: 0 };
   const data = await get('/search/person', { query: query.trim(), page }, signal);
   return {
-    results:    data.results.map(p => normalisePerson(p)),
-    page:       data.page,
-    totalPages: data.total_pages,
-    totalResults: data.total_results,
+    results:    safeResults(data).map(p => normalisePerson(p)),
+    page:       data?.page ?? 1,
+    totalPages: data?.total_pages ?? 0,
+    totalResults: data?.total_results ?? 0,
   };
 }
 
@@ -578,7 +704,7 @@ export async function getAnime(page = 1, signal = null) {
     'vote_count.gte':     ANIME_CONFIG.min_vote_count,
     page,
   }, signal);
-  return paginated(data, 'tv');
+  return paginated(data, 'anime');
 }
 
 /** Top-rated anime — higher vote threshold for quality filtering */
@@ -589,7 +715,7 @@ export async function getTopRatedAnime(signal = null) {
     sort_by:              'vote_average.desc',
     'vote_count.gte':     300, // stricter threshold for "top rated"
   }, signal);
-  return data.results.map(item => normalise(item, 'tv'));
+  return safeResults(data).map(item => normalise(item, 'anime'));
 }
 
 /** Upcoming / airing-soon anime */
@@ -600,7 +726,7 @@ export async function getAiringAnime(signal = null) {
     sort_by:              'first_air_date.desc',
     'vote_count.gte':     10,
   }, signal);
-  return data.results.map(item => normalise(item, 'tv'));
+  return safeResults(data).map(item => normalise(item, 'anime'));
 }
 
 // --- Search ---
@@ -613,12 +739,12 @@ export async function searchMulti(query, page = 1, signal = null) {
   if (!query?.trim()) return { results: [], page: 1, totalPages: 0, totalResults: 0 };
   const data = await get('/search/multi', { query: query.trim(), page }, signal);
   return {
-    results: data.results
+    results: safeResults(data)
       .filter(item => item.media_type === 'movie' || item.media_type === 'tv')
       .map(item => normalise(item)),
-    page:         data.page,
-    totalPages:   data.total_pages,
-    totalResults: data.total_results,
+    page:         data?.page ?? 1,
+    totalPages:   data?.total_pages ?? 0,
+    totalResults: data?.total_results ?? 0,
   };
 }
 
@@ -678,10 +804,13 @@ export async function getTVGenres(signal = null) {
  * @param {Object} providers  — `providers` object from TMDB (keyed by country code)
  * @returns {{ countryCode: string|null, region: Object|null }}
  */
-export function pickWatchRegion(providers = {}) {
+export function pickWatchRegion(providers = {}, preferredCode = null) {
   const codes = Object.keys(providers);
   if (codes.length === 0) return { countryCode: null, region: null };
-  const countryCode = codes.find(c => ['US', 'IN', 'GB', 'CA', 'AU'].includes(c)) || codes[0];
+  if (preferredCode && providers[preferredCode]) {
+    return { countryCode: preferredCode, region: providers[preferredCode] };
+  }
+  const countryCode = codes.find(c => ['IN', 'US', 'GB', 'CA', 'AU'].includes(c)) || codes[0];
   return { countryCode, region: providers[countryCode] };
 }
 
@@ -692,11 +821,11 @@ export function pickWatchRegion(providers = {}) {
  * @param {Object} opts
  * @param {string}        opts.mediaType    'movie' | 'tv' | 'anime'
  * @param {number|string} opts.id           TMDB content ID
- * @param {string}        [opts.countryCode='US']
+ * @param {string}        [opts.countryCode='IN']
  * @param {number|string} [opts.providerId] Provider ID to deep-link to
  * @returns {string}
  */
-export function buildProviderWatchUrl({ mediaType, id, countryCode = 'US', providerId = null }) {
+export function buildProviderWatchUrl({ mediaType, id, countryCode = _region, providerId = null }) {
   const type = mediaType === 'movie' ? 'movie' : 'tv'; // anime resolves to tv on TMDB
   const params = new URLSearchParams({ locale: countryCode });
   if (providerId) params.set('watch_provider', providerId);
@@ -707,9 +836,74 @@ export function buildProviderWatchUrl({ mediaType, id, countryCode = 'US', provi
  * The top streaming (flatrate) provider for a title, if any.
  * @returns {Object|null}
  */
-export function getTopStreamingProvider(providers = {}) {
-  const { region } = pickWatchRegion(providers);
+export function getTopStreamingProvider(providers = {}, preferredCode = null) {
+  const { region } = pickWatchRegion(providers, preferredCode);
   return region?.flatrate?.[0] || null;
+}
+
+// --- Reviews ---
+
+/** Movie reviews from TMDB */
+export async function getMovieReviews(id, page = 1, signal = null) {
+  const data = await get(`/movie/${id}/reviews`, { page }, signal);
+  return {
+    results: safeResults(data).map(normaliseReview),
+    page: data?.page ?? 1,
+    totalPages: data?.total_pages ?? 0,
+  };
+}
+
+/** TV reviews from TMDB */
+export async function getTVReviews(id, page = 1, signal = null) {
+  const data = await get(`/tv/${id}/reviews`, { page }, signal);
+  return {
+    results: safeResults(data).map(normaliseReview),
+    page: data?.page ?? 1,
+    totalPages: data?.total_pages ?? 0,
+  };
+}
+
+function normaliseReview(r) {
+  return {
+    id: r.id,
+    author: r.author || 'Anonymous',
+    authorDetails: r.author_details || {},
+    content: r.content || '',
+    createdAt: r.created_at || null,
+    updatedAt: r.updated_at || null,
+    url: r.url || null,
+  };
+}
+
+// --- Collections ---
+
+/** Collection details with parts (movies in order). */
+export async function getCollectionDetails(id, signal = null) {
+  const data = await get(`/collection/${id}`, {}, signal);
+  return {
+    id: data.id,
+    name: data.name || '',
+    overview: data.overview || '',
+    posterPath: data.poster_path || null,
+    backdropPath: data.backdrop_path || null,
+    parts: (Array.isArray(data.parts) ? data.parts : []).map(item => normalise(item, 'movie')),
+  };
+}
+
+// --- Company ---
+
+/** Production company details */
+export async function getCompanyDetails(id, signal = null) {
+  const data = await get(`/company/${id}`, {}, signal);
+  return {
+    id: data.id,
+    name: data.name || '',
+    description: data.description || '',
+    headquarters: data.headquarters || '',
+    homepage: data.homepage || '',
+    logoPath: data.logo_path || null,
+    originCountry: data.origin_country || '',
+  };
 }
 
 // --- Images ---

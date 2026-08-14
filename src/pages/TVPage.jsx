@@ -1,15 +1,18 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import useTMDB from '../hooks/useTMDB';
-import { getPopularTV, getTopRatedTV, discoverTV } from '../services/tmdb';
+import usePaginatedTMDB from '../hooks/usePaginatedTMDB';
+import { getPopularTV, getTopRatedTV, getTVAiringToday, getTVOnTheAir, discoverTV, getTVGenres } from '../services/tmdb';
 import MovieCard from '../components/movie-card/MovieCard';
 
 const TABS = [
-  { id: 'popular',   label: 'Popular' },
-  { id: 'top_rated', label: 'Top Rated' },
+  { id: 'popular',      label: 'Popular' },
+  { id: 'top_rated',    label: 'Top Rated' },
+  { id: 'airing_today', label: 'Airing Today' },
+  { id: 'on_the_air',   label: 'On The Air' },
 ];
 
-const GENRES = [
+const FALLBACK_GENRES = [
   { id: 10759, name: 'Action & Adventure' },
   { id: 16, name: 'Animation' },
   { id: 35, name: 'Comedy' },
@@ -36,21 +39,35 @@ export default function TVPage() {
 
   const [activeTab, setActiveTab] = useState('popular');
   const [sortBy, setSortBy] = useState('popularity.desc');
+  const [year, setYear] = useState('');
+  const [minRating, setMinRating] = useState('');
 
-  const inDiscover = genreId !== null || sortBy !== 'popularity.desc';
+  const { data: apiGenres } = useTMDB(getTVGenres, []);
+  const GENRES = apiGenres?.length ? apiGenres : FALLBACK_GENRES;
 
-  // Discover mode (genre + sort) OR curated tab lists
-  const fetcher = inDiscover
-    ? () => discoverTV({ genreId, sortBy }).then(r => r.results)
-    : (() => {
-        const fetchers = {
-          popular:   () => getPopularTV().then(r => r.results),
-          top_rated: () => getTopRatedTV().then(r => r.results),
-        };
-        return fetchers[activeTab];
-      })();
+  const inDiscover = genreId !== null || sortBy !== 'popularity.desc' || year !== '' || minRating !== '';
 
-  const { data: shows, loading, error } = useTMDB(fetcher, [activeTab, genreId, sortBy]);
+  const fetchPage = useMemo(() => {
+    if (inDiscover) {
+      return (page) => discoverTV({
+        genreId,
+        year: year ? Number(year) : null,
+        sortBy,
+        minRating: minRating ? Number(minRating) : null,
+        page,
+      });
+    }
+    const fetchers = {
+      popular:      (page) => getPopularTV(page),
+      top_rated:    (page) => getTopRatedTV(page),
+      airing_today: (page) => getTVAiringToday(page),
+      on_the_air:   (page) => getTVOnTheAir(page),
+    };
+    return fetchers[activeTab];
+  }, [inDiscover, genreId, sortBy, year, minRating, activeTab]);
+
+  const { items: shows, loading, loadingMore, error, hasMore, loadMore, retry } =
+    usePaginatedTMDB(fetchPage, [activeTab, genreId, sortBy, year, minRating]);
 
   const activeGenre = GENRES.find(g => g.id === genreId) || null;
 
@@ -61,6 +78,8 @@ export default function TVPage() {
   function selectTab(id) {
     setActiveTab(id);
     setSortBy('popularity.desc');
+    setYear('');
+    setMinRating('');
     setSearchParams({});
   }
 
@@ -77,68 +96,56 @@ export default function TVPage() {
         </p>
       </div>
 
-      {/* Genre filter pills */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.5rem' }}>
-        <button
-          onClick={() => selectGenre(null)}
-          className="tab-btn"
-          style={{
-            background: !activeGenre && !inDiscover ? 'var(--brand-gradient)' : 'rgba(255,255,255,0.06)',
-            color: !activeGenre && !inDiscover ? '#fff' : 'var(--text-secondary)',
-          }}
-        >
+      <div className="page-genre-pills">
+        <button type="button" onClick={() => selectGenre(null)} className="tab-btn"
+          style={{ background: !activeGenre && !inDiscover ? 'var(--brand-gradient)' : 'rgba(255,255,255,0.06)', color: !activeGenre && !inDiscover ? '#fff' : 'var(--text-secondary)' }}>
           All
         </button>
         {GENRES.map(g => (
-          <button
-            key={g.id}
-            onClick={() => selectGenre(g.id)}
-            className="tab-btn"
-            style={{
-              background: activeGenre?.id === g.id ? 'var(--brand-gradient)' : 'rgba(255,255,255,0.06)',
-              color: activeGenre?.id === g.id ? '#fff' : 'var(--text-secondary)',
-            }}
-          >
+          <button key={g.id} type="button" onClick={() => selectGenre(g.id)} className="tab-btn"
+            style={{ background: activeGenre?.id === g.id ? 'var(--brand-gradient)' : 'rgba(255,255,255,0.06)', color: activeGenre?.id === g.id ? '#fff' : 'var(--text-secondary)' }}>
             {g.name}
           </button>
         ))}
       </div>
 
-      {/* Sort + tab bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
+      <div className="page-toolbar">
         <div className="tab-bar" style={{ marginBottom: 0 }}>
           {TABS.map(tab => (
-            <button
-              key={tab.id}
-              className={`tab-btn ${!inDiscover && activeTab === tab.id ? 'active' : ''}`}
-              onClick={() => selectTab(tab.id)}
-              disabled={inDiscover}
-              style={inDiscover ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
-            >
+            <button key={tab.id} type="button" className={`tab-btn ${!inDiscover && activeTab === tab.id ? 'active' : ''}`}
+              onClick={() => selectTab(tab.id)} disabled={inDiscover} style={inDiscover ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}>
               {tab.label}
             </button>
           ))}
         </div>
-
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+          Year:
+          <input type="number" min="1900" max="2030" placeholder="Any" value={year}
+            onChange={e => setYear(e.target.value)}
+            style={{ padding: '0.5rem 0.75rem', borderRadius: '999px', width: '90px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)', color: '#f8fafc', fontSize: '0.85rem' }} />
+        </label>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+          Min rating:
+          <input type="number" min="0" max="10" step="0.5" placeholder="Any" value={minRating}
+            onChange={e => setMinRating(e.target.value)}
+            style={{ padding: '0.5rem 0.75rem', borderRadius: '999px', width: '80px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)', color: '#f8fafc', fontSize: '0.85rem' }} />
+        </label>
         <label style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
           Sort:
-          <select
-            value={sortBy}
-            onChange={e => setSortBy(e.target.value)}
-            style={{
-              padding: '0.5rem 1.1rem', borderRadius: '999px',
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.15)',
-              color: '#f8fafc', fontSize: '0.85rem', fontWeight: 700,
-              cursor: 'pointer', outline: 'none', backdropFilter: 'blur(8px)',
-            }}
-          >
-            {SORTS.map(s => <option key={s.id} value={s.id} style={{ background: '#0f172a', color: '#fff' }}>{s.label}</option>)}
+          <select value={sortBy} onChange={e => setSortBy(e.target.value)}
+            style={{ padding: '0.5rem 1.1rem', borderRadius: '999px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)', color: '#f8fafc', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', outline: 'none' }}>
+            {SORTS.map(s => <option key={s.id} value={s.id} style={{ background: '#0f172a' }}>{s.label}</option>)}
           </select>
         </label>
       </div>
 
-      {error && <p className="error-msg">{error}</p>}
+      {error && (
+        <div className="row-error-state" style={{ marginBottom: '1.5rem' }}>
+          <p>{error}</p>
+          <button type="button" className="btn-ghost" onClick={retry}>Retry</button>
+        </div>
+      )}
+
       <div className="media-grid">
         {loading
           ? [...Array(20)].map((_, i) => (
@@ -150,9 +157,28 @@ export default function TVPage() {
                 </div>
               </div>
             ))
-          : shows.map(s => <MovieCard key={s.id} movie={s} />)
+          : shows.length === 0 && !error
+            ? (
+              <div className="empty-state" style={{ gridColumn: '1 / -1' }}>
+                <span style={{ fontSize: '3rem' }}>📺</span>
+                <h3>No TV shows found</h3>
+                <p>Try a different genre or sort option.</p>
+              </div>
+            )
+            : shows.map(m => <MovieCard key={m.id} movie={m} />)
         }
+        {loadingMore && [...Array(8)].map((_, i) => (
+          <div key={`more-${i}`} className="movie-card movie-card--md"><div className="card-poster skeleton" /></div>
+        ))}
       </div>
+
+      {hasMore && !loading && (
+        <div style={{ textAlign: 'center', marginTop: '3rem' }}>
+          <button type="button" className="btn-ghost" onClick={loadMore} disabled={loadingMore}>
+            {loadingMore ? 'Loading…' : 'Load More'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

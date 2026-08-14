@@ -15,8 +15,8 @@ export const TMDB_CONFIG = {
   API_KEY,
   BASE_URL: import.meta.env.VITE_TMDB_BASE_URL || 'https://api.themoviedb.org/3',
   IMG_BASE: import.meta.env.VITE_TMDB_IMAGE_BASE || 'https://image.tmdb.org/t/p',
-  LANGUAGE: 'en-US',
-  REGION:   'US',
+  LANGUAGE: import.meta.env.VITE_TMDB_LANGUAGE || 'en-US',
+  REGION:   import.meta.env.VITE_TMDB_REGION || 'IN',
 };
 
 /**
@@ -57,6 +57,22 @@ export const PROFILE_SIZES = {
   sm:  'w45',
   md:  'w185',
   lg:  'h632',
+  original: 'original',
+};
+
+/** Logo sizes for provider/company logos */
+export const LOGO_SIZES = {
+  sm: 'w45',
+  md: 'w92',
+  lg: 'w154',
+  original: 'original',
+};
+
+/** Episode still image sizes */
+export const STILL_SIZES = {
+  sm: 'w185',
+  md: 'w300',
+  lg: 'w780',
   original: 'original',
 };
 

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { getAuthErrorMessage } from '../../utils/authErrors';
 import gsap from 'gsap';
 import AuthVisual from '../../components/auth/AuthVisual';
 
@@ -13,9 +14,12 @@ export default function Register() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const { signup, loginWithGoogle } = useAuth();
+  const { signup, loginWithGoogle, verifyEmail } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const formRef = useRef(null);
+
+  const redirectTo = location.state?.from?.pathname ?? '/home';
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -29,6 +33,9 @@ export default function Register() {
 
   async function handleEmailSubmit(e) {
     e.preventDefault();
+    if (password.length < 6) {
+      return setError('Password must be at least 6 characters.');
+    }
     if (password !== confirmPassword) {
       return setError('Passwords do not match');
     }
@@ -37,9 +44,14 @@ export default function Register() {
       setError('');
       setLoading(true);
       await signup(email, password);
-      navigate('/home');
+      try {
+        await verifyEmail();
+      } catch {
+        // Non-blocking — user can verify later from profile
+      }
+      navigate(redirectTo, { replace: true });
     } catch (err) {
-      setError('Failed to create an account. ' + err.message);
+      setError(getAuthErrorMessage(err, 'Failed to create an account.'));
       setLoading(false);
     }
   }
@@ -49,9 +61,9 @@ export default function Register() {
       setError('');
       setLoading(true);
       await loginWithGoogle();
-      navigate('/home');
-    } catch {
-      setError('Failed to log in with Google.');
+      navigate(redirectTo, { replace: true });
+    } catch (err) {
+      setError(getAuthErrorMessage(err, 'Failed to log in with Google.'));
       setLoading(false);
     }
   }

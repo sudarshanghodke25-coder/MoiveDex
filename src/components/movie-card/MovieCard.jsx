@@ -79,11 +79,13 @@ export default function MovieCard({ movie, size = 'md', ...directProps }) {
     : (typeof item.vote_average === 'number' && item.vote_average > 0 ? item.vote_average : null);
   const rating = ratingVal ? ratingVal.toFixed(1) : null;
   
-  const type = item.mediaType === 'tv' ? 'TV' : 'Film';
+  const type = item.mediaType === 'anime' ? 'Anime' : item.mediaType === 'tv' ? 'TV' : 'Film';
   const genres = item.genreNames?.slice(0, 2) || [];
 
   function handleClick() {
-    navigate(item.mediaType === 'tv' ? `/tv/${item.id}` : `/movie/${item.id}`);
+    if (item.mediaType === 'anime') navigate(`/anime/${item.id}`);
+    else if (item.mediaType === 'tv') navigate(`/tv/${item.id}`);
+    else navigate(`/movie/${item.id}`);
   }
 
   function handleKeyDown(e) {

@@ -3,8 +3,18 @@
  * Opens safely in a new tab. Only renders links that actually exist.
  */
 
+function isSafeUrl(url) {
+  if (!url || typeof url !== 'string') return false;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 function LinkButton({ href, icon, label }) {
-  if (!href) return null;
+  if (!href || !isSafeUrl(href)) return null;
   return (
     <a
       href={href}
@@ -44,13 +54,15 @@ export default function ExternalLinks({ detail, mediaType = 'movie' }) {
   if (!detail) return null;
 
   const tmdbType = mediaType === 'movie' ? 'movie' : 'tv';
+  const ext = detail.externalIds || {};
+
   const links = [
     detail.imdbId && {
       href: `https://www.imdb.com/title/${detail.imdbId}/`,
       icon: '🎬',
       label: 'IMDb',
     },
-    detail.homepage && {
+    detail.homepage && isSafeUrl(detail.homepage) && {
       href: detail.homepage,
       icon: '🌐',
       label: 'Official Website',
@@ -59,6 +71,21 @@ export default function ExternalLinks({ detail, mediaType = 'movie' }) {
       href: `https://www.themoviedb.org/${tmdbType}/${detail.id}`,
       icon: '🍿',
       label: 'TMDB',
+    },
+    ext.facebook_id && {
+      href: `https://www.facebook.com/${ext.facebook_id}`,
+      icon: '📘',
+      label: 'Facebook',
+    },
+    ext.instagram_id && {
+      href: `https://www.instagram.com/${ext.instagram_id}`,
+      icon: '📸',
+      label: 'Instagram',
+    },
+    ext.twitter_id && {
+      href: `https://x.com/${ext.twitter_id}`,
+      icon: '🐦',
+      label: 'X / Twitter',
     },
   ].filter(Boolean);
 

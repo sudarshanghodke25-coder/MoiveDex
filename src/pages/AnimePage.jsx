@@ -1,24 +1,22 @@
-import { useState } from 'react';
-import useTMDB from '../hooks/useTMDB';
-import { getAnime, getTopRatedAnime } from '../services/tmdb';
+import { useState, useMemo } from 'react';
+import usePaginatedTMDB from '../hooks/usePaginatedTMDB';
+import { getAnime, getTopRatedAnime, getAiringAnime } from '../services/tmdb';
 import MovieCard from '../components/movie-card/MovieCard';
 
 const TABS = [
-  { id: 'popular',   label: 'Popular' },
-  { id: 'top_rated', label: 'Top Rated' },
+  { id: 'popular',   label: 'Popular',   fetch: (page) => getAnime(page) },
+  { id: 'top_rated', label: 'Top Rated', fetch: () => getTopRatedAnime().then(r => ({ results: r, totalPages: 1 })) },
+  { id: 'airing',    label: 'Airing Now', fetch: () => getAiringAnime().then(r => ({ results: r, totalPages: 1 })) },
 ];
-
-function useAnimeFetch(activeTab) {
-  const fetchers = {
-    popular:   () => getAnime().then(r => r.results),
-    top_rated: () => getTopRatedAnime(),
-  };
-  return useTMDB(fetchers[activeTab], [activeTab]);
-}
 
 export default function AnimePage() {
   const [activeTab, setActiveTab] = useState('popular');
-  const { data: animeList, loading, error } = useAnimeFetch(activeTab);
+  const tab = TABS.find(t => t.id === activeTab) || TABS[0];
+
+  const fetchPage = useMemo(() => tab.fetch, [tab]);
+
+  const { items: animeList, loading, loadingMore, error, hasMore, loadMore, retry } =
+    usePaginatedTMDB(fetchPage, [activeTab]);
 
   return (
     <div className="page-content">
@@ -30,18 +28,20 @@ export default function AnimePage() {
       </div>
 
       <div className="tab-bar">
-        {TABS.map(tab => (
-          <button
-            key={tab.id}
-            className={`tab-btn ${activeTab === tab.id ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab.id)}
-          >
-            {tab.label}
+        {TABS.map(t => (
+          <button key={t.id} type="button" className={`tab-btn ${activeTab === t.id ? 'active' : ''}`} onClick={() => setActiveTab(t.id)}>
+            {t.label}
           </button>
         ))}
       </div>
 
-      {error && <p className="error-msg">{error}</p>}
+      {error && (
+        <div className="row-error-state" style={{ marginBottom: '1.5rem' }}>
+          <p>{error}</p>
+          <button type="button" className="btn-ghost" onClick={retry}>Retry</button>
+        </div>
+      )}
+
       <div className="media-grid">
         {loading
           ? [...Array(20)].map((_, i) => (
@@ -53,9 +53,28 @@ export default function AnimePage() {
                 </div>
               </div>
             ))
-          : animeList.map(a => <MovieCard key={a.id} movie={a} />)
+          : animeList.length === 0 && !error
+            ? (
+              <div className="empty-state" style={{ gridColumn: '1 / -1' }}>
+                <span style={{ fontSize: '3rem' }}>⚡</span>
+                <h3>No anime found</h3>
+                <p>Try a different tab or check back later.</p>
+              </div>
+            )
+            : animeList.map(a => <MovieCard key={a.id} movie={a} />)
         }
+        {loadingMore && [...Array(8)].map((_, i) => (
+          <div key={`more-${i}`} className="movie-card movie-card--md"><div className="card-poster skeleton" /></div>
+        ))}
       </div>
+
+      {hasMore && !loading && activeTab === 'popular' && (
+        <div style={{ textAlign: 'center', marginTop: '3rem' }}>
+          <button type="button" className="btn-ghost" onClick={loadMore} disabled={loadingMore}>
+            {loadingMore ? 'Loading…' : 'Load More'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

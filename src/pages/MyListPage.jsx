@@ -10,7 +10,7 @@ const TABS = [
 ];
 
 export default function MyListPage() {
-  const { watchlist, clearWatchlist } = useWatchlist();
+  const { watchlist, clearWatchlist, loading } = useWatchlist();
   const [activeTab, setActiveTab] = useState('all');
 
   const filteredItems = watchlist.filter(item => {
@@ -73,7 +73,18 @@ export default function MyListPage() {
         </div>
       )}
 
-      {watchlist.length === 0 ? (
+      {loading ? (
+        <div className="media-grid">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="movie-card movie-card--md">
+              <div className="card-poster skeleton" />
+              <div className="card-info">
+                <div className="skeleton" style={{ height: '0.875rem', width: '80%', marginBottom: '0.4rem', borderRadius: '4px' }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : watchlist.length === 0 ? (
         <div className="empty-state" style={{ minHeight: '50vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', gap: '1.25rem', padding: '4rem 1rem' }}>
           <div style={{ fontSize: '4rem', filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.5))' }}>🔖</div>
           <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#f8fafc' }}>Your list is empty</h2>

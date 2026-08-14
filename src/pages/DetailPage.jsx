@@ -5,9 +5,17 @@ import {
   getTVDetails,
   getTVSeasonDetails,
   getTVEpisodeDetails,
+  getMovieCertification,
+  getTVCertification,
+  getMovieReleaseDates,
+  getTVContentRatings,
+  getMovieReviews,
+  getTVReviews,
+  getCollectionDetails,
   getVideos,
   backdropUrl,
   posterUrl,
+  stillUrl as buildStillUrl,
   normalise,
   pickTrailer,
   pickWatchRegion,
@@ -18,6 +26,8 @@ import { TMDB_CONFIG } from '../services/tmdbConfig';
 import MovieCard from '../components/movie-card/MovieCard';
 import { useWatchlist } from '../contexts/WatchlistContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
+import useUserSettings from '../hooks/useUserSettings';
 import { getPlaybackSource } from '../services/playback';
 import { saveWatchProgress, getWatchProgress, getContentId } from '../services/history';
 import VideoPlayer from '../components/player/VideoPlayer';
@@ -27,6 +37,9 @@ import QuickStats from '../components/detail/QuickStats';
 import CrewSection from '../components/detail/CrewSection';
 import MediaGallery from '../components/detail/MediaGallery';
 import ExternalLinks from '../components/detail/ExternalLinks';
+import ReviewsSection from '../components/detail/ReviewsSection';
+import CollectionBanner from '../components/detail/CollectionBanner';
+import ReleaseDatesSection from '../components/detail/ReleaseDatesSection';
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -151,13 +164,24 @@ export default function DetailPage({ mediaType = 'movie' }) {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const { isInWatchlist, toggleWatchlist } = useWatchlist();
+  const { showToast } = useToast();
+  const { watchProviderRegion } = useUserSettings();
 
   const [detail, setDetail]           = useState(null);
   const [loading, setLoading]         = useState(true);
   const [error, setError]             = useState(null);
+  const [certification, setCertification] = useState(null);
   const [allVideos, setAllVideos]     = useState([]);
   const [showTrailer, setShowTrailer] = useState(false);
   const [trailerVideo, setTrailerVideo] = useState(null);
+
+  // Secondary TMDB sections (lazy-loaded after main detail)
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [collection, setCollection] = useState(null);
+  const [collectionLoading, setCollectionLoading] = useState(false);
+  const [releaseDates, setReleaseDates] = useState([]);
+  const [contentRatings, setContentRatings] = useState([]);
 
   // TV / Anime Season & Episode states
   const [selectedSeasonNum, setSelectedSeasonNum] = useState(null); // null until we know the first real season
@@ -180,9 +204,11 @@ export default function DetailPage({ mediaType = 'movie' }) {
 
   // 1. Fetch main detail
   useEffect(() => {
+    let cancelled = false;
     setLoading(true);
     setDetail(null);
     setError(null);
+    setCertification(null);
     setSeasonData(null);
     setSelectedSeasonNum(null);
     setAllVideos([]);
@@ -190,8 +216,15 @@ export default function DetailPage({ mediaType = 'movie' }) {
     const fetcher = (mediaType === 'tv' || mediaType === 'anime') ? getTVDetails : getMovieDetails;
     fetcher(id)
       .then(data => {
+        if (cancelled) return;
         setDetail(data);
         setLoading(false);
+
+        // Content rating / age certification (best-effort, non-blocking)
+        const certFetcher = (mediaType === 'tv' || mediaType === 'anime') ? getTVCertification : getMovieCertification;
+        certFetcher(id)
+          .then(cert => { if (!cancelled) setCertification(cert); })
+          .catch(() => { if (!cancelled) setCertification(null); });
 
         // Videos come appended in the detail response; also fetch separately as fallback
         const embedded = data.videos?.results || [];
@@ -199,8 +232,8 @@ export default function DetailPage({ mediaType = 'movie' }) {
           setAllVideos(prioritiseVideos(embedded));
         } else {
           getVideos(id, mediaType === 'anime' ? 'tv' : mediaType)
-            .then(vids => setAllVideos(prioritiseVideos(vids)))
-            .catch(() => setAllVideos([]));
+            .then(vids => { if (!cancelled) setAllVideos(prioritiseVideos(vids)); })
+            .catch(() => { if (!cancelled) setAllVideos([]); });
         }
 
         // For TV/anime, default to the first real (non-specials) season
@@ -211,32 +244,83 @@ export default function DetailPage({ mediaType = 'movie' }) {
         }
       })
       .catch(e => {
+        if (cancelled) return;
         setError(e.message || 'Unable to load this title. Please try again.');
         setLoading(false);
       });
 
     window.scrollTo(0, 0);
+    return () => { cancelled = true; };
   }, [id, mediaType]);
 
-  // 2. Fetch Season details for TV/Anime when season selection changes
+  // 1b. Lazy-load reviews, collection, release/rating info (non-blocking)
+  useEffect(() => {
+    if (!detail?.id) return;
+    let cancelled = false;
+
+    setReviewsLoading(true);
+    const reviewFetcher = mediaType === 'movie' ? getMovieReviews : getTVReviews;
+    reviewFetcher(detail.id)
+      .then(data => { if (!cancelled) setReviews(data.results || []); })
+      .catch(() => { if (!cancelled) setReviews([]); })
+      .finally(() => { if (!cancelled) setReviewsLoading(false); });
+
+    if (detail.belongsToCollection?.id) {
+      setCollectionLoading(true);
+      getCollectionDetails(detail.belongsToCollection.id)
+        .then(data => { if (!cancelled) setCollection(data); })
+        .catch(() => { if (!cancelled) setCollection(null); })
+        .finally(() => { if (!cancelled) setCollectionLoading(false); });
+    } else {
+      setCollection(null);
+      setCollectionLoading(false);
+    }
+
+    if (mediaType === 'movie') {
+      getMovieReleaseDates(detail.id)
+        .then(data => { if (!cancelled) setReleaseDates(data); })
+        .catch(() => { if (!cancelled) setReleaseDates([]); });
+      setContentRatings([]);
+    } else {
+      getTVContentRatings(detail.id)
+        .then(data => { if (!cancelled) setContentRatings(data); })
+        .catch(() => { if (!cancelled) setContentRatings([]); });
+      setReleaseDates([]);
+    }
+
+    return () => { cancelled = true; };
+  }, [detail?.id, mediaType, detail?.belongsToCollection?.id]);
+
+  // 2. Fetch Season details
   useEffect(() => {
     if (!detail || (mediaType !== 'tv' && mediaType !== 'anime') || selectedSeasonNum === null) return;
 
+    let cancelled = false;
     setSeasonLoading(true);
     setSeasonData(null);
-    setSelectedEpisode(null); // clear selected episode when season changes
+    setSelectedEpisode(null);
     setEpisodeExtras(null);
     getTVSeasonDetails(id, selectedSeasonNum)
       .then(data => {
+        if (cancelled) return;
         setSeasonData(data);
         setSeasonLoading(false);
       })
       .catch(err => {
+        if (cancelled) return;
         console.error('Failed to load season details:', err);
         setSeasonData(null);
         setSeasonLoading(false);
       });
+    return () => { cancelled = true; };
   }, [detail, id, mediaType, selectedSeasonNum]);
+
+  // Clear debounced save timer on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    };
+  }, []);
 
   // 3. Launch Video Player for movie or episode
   const handleStartPlayback = async (ep = null) => {
@@ -261,13 +345,27 @@ export default function DetailPage({ mediaType = 'movie' }) {
         setActiveEpisode(ep);
         setActivePlayback(playback);
       } else {
-        alert(playback.reason || 'No authorized playback source is currently connected.');
+        showToast(playback.reason || 'No authorized playback source is currently connected.', 'error');
       }
     } catch (e) {
       console.error('Playback error:', e);
-      alert('Could not start playback. Please try again.');
+      showToast('Could not start playback. Please try again.', 'error');
     }
   };
+
+  async function handleShare() {
+    const url = window.location.href;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: detail?.title, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        showToast('Link copied to clipboard!', 'success');
+      }
+    } catch {
+      // User cancelled share or clipboard denied
+    }
+  }
 
   // 4. Debounced Watch Progress Saver
   const handlePlayerProgress = useCallback((currentTime, duration) => {
@@ -347,7 +445,11 @@ export default function DetailPage({ mediaType = 'movie' }) {
   // Cast & Crew
   const cast = detail.credits?.cast || [];
   const crew = detail.credits?.crew || [];
-  const { director, writers, creators } = extractKeyCrewRoles(crew);
+  const { director, writers, creators: crewCreators } = extractKeyCrewRoles(crew);
+  const createdByNames = (detail.createdBy || []).map(c => c.name);
+  const displayCreators = crewCreators.length > 0
+    ? crewCreators
+    : createdByNames.map(name => ({ name }));
 
   // Recommendations & Similar — normalised for MovieCard
   const recommendations = (detail.recommendations?.results || [])
@@ -364,8 +466,8 @@ export default function DetailPage({ mediaType = 'movie' }) {
   // Watch providers — real streaming happens outbound via TMDB per-provider links;
   // the in-app player is always a clearly-labeled preview.
   const providers = detail.providers || {};
-  const { countryCode: regionCode } = pickWatchRegion(providers);
-  const topProvider = getTopStreamingProvider(providers);
+  const { countryCode: regionCode } = pickWatchRegion(providers, watchProviderRegion);
+  const topProvider = getTopStreamingProvider(providers, watchProviderRegion);
   const providerWatchUrl = topProvider && detail.id
     ? buildProviderWatchUrl({ mediaType, id: detail.id, countryCode: regionCode || 'US', providerId: topProvider.provider_id })
     : null;
@@ -426,6 +528,7 @@ export default function DetailPage({ mediaType = 'movie' }) {
           {/* Badges */}
           <div className="detail-badges">
             <span className="pill">{typeLabel}</span>
+            {certification && <span className="pill" style={{ borderColor: 'rgba(245,158,11,0.5)', color: 'var(--brand-accent)', fontWeight: 800 }}>{certification}</span>}
             {year && <span className="pill">{year}</span>}
             {detail.status && <span className="pill">{detail.status}</span>}
           </div>
@@ -491,7 +594,10 @@ export default function DetailPage({ mediaType = 'movie' }) {
               {detail.genreObjects.map(g => (
                 <Link
                   key={g.id}
-                  to={isTV ? `/tv?genre=${g.id}` : `/movies?genre=${g.id}`}
+                  to={
+                    mediaType === 'anime' ? `/anime?genre=${g.id}`
+                    : isTV ? `/tv?genre=${g.id}` : `/movies?genre=${g.id}`
+                  }
                   className="pill"
                   style={{ textDecoration: 'none', transition: 'all 0.2s ease' }}
                   onMouseEnter={e => { e.currentTarget.style.background = 'var(--brand-gradient)'; e.currentTarget.style.color = '#fff'; }}
@@ -518,7 +624,7 @@ export default function DetailPage({ mediaType = 'movie' }) {
           )}
 
           {/* Key Crew (Director / Writers / Creator) */}
-          {(director || writers.length > 0 || creators.length > 0) && (
+          {(director || writers.length > 0 || displayCreators.length > 0) && (
             <div style={{ marginTop: '1rem', display: 'flex', flexWrap: 'wrap', gap: '1.25rem' }}>
               {director && (
                 <div>
@@ -540,13 +646,13 @@ export default function DetailPage({ mediaType = 'movie' }) {
                   </span>
                 </div>
               )}
-              {!director && creators.length > 0 && (
+              {!director && displayCreators.length > 0 && (
                 <div>
                   <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', display: 'block', marginBottom: '0.2rem' }}>
-                    {creators.length === 1 ? 'Creator' : 'Creators'}
+                    {displayCreators.length === 1 ? 'Creator' : 'Creators'}
                   </span>
                   <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                    {creators.map(c => c.name).join(', ')}
+                    {displayCreators.map(c => c.name).join(', ')}
                   </span>
                 </div>
               )}
@@ -635,6 +741,15 @@ export default function DetailPage({ mediaType = 'movie' }) {
               </svg>
               {inList ? 'In My List' : 'Add to List'}
             </button>
+
+            <button
+              type="button"
+              className="btn-ghost"
+              onClick={handleShare}
+              style={{ borderRadius: '999px', padding: '0.875rem 1.75rem', fontWeight: 600 }}
+            >
+              🔗 Share
+            </button>
           </div>
         </div>
       </div>
@@ -643,7 +758,7 @@ export default function DetailPage({ mediaType = 'movie' }) {
       <QuickStats detail={detail} isTV={isTV} />
 
       {/* ── Metadata Block ────────────────────────────────────────── */}
-      {(detail.originalLanguage || langs || companies || networks || budgetFmt || revenueFmt || detail.productionCountries?.length > 0) && (
+      {(detail.originalLanguage || langs || companies || networks || budgetFmt || revenueFmt || certification || detail.productionCountries?.length > 0) && (
         <div className="detail-section" style={{ marginTop: '2.5rem' }}>
           <SectionHeader title="Details" />
           <div style={{
@@ -661,6 +776,10 @@ export default function DetailPage({ mediaType = 'movie' }) {
             {detail.productionCountries?.length > 0 && (
               <MetaRow label="Country" value={detail.productionCountries.join(', ')} />
             )}
+            {/* Content rating */}
+            {certification && (
+              <MetaRow label="Content Rating" value={certification} />
+            )}
             {/* Movie-only */}
             {!isTV && companies && (
               <MetaRow label="Production" value={companies} />
@@ -672,14 +791,35 @@ export default function DetailPage({ mediaType = 'movie' }) {
               <MetaRow label="Revenue" value={revenueFmt} />
             )}
             {/* TV-only */}
+            {isTV && companies && (
+              <MetaRow label="Production" value={companies} />
+            )}
             {isTV && networks && (
               <MetaRow label="Network" value={networks} />
+            )}
+            {isTV && detail.tvType && (
+              <MetaRow label="Type" value={detail.tvType} />
+            )}
+            {isTV && detail.episodeRunTime?.length > 0 && (
+              <MetaRow label="Episode Runtime" value={detail.episodeRunTime.map(m => formatRuntime(m)).filter(Boolean).join(' · ')} />
             )}
             {isTV && detail.firstAirDate && (
               <MetaRow label="First Aired" value={detail.firstAirDate} />
             )}
             {isTV && detail.lastAirDate && detail.lastAirDate !== detail.firstAirDate && (
               <MetaRow label="Last Aired" value={detail.lastAirDate} />
+            )}
+            {isTV && detail.nextEpisodeToAir && (
+              <MetaRow
+                label="Next Episode"
+                value={`${detail.nextEpisodeToAir.name || `Episode ${detail.nextEpisodeToAir.episode_number}`} — S${detail.nextEpisodeToAir.season_number}E${detail.nextEpisodeToAir.episode_number}${detail.nextEpisodeToAir.air_date ? ` (${detail.nextEpisodeToAir.air_date})` : ''}`}
+              />
+            )}
+            {isTV && detail.lastEpisodeToAir && detail.lastEpisodeToAir.id !== detail.nextEpisodeToAir?.id && (
+              <MetaRow
+                label="Last Episode"
+                value={`${detail.lastEpisodeToAir.name || `Episode ${detail.lastEpisodeToAir.episode_number}`} — S${detail.lastEpisodeToAir.season_number}E${detail.lastEpisodeToAir.episode_number}${detail.lastEpisodeToAir.air_date ? ` (${detail.lastEpisodeToAir.air_date})` : ''}`}
+              />
             )}
 
             {/* Production companies — logos when available, text fallback */}
@@ -726,6 +866,39 @@ export default function DetailPage({ mediaType = 'movie' }) {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Keywords ──────────────────────────────────────────────── */}
+      {detail.keywords?.length > 0 && (
+        <div className="detail-section" style={{ marginTop: '2.5rem' }}>
+          <SectionHeader title="Keywords" />
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+            {detail.keywords.slice(0, 24).map(kw => (
+              <Link
+                key={kw.id || kw.name}
+                to={`/search?q=${encodeURIComponent(kw.name)}`}
+                style={{
+                  fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)',
+                  padding: '0.35rem 0.85rem', borderRadius: '999px',
+                  background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+                  transition: 'all 0.2s ease', textDecoration: 'none',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = 'rgba(245,158,11,0.1)';
+                  e.currentTarget.style.borderColor = 'rgba(245,158,11,0.45)';
+                  e.currentTarget.style.color = '#f8fafc';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+                  e.currentTarget.style.color = 'var(--text-secondary)';
+                }}
+              >
+                #{kw.name}
+              </Link>
+            ))}
           </div>
         </div>
       )}
@@ -784,11 +957,11 @@ export default function DetailPage({ mediaType = 'movie' }) {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))', gap: '1.25rem' }}>
               {seasonData.episodes.map(ep => {
                 // Fallback chain: episode still → season poster → series backdrop
-                const stillUrl = ep.stillPath
-                  ? `https://image.tmdb.org/t/p/w300${ep.stillPath}`
+                const epStill = ep.stillPath
+                  ? buildStillUrl(ep.stillPath, 'md')
                   : (seasonData?.posterPath
-                    ? `https://image.tmdb.org/t/p/w300${seasonData.posterPath}`
-                    : (detail.backdropPath ? `https://image.tmdb.org/t/p/w300${detail.backdropPath}` : null));
+                    ? posterUrl(seasonData.posterPath, 'md')
+                    : (detail.backdropPath ? backdropUrl(detail.backdropPath, 'sm') : null));
                 const isSelected = selectedEpisode?.id === ep.id;
                 return (
                   <div
@@ -824,8 +997,8 @@ export default function DetailPage({ mediaType = 'movie' }) {
                   >
                     {/* Still image */}
                     <div style={{ height: '150px', position: 'relative', background: '#09090b' }}>
-                      {stillUrl ? (
-                        <img src={stillUrl} alt={ep.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" />
+                      {epStill ? (
+                        <img src={epStill} alt={ep.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" />
                       ) : (
                         <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.3)' }}>🎬</div>
                       )}
@@ -914,10 +1087,10 @@ export default function DetailPage({ mediaType = 'movie' }) {
             const ep = selectedEpisode;
             // Fallback chain: episode still → season poster → series backdrop
             const stillLg = ep.stillPath
-              ? `https://image.tmdb.org/t/p/w780${ep.stillPath}`
+              ? buildStillUrl(ep.stillPath, 'lg')
               : (seasonData?.posterPath
-                ? `https://image.tmdb.org/t/p/w780${seasonData.posterPath}`
-                : (detail.backdropPath ? `https://image.tmdb.org/t/p/w780${detail.backdropPath}` : null));
+                ? posterUrl(seasonData.posterPath, 'lg')
+                : (detail.backdropPath ? backdropUrl(detail.backdropPath, 'md') : null));
             const episodes = seasonData?.episodes || [];
             const currentIdx = episodes.findIndex(e => e.id === ep.id);
             const hasPrev = currentIdx > 0;
@@ -1166,6 +1339,16 @@ export default function DetailPage({ mediaType = 'movie' }) {
         </div>
       )}
 
+      {/* ── Collection ─────────────────────────────────────────────── */}
+      <CollectionBanner collection={collection || detail.belongsToCollection} loading={collectionLoading} />
+
+      {/* ── Release / content ratings ─────────────────────────────── */}
+      <ReleaseDatesSection
+        releaseDates={releaseDates}
+        contentRatings={contentRatings}
+        preferredRegion={watchProviderRegion}
+      />
+
       {/* ── Cast ──────────────────────────────────────────────────── */}
       {cast.length > 0 && (
         <CastRow cast={cast} />
@@ -1255,7 +1438,7 @@ export default function DetailPage({ mediaType = 'movie' }) {
       )}
 
       {/* ── Similar Titles (only show if recommendations are sparse) ── */}
-      {similar.length > 0 && (!showBothSections ? true : true) && (
+      {similar.length > 0 && !showBothSections && (
         <div className="detail-section" style={{ marginTop: '2.5rem' }}>
           <SectionHeader title={showBothSections ? 'More Like This' : (recommendations.length > 0 ? 'More Like This' : 'Similar Titles')} />
           <div className="media-grid">
@@ -1266,6 +1449,9 @@ export default function DetailPage({ mediaType = 'movie' }) {
 
       {/* ── External Links ─────────────────────────────────────────── */}
       <ExternalLinks detail={detail} mediaType={mediaType} />
+
+      {/* ── Reviews ────────────────────────────────────────────────── */}
+      <ReviewsSection reviews={reviews} loading={reviewsLoading} />
 
       {/* ── Video Player Modal ─────────────────────────────────────── */}
       {activePlayback && (
