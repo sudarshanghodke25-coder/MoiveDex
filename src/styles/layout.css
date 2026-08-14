@@ -120,13 +120,6 @@
   background: rgba(255, 255, 255, 0.07);
 }
 
-.navbar-link.active {
-  color: #fff;
-  background: var(--brand-gradient);
-  box-shadow: 0 0 18px rgba(225, 29, 72, 0.4), inset 0 0 12px rgba(255, 255, 255, 0.08);
-  border-color: rgba(245, 158, 11, 0.55);
-}
-
 .navbar-link-icon {
   display: inline-flex;
   align-items: center;
@@ -140,6 +133,10 @@
   gap: clamp(0.65rem, 1vw, 1rem);
   justify-self: end;
   min-width: 0;
+}
+
+.navbar-search-wrapper {
+  position: relative;
 }
 
 .navbar-search {
@@ -167,11 +164,177 @@
   color: var(--text-primary);
   font-family: inherit;
   font-size: 0.875rem;
-  width: 168px;
+  width: 175px;
   min-width: 0;
+  transition: width 0.25s ease;
+}
+
+.navbar-search:focus-within input {
+  width: 220px;
 }
 
 .navbar-search input::placeholder { color: var(--text-muted); }
+
+/* ── Live Search Dropdown ── */
+.navbar-search-results {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 350px;
+  max-width: 90vw;
+  background: rgba(14, 15, 24, 0.97);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.7), 0 0 24px rgba(225, 29, 72, 0.12);
+  z-index: 1000;
+  overflow: hidden;
+  animation: searchDropdownIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes searchDropdownIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.navbar-search-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.navbar-search-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0.85rem;
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: background 0.15s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+}
+
+.navbar-search-item:hover, .navbar-search-item:focus {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.navbar-search-thumb {
+  width: 36px;
+  height: 52px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: #181924;
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.navbar-search-thumb-placeholder {
+  width: 36px;
+  height: 52px;
+  border-radius: 6px;
+  background: #181924;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.navbar-search-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.navbar-search-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #f8fafc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 0.2rem;
+}
+
+.navbar-search-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.725rem;
+  color: var(--text-secondary);
+}
+
+.navbar-search-badge {
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  background: rgba(225, 29, 72, 0.2);
+  color: #fb7185;
+  border: 1px solid rgba(225, 29, 72, 0.3);
+}
+
+.navbar-search-badge--tv {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.navbar-search-badge--anime {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.navbar-search-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  font-weight: 600;
+  color: #fbbf24;
+}
+
+.navbar-search-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.85rem;
+  background: rgba(10, 11, 18, 0.8);
+  font-size: 0.775rem;
+  font-weight: 600;
+  color: var(--brand-accent);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  width: 100%;
+  border: none;
+  text-align: left;
+}
+
+.navbar-search-footer:hover {
+  background: rgba(225, 29, 72, 0.15);
+  color: #fff;
+}
+
+.navbar-mobile-search-results {
+  width: 100%;
+  margin-top: 0.65rem;
+  background: rgba(15, 16, 24, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  overflow: hidden;
+}
 
 /* Auth buttons */
 .navbar-auth-btn {

@@ -3,10 +3,34 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="description" content="MovieDex — Discover movies, TV shows, and anime. A premium streaming-style discovery platform." />
+    <title>MovieDex - Discover Movies & TV Shows</title>
+    <meta name="description" content="Explore top-rated movies, trending TV shows, and personalized recommendations." />
+    <meta name="keywords" content="movies, tv shows, anime, streaming, tmdb, discovery, cinema, trailers, reviews, watchlist" />
+    <meta name="author" content="MovieDex" />
     <meta name="theme-color" content="#08060d" />
+    <link rel="canonical" href="https://moviedex-zeta.vercel.app/" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>MovieDex — Discover Your Next Obsession</title>
+
+    <!-- Open Graph / Facebook / WhatsApp / LinkedIn -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="MovieDex" />
+    <meta property="og:title" content="MovieDex - Discover Movies & TV Shows" />
+    <meta property="og:description" content="Your ultimate streaming & movie discovery platform." />
+    <meta property="og:image" content="https://moviedex-zeta.vercel.app/og-image.png" />
+    <meta property="og:image:secure_url" content="https://moviedex-zeta.vercel.app/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="MovieDex — Stream, Track & Explore Movies & TV Shows" />
+    <meta property="og:url" content="https://moviedex-zeta.vercel.app/" />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="MovieDex - Discover Movies & TV Shows" />
+    <meta name="twitter:description" content="Your ultimate streaming & movie discovery platform." />
+    <meta name="twitter:image" content="https://moviedex-zeta.vercel.app/og-image.png" />
+    <meta name="twitter:image:alt" content="MovieDex — Discover Movies & TV Shows" />
+
     <!-- Outfit Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,7 +40,38 @@
     />
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Instant pre-mount fallback loader for slow connections -->
+      <div id="app-preloader" style="position: fixed; inset: 0; background-color: #06060d; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 99999; font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #f8fafc;">
+        <div style="position: relative; width: 72px; height: 72px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center;">
+          <div style="position: absolute; inset: -8px; border-radius: 20px; background: linear-gradient(135deg, rgba(225,29,72,0.4), rgba(245,158,11,0.3)); filter: blur(12px); animation: pulseGlow 2s ease-in-out infinite alternate;"></div>
+          <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="position: relative; z-index: 1;">
+            <defs>
+              <linearGradient id="pre_brand" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#e11d48"/>
+                <stop offset="100%" stop-color="#f59e0b"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="60" height="60" rx="14" fill="#14131d" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+            <rect x="14" y="20" width="36" height="24" rx="3" fill="#0b0a14" stroke="rgba(255,255,255,0.18)"/>
+            <rect x="14" y="17" width="36" height="6" rx="3" fill="url(#pre_brand)"/>
+            <rect x="20" y="17" width="3" height="6" fill="rgba(255,255,255,0.35)"/>
+            <rect x="27" y="17" width="3" height="6" fill="rgba(255,255,255,0.35)"/>
+            <rect x="34" y="17" width="3" height="6" fill="rgba(255,255,255,0.35)"/>
+            <rect x="41" y="17" width="3" height="6" fill="rgba(255,255,255,0.35)"/>
+            <path d="M27 27l12 7-12 7z" fill="url(#pre_brand)"/>
+          </svg>
+        </div>
+        <div style="font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em; background: linear-gradient(135deg, #fff 30%, rgba(255,255,255,0.7) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">MovieDex</div>
+        <div style="margin-top: 14px; width: 140px; height: 3px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden; position: relative;">
+          <div style="position: absolute; height: 100%; width: 45%; background: linear-gradient(90deg, #e11d48, #f59e0b); border-radius: 999px; animation: loadBar 1.4s ease-in-out infinite;"></div>
+        </div>
+        <style>
+          @keyframes pulseGlow { 0% { opacity: 0.4; transform: scale(0.95); } 100% { opacity: 0.85; transform: scale(1.08); } }
+          @keyframes loadBar { 0% { left: -45%; } 50% { left: 40%; width: 60%; } 100% { left: 100%; width: 30%; } }
+        </style>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

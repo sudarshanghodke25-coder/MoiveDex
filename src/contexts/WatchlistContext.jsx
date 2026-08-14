@@ -3,18 +3,15 @@
  *
  * Provides My List state to the entire app.
  *
- * DATA SOURCE: Firestore  users/{uid}/myList
- * IDENTITY:   Firebase Auth UID (via AuthContext)
+ * DATA SOURCES:
+ *  - Authenticated: Firestore users/{uid}/myList (real-time sync)
+ *  - Guest / Offline: localStorage 'moviedex_guest_watchlist'
  *
- * Behaviour:
- *  - Subscribes to the current user's Firestore myList collection in real-time.
- *  - Clears local state and unsubscribes when the user logs out (uid → null).
- *  - Exposes the same public API as before so all consumers continue to work
- *    without modification:
- *      watchlist, addToWatchlist, removeFromWatchlist,
- *      isInWatchlist, toggleWatchlist, clearWatchlist, loading
- *
- * ⚠️  localStorage is NOT used for My List. Firestore is the single source of truth.
+ * Seamless Behaviour:
+ *  - Guests can bookmark and save items immediately without logging in.
+ *  - When a guest signs in, their local guest watchlist is automatically
+ *    migrated & merged into their Firestore account.
+ *  - Provides instant toast notifications on add / remove.
  */
 
 import {
@@ -26,12 +23,32 @@ import {
   useCallback,
 } from 'react';
 import { useAuth } from './AuthContext';
+import { useToast } from './ToastContext';
 import {
   subscribeToMyList,
   addToMyList,
   removeFromMyList,
   clearMyList,
 } from '../services/myList';
+
+const GUEST_STORAGE_KEY = 'moviedex_guest_watchlist';
+
+function loadGuestWatchlist() {
+  try {
+    const data = localStorage.getItem(GUEST_STORAGE_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveGuestWatchlist(items) {
+  try {
+    localStorage.setItem(GUEST_STORAGE_KEY, JSON.stringify(items));
+  } catch (err) {
+    console.warn('[myList] Failed to save guest watchlist to localStorage:', err);
+  }
+}
 
 const WatchlistContext = createContext();
 
@@ -46,33 +63,46 @@ export function useWatchlist() {
 export function WatchlistProvider({ children }) {
   const { currentUser } = useAuth();
   const uid = currentUser?.uid ?? null;
+  const { showToast } = useToast();
 
-  // The active watchlist for the current user
-  const [watchlist, setWatchlist] = useState([]);
-  // True while waiting for the first Firestore snapshot
-  const [loading, setLoading] = useState(false);
+  // The active watchlist items
+  const [watchlist, setWatchlist] = useState(() => (uid ? [] : loadGuestWatchlist()));
+  // Loading state for initial fetch
+  const [loading, setLoading] = useState(Boolean(uid));
 
-  // Keep a ref to the active Firestore unsubscribe function so we can
-  // tear it down when the user changes or unmounts.
   const unsubscribeRef = useRef(null);
 
+  // Sync / Listeners
   useEffect(() => {
-    // Unsubscribe any previous listener and clear stale data immediately
+    // Teardown previous listener
     if (unsubscribeRef.current) {
       unsubscribeRef.current();
       unsubscribeRef.current = null;
     }
-    setWatchlist([]);
 
     if (!uid) {
-      // No user — nothing to load
+      // Guest mode: load from localStorage
+      setWatchlist(loadGuestWatchlist());
       setLoading(false);
       return;
     }
 
-    // Start loading indicator before first snapshot arrives
-    setLoading(true);
+    // Authenticated mode: migrate any guest items first
+    const guestItems = loadGuestWatchlist();
+    if (guestItems.length > 0) {
+      // Migrate guest items into Firestore in the background
+      Promise.all(
+        guestItems.map(item => addToMyList(uid, item).catch(() => null))
+      ).then(() => {
+        try {
+          localStorage.removeItem(GUEST_STORAGE_KEY);
+        } catch {
+          // ignore
+        }
+      });
+    }
 
+    setLoading(true);
     const unsubscribe = subscribeToMyList(uid, (items) => {
       setWatchlist(items);
       setLoading(false);
@@ -80,7 +110,6 @@ export function WatchlistProvider({ children }) {
 
     unsubscribeRef.current = unsubscribe;
 
-    // Cleanup on unmount or uid change
     return () => {
       unsubscribe();
       unsubscribeRef.current = null;
@@ -105,35 +134,71 @@ export function WatchlistProvider({ children }) {
 
   const addToWatchlist = useCallback(
     async (item) => {
+      if (!item?.id) return;
+      const mediaType = item.mediaType || 'movie';
+      if (isInWatchlist(item.id, mediaType)) return;
+
+      const normalizedItem = {
+        id: item.id,
+        title: item.title || item.name || 'Untitled',
+        posterPath: item.posterPath || item.poster_path || null,
+        backdropPath: item.backdropPath || item.backdrop_path || null,
+        rating: item.rating ?? item.vote_average ?? null,
+        releaseDate: item.releaseDate || item.release_date || item.first_air_date || null,
+        mediaType,
+        overview: item.overview || '',
+        genreNames: item.genreNames || [],
+        addedAt: new Date().toISOString(),
+      };
+
       if (!uid) {
-        console.warn('[myList] No authenticated user. Cannot add to My List.');
+        // Guest mode: save locally
+        setWatchlist((prev) => {
+          const next = [normalizedItem, ...prev.filter(i => !(String(i.id) === String(item.id) && (i.mediaType || 'movie') === mediaType))];
+          saveGuestWatchlist(next);
+          return next;
+        });
+        showToast(`Added "${normalizedItem.title}" to My List (saved locally)`, 'success', 3000);
         return;
       }
-      if (!item?.id) return;
-
-      const mediaType = item.mediaType || 'movie';
-      if (isInWatchlist(item.id, mediaType)) return; // already in list
 
       try {
-        await addToMyList(uid, item);
-        // Optimistic UI is not needed — onSnapshot will update watchlist
+        await addToMyList(uid, normalizedItem);
+        showToast(`Added "${normalizedItem.title}" to My List`, 'success', 3000);
       } catch (err) {
         console.error('[myList] addToWatchlist error:', err);
+        showToast('Could not save to My List. Please try again.', 'error', 3500);
       }
     },
-    [uid, isInWatchlist]
+    [uid, isInWatchlist, showToast]
   );
 
   const removeFromWatchlist = useCallback(
     async (id, mediaType = 'movie') => {
-      if (!uid || !id) return;
+      if (!id) return;
+
+      if (!uid) {
+        // Guest mode
+        setWatchlist((prev) => {
+          const next = prev.filter(
+            (i) => !(String(i.id) === String(id) && (i.mediaType || 'movie') === (mediaType || 'movie'))
+          );
+          saveGuestWatchlist(next);
+          return next;
+        });
+        showToast('Removed from My List', 'info', 2500);
+        return;
+      }
+
       try {
         await removeFromMyList(uid, id, mediaType);
+        showToast('Removed from My List', 'info', 2500);
       } catch (err) {
         console.error('[myList] removeFromWatchlist error:', err);
+        showToast('Could not remove from My List. Please try again.', 'error', 3500);
       }
     },
-    [uid]
+    [uid, showToast]
   );
 
   const toggleWatchlist = useCallback(
@@ -142,25 +207,31 @@ export function WatchlistProvider({ children }) {
       const mediaType = item.mediaType || 'movie';
       if (isInWatchlist(item.id, mediaType)) {
         await removeFromWatchlist(item.id, mediaType);
-        return false; // removed
+        return false;
       } else {
         await addToWatchlist(item);
-        return true; // added
+        return true;
       }
     },
     [isInWatchlist, addToWatchlist, removeFromWatchlist]
   );
 
   const clearWatchlist = useCallback(async () => {
-    if (!uid) return;
+    if (!uid) {
+      setWatchlist([]);
+      saveGuestWatchlist([]);
+      showToast('Cleared your My List', 'info', 2500);
+      return;
+    }
+
     try {
       await clearMyList(uid);
+      showToast('Cleared your My List', 'info', 2500);
     } catch (err) {
       console.error('[myList] clearWatchlist error:', err);
+      showToast('Could not clear My List. Please try again.', 'error', 3500);
     }
-  }, [uid]);
-
-  // ── Context Value ──────────────────────────────────────────────────────────
+  }, [uid, showToast]);
 
   const value = {
     watchlist,
@@ -178,3 +249,4 @@ export function WatchlistProvider({ children }) {
     </WatchlistContext.Provider>
   );
 }
+

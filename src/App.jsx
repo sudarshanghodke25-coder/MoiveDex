@@ -12,14 +12,14 @@ export default function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
-      <AuthProvider>
-        <WatchlistProvider>
-          <ToastProvider>
+      <ToastProvider>
+        <AuthProvider>
+          <WatchlistProvider>
             <SparkleTrail />
             <AppRouter />
-          </ToastProvider>
-        </WatchlistProvider>
-      </AuthProvider>
+          </WatchlistProvider>
+        </AuthProvider>
+      </ToastProvider>
     </BrowserRouter>
   );
 }

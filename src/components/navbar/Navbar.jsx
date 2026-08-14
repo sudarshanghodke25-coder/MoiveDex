@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import gsap from 'gsap';
 import logoImg from '../../assets/MovieDex.jpg';
 import { getDefaultAvatarUrl, getUserInitial } from '../../utils/userAvatar';
+import { searchMulti, posterUrl } from '../../services/tmdb';
 import {
   subscribeToNotifications,
   markNotificationAsRead,
@@ -29,6 +30,12 @@ function NotifThumb({ notif, imgUrl }) {
       )}
     </div>
   );
+}
+
+function getItemRoute(item) {
+  if (item.mediaType === 'anime') return `/anime/${item.id}`;
+  if (item.mediaType === 'tv') return `/tv/${item.id}`;
+  return `/movie/${item.id}`;
 }
 
 const NAV_LINKS = [
@@ -113,8 +120,13 @@ const NAV_LINKS = [
 
 export default function Navbar() {
   const navRef = useRef(null);
+  const searchRef = useRef(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+
   const [profileOpen, setProfileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -142,18 +154,56 @@ export default function Navbar() {
   }
 
   function handleSearchSubmit(e) {
-    e.preventDefault();
+    if (e) e.preventDefault();
     const q = searchQuery.trim();
     if (!q) return;
+    setSearchOpen(false);
     setMobileOpen(false);
     navigate(`/search?q=${encodeURIComponent(q)}`);
   }
+
+  function handleResultClick(item) {
+    setSearchOpen(false);
+    setMobileOpen(false);
+    setSearchQuery('');
+    navigate(getItemRoute(item));
+  }
+
+  // Debounced real-time live search suggestions
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (q.length < 2) {
+      setSearchResults([]);
+      setSearchLoading(false);
+      setSearchOpen(false);
+      return;
+    }
+
+    setSearchLoading(true);
+    const timer = setTimeout(async () => {
+      try {
+        const data = await searchMulti(q, 1);
+        const filtered = (data?.results || [])
+          .filter(item => item.mediaType === 'movie' || item.mediaType === 'tv' || item.mediaType === 'anime')
+          .slice(0, 5);
+        setSearchResults(filtered);
+        setSearchOpen(true);
+      } catch (err) {
+        console.warn('[Navbar] Search query error:', err);
+        setSearchResults([]);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   function isActive(to) {
     return location.pathname.startsWith(to);
   }
 
-  // Detect hover capability (skip hover-open profile menu on touch)
+  // Detect hover capability
   useEffect(() => {
     setCanHover(window.matchMedia('(hover: hover)').matches);
   }, []);
@@ -163,6 +213,7 @@ export default function Navbar() {
     setMobileOpen(false);
     setProfileOpen(false);
     setNotifOpen(false);
+    setSearchOpen(false);
     setSearchQuery('');
   }, [location.pathname]);
 
@@ -174,21 +225,26 @@ export default function Navbar() {
     return () => { document.body.style.overflow = prev; };
   }, [mobileOpen]);
 
-  // Close mobile menu on Escape
+  // Close menus on Escape
   useEffect(() => {
-    if (!mobileOpen) return;
     function onKeyDown(e) {
-      if (e.key === 'Escape') setMobileOpen(false);
+      if (e.key === 'Escape') {
+        setMobileOpen(false);
+        setSearchOpen(false);
+        setProfileOpen(false);
+        setNotifOpen(false);
+      }
     }
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [mobileOpen]);
+  }, []);
 
-  // Click outside — close popovers
+  // Click outside — close popovers & live search
   useEffect(() => {
     function handleClickOutside(e) {
       if (notifRef.current && !notifRef.current.contains(e.target)) setNotifOpen(false);
       if (profileRef.current && !profileRef.current.contains(e.target)) setProfileOpen(false);
+      if (searchRef.current && !searchRef.current.contains(e.target)) setSearchOpen(false);
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -224,7 +280,6 @@ export default function Navbar() {
       lastScrollY.current = currentScrollY;
     };
     
-    // We attach this to .auth-content (inner app) or window (landing page)
     const authContent = document.querySelector('.auth-content');
     const target = authContent || window;
     
@@ -322,20 +377,81 @@ export default function Navbar() {
             </svg>
           </button>
 
-          {/* Search (desktop) */}
-          <form className="navbar-search" role="search" onSubmit={handleSearchSubmit} aria-label="Search">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.35-4.35" />
-            </svg>
-            <input
-              type="text"
-              placeholder="Search movies, shows, anime..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              aria-label="Search movies, shows, anime"
-            />
-          </form>
+          {/* Search with Live Results Dropdown (desktop) */}
+          <div className="navbar-search-wrapper" ref={searchRef}>
+            <form className="navbar-search" role="search" onSubmit={handleSearchSubmit} aria-label="Search">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Search movies, shows, anime..."
+                value={searchQuery}
+                onFocus={() => { if (searchResults.length > 0) setSearchOpen(true); }}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                aria-label="Search movies, shows, anime"
+              />
+              {searchLoading && (
+                <div style={{ width: 14, height: 14, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.2)', borderTopColor: 'var(--brand-accent)', animation: 'spin 0.8s linear infinite' }} />
+              )}
+            </form>
+
+            {/* Live Search Popup */}
+            {searchOpen && searchQuery.trim().length >= 2 && (
+              <div className="navbar-search-results">
+                <div className="navbar-search-header">
+                  <span>{searchLoading ? 'Searching...' : searchResults.length > 0 ? 'Top Matches' : 'No Instant Results'}</span>
+                  <span>TMDB</span>
+                </div>
+
+                {searchResults.map((item) => {
+                  const poster = item.posterPath ? posterUrl(item.posterPath, 'xs') : null;
+                  const year = item.releaseDate ? new Date(item.releaseDate).getFullYear() : null;
+                  const rating = item.rating ? Number(item.rating).toFixed(1) : (item.vote_average ? Number(item.vote_average).toFixed(1) : null);
+                  const isAnime = item.mediaType === 'anime';
+                  const isTv = item.mediaType === 'tv';
+                  const badgeClass = isAnime ? 'navbar-search-badge--anime' : isTv ? 'navbar-search-badge--tv' : '';
+                  const badgeLabel = isAnime ? 'Anime' : isTv ? 'TV' : 'Movie';
+
+                  return (
+                    <div
+                      key={`${item.mediaType}-${item.id}`}
+                      className="navbar-search-item"
+                      onClick={() => handleResultClick(item)}
+                    >
+                      {poster ? (
+                        <img src={poster} alt="" className="navbar-search-thumb" loading="lazy" />
+                      ) : (
+                        <div className="navbar-search-thumb-placeholder">🎬</div>
+                      )}
+                      <div className="navbar-search-info">
+                        <div className="navbar-search-title">{item.title || item.name || 'Untitled'}</div>
+                        <div className="navbar-search-meta">
+                          <span className={`navbar-search-badge ${badgeClass}`}>{badgeLabel}</span>
+                          {year && <span>{year}</span>}
+                          {rating && (
+                            <span className="navbar-search-rating">
+                              ★ {rating}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                <button
+                  type="button"
+                  className="navbar-search-footer"
+                  onClick={handleSearchSubmit}
+                >
+                  <span>Explore full results for "{searchQuery.trim()}"</span>
+                  <span>↵ Enter</span>
+                </button>
+              </div>
+            )}
+          </div>
 
           {/* Notifications bell & dropdown */}
           <div className="navbar-notif" ref={notifRef}>
@@ -425,8 +541,7 @@ export default function Navbar() {
                 </span>
                 <svg
                   className={`navbar-chevron ${profileOpen ? 'open' : ''}`}
-                  width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
-                >
+                  width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <polyline points="6 9 12 15 18 9" />
                 </svg>
               </button>
@@ -497,52 +612,93 @@ export default function Navbar() {
             onClick={() => setMobileOpen(false)}
           />
           <div className="navbar-mobile">
-          {/* Search */}
-          <form className="navbar-mobile-search" role="search" onSubmit={handleSearchSubmit}>
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.35-4.35" />
-            </svg>
-            <input
-              type="text"
-              placeholder="Search movies, shows, anime..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              aria-label="Search movies, shows, anime"
-            />
-          </form>
+            {/* Search */}
+            <form className="navbar-mobile-search" role="search" onSubmit={handleSearchSubmit}>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Search movies, shows, anime..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                aria-label="Search movies, shows, anime"
+              />
+            </form>
 
-          <nav className="navbar-mobile-nav" aria-label="Mobile navigation">
-            {NAV_LINKS.map(({ label, to, icon }) => {
-              const active = isActive(to);
-              return (
-                <Link
-                  key={to}
-                  to={to}
-                  className={`navbar-mobile-link ${active ? 'active' : ''}`}
-                  aria-current={active ? 'page' : undefined}
-                >
-                  <span className="navbar-link-icon" aria-hidden="true">{icon}</span>
-                  {label}
-                </Link>
-              );
-            })}
-          </nav>
+            {/* Mobile Live Search Results */}
+            {searchResults.length > 0 && searchQuery.trim().length >= 2 && (
+              <div className="navbar-mobile-search-results">
+                {searchResults.map((item) => {
+                  const poster = item.posterPath ? posterUrl(item.posterPath, 'xs') : null;
+                  const year = item.releaseDate ? new Date(item.releaseDate).getFullYear() : null;
+                  const rating = item.rating ? Number(item.rating).toFixed(1) : (item.vote_average ? Number(item.vote_average).toFixed(1) : null);
+                  const isAnime = item.mediaType === 'anime';
+                  const isTv = item.mediaType === 'tv';
+                  const badgeClass = isAnime ? 'navbar-search-badge--anime' : isTv ? 'navbar-search-badge--tv' : '';
+                  const badgeLabel = isAnime ? 'Anime' : isTv ? 'TV' : 'Movie';
 
-          {/* Auth actions inside the drawer */}
-          <div className="navbar-mobile-auth">
-            {currentUser ? (
-              <button type="button" className="navbar-mobile-logout" onClick={handleLogout}>
-                🚪 Log Out
-              </button>
-            ) : (
-              <>
-                <Link to="/login" className="navbar-auth-btn navbar-auth-ghost navbar-mobile-auth-btn">Log In</Link>
-                <Link to="/register" className="navbar-auth-btn navbar-auth-primary navbar-mobile-auth-btn">Register</Link>
-              </>
+                  return (
+                    <div
+                      key={`mob-${item.mediaType}-${item.id}`}
+                      className="navbar-search-item"
+                      onClick={() => handleResultClick(item)}
+                    >
+                      {poster ? (
+                        <img src={poster} alt="" className="navbar-search-thumb" loading="lazy" />
+                      ) : (
+                        <div className="navbar-search-thumb-placeholder">🎬</div>
+                      )}
+                      <div className="navbar-search-info">
+                        <div className="navbar-search-title">{item.title || item.name || 'Untitled'}</div>
+                        <div className="navbar-search-meta">
+                          <span className={`navbar-search-badge ${badgeClass}`}>{badgeLabel}</span>
+                          {year && <span>{year}</span>}
+                          {rating && (
+                            <span className="navbar-search-rating">
+                              ★ {rating}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             )}
+
+            <nav className="navbar-mobile-nav" aria-label="Mobile navigation">
+              {NAV_LINKS.map(({ label, to, icon }) => {
+                const active = isActive(to);
+                return (
+                  <Link
+                    key={to}
+                    to={to}
+                    className={`navbar-mobile-link ${active ? 'active' : ''}`}
+                    aria-current={active ? 'page' : undefined}
+                  >
+                    <span className="navbar-link-icon" aria-hidden="true">{icon}</span>
+                    {label}
+                  </Link>
+                );
+              })}
+            </nav>
+
+            {/* Auth actions inside the drawer */}
+            <div className="navbar-mobile-auth">
+              {currentUser ? (
+                <button type="button" className="navbar-mobile-logout" onClick={handleLogout}>
+                  🚪 Log Out
+                </button>
+              ) : (
+                <>
+                  <Link to="/login" className="navbar-auth-btn navbar-auth-ghost navbar-mobile-auth-btn">Log In</Link>
+                  <Link to="/register" className="navbar-auth-btn navbar-auth-primary navbar-mobile-auth-btn">Register</Link>
+                </>
+              )}
+            </div>
           </div>
-        </div>
         </>
       )}
     </header>
