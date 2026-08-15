@@ -28,6 +28,7 @@ import { useWatchlist } from '../contexts/WatchlistContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import useUserSettings from '../hooks/useUserSettings';
+import usePageTitle from '../hooks/usePageTitle';
 import { getPlaybackSource } from '../services/playback';
 import { saveWatchProgress, getWatchProgress, getContentId } from '../services/history';
 import VideoPlayer from '../components/player/VideoPlayer';
@@ -407,6 +408,8 @@ export default function DetailPage({ mediaType = 'movie' }) {
       selectedEpisodeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }, 50);
   }
+
+  usePageTitle(detail ? `${detail.title} | MovieDex` : 'MovieDex');
 
   // ── Loading / Error states ──────────────────────────────────────────────
 

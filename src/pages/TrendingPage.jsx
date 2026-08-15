@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import usePaginatedTMDB from '../hooks/usePaginatedTMDB';
+import usePageTitle from '../hooks/usePageTitle';
 import {
   getTrending,
   getTrendingToday,
@@ -20,6 +21,8 @@ const TABS = [
 ];
 
 export default function TrendingPage() {
+  usePageTitle('Trending | MovieDex');
+
   const [activeTab, setActiveTab] = useState('all_week');
   const tab = TABS.find(t => t.id === activeTab) || TABS[0];
 

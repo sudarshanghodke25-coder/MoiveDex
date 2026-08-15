@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import useTMDB from '../hooks/useTMDB';
 import usePaginatedTMDB from '../hooks/usePaginatedTMDB';
+import usePageTitle from '../hooks/usePageTitle';
 import {
   getPopularMovies,
   getTopRatedMovies,
@@ -44,6 +45,8 @@ const SORTS = [
 ];
 
 export default function MoviesPage() {
+  usePageTitle('Movies | MovieDex');
+
   const [searchParams, setSearchParams] = useSearchParams();
   const genreParam = searchParams.get('genre');
   const genreId = genreParam ? Number(genreParam) : null;

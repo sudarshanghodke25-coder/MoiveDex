@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import useTMDB from '../hooks/useTMDB';
 import usePaginatedTMDB from '../hooks/usePaginatedTMDB';
+import usePageTitle from '../hooks/usePageTitle';
 import { getPopularTV, getTopRatedTV, getTVAiringToday, getTVOnTheAir, discoverTV, getTVGenres } from '../services/tmdb';
 import MovieCard from '../components/movie-card/MovieCard';
 
@@ -33,6 +34,8 @@ const SORTS = [
 ];
 
 export default function TVPage() {
+  usePageTitle('TV Shows | MovieDex');
+
   const [searchParams, setSearchParams] = useSearchParams();
   const genreParam = searchParams.get('genre');
   const genreId = genreParam ? Number(genreParam) : null;

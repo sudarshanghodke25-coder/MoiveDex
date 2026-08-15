@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import usePageTitle from '../hooks/usePageTitle';
 
 const STEPS = [
   {
@@ -50,6 +51,8 @@ const STEPS = [
 ];
 
 export default function HowItWorksPage() {
+  usePageTitle('How It Works | MovieDex');
+
   return (
     <div className="page-content" style={{ maxWidth: '800px', margin: '0 auto' }}>
       {/* Header */}

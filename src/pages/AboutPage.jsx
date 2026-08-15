@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import usePageTitle from '../hooks/usePageTitle';
 
 const FEATURES = [
   {
@@ -40,6 +41,8 @@ const FEATURES = [
 ];
 
 export default function AboutPage() {
+  usePageTitle('About | MovieDex');
+
   return (
     <div className="page-content" style={{ maxWidth: '900px', margin: '0 auto' }}>
       {/* Header */}

@@ -1,6 +1,10 @@
+import usePageTitle from '../hooks/usePageTitle';
+
 const LAST_UPDATED = 'August 2026';
 
 export default function PrivacyPolicyPage() {
+  usePageTitle('Privacy Policy | MovieDex');
+
   return (
     <div className="page-content" style={{ maxWidth: '780px', margin: '0 auto' }}>
       {/* Header */}

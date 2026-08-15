@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import useTMDB from '../hooks/useTMDB';
+import usePageTitle from '../hooks/usePageTitle';
 import { getCollectionDetails, backdropUrl, posterUrl } from '../services/tmdb';
 import MovieCard from '../components/movie-card/MovieCard';
 
@@ -7,6 +8,8 @@ export default function CollectionPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: collection, loading, error } = useTMDB(() => getCollectionDetails(id), [id]);
+
+  usePageTitle(collection?.name ? `${collection.name} | MovieDex` : 'Collection | MovieDex');
 
   if (loading) {
     return (

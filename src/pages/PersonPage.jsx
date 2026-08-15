@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getPersonDetails, profileUrl } from '../services/tmdb';
 import useTMDB from '../hooks/useTMDB';
+import usePageTitle from '../hooks/usePageTitle';
 import MovieCard from '../components/movie-card/MovieCard';
 
 const BIO_EXPAND_LENGTH = 420;
@@ -28,6 +29,8 @@ export default function PersonPage() {
   const [mediaFilter, setMediaFilter] = useState('all');
 
   const { data, loading, error } = useTMDB(() => getPersonDetails(id), [id]);
+
+  usePageTitle(data?.name ? `${data.name} | MovieDex` : 'Person | MovieDex');
 
   if (loading) return <PersonSkeleton />;
 

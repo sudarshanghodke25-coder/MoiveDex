@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import useTMDB from '../hooks/useTMDB';
+import usePageTitle from '../hooks/usePageTitle';
 import { getMovieGenres, getTVGenres } from '../services/tmdb';
 
 const GENRE_COLORS = [
@@ -9,6 +10,8 @@ const GENRE_COLORS = [
 ];
 
 export default function GenresPage() {
+  usePageTitle('Genres | MovieDex');
+
   const [mediaType, setMediaType] = useState('movie');
 
   const { data: movieGenres, loading: loadingMovies, error: movieError, retry: retryMovies } =

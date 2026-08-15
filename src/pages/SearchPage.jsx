@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { searchMulti, searchPeople, searchMovies, searchTV, profileUrl } from '../services/tmdb';
+import usePageTitle from '../hooks/usePageTitle';
 import MovieCard from '../components/movie-card/MovieCard';
 
 const DEBOUNCE_MS = 400;
@@ -27,11 +28,14 @@ function saveRecentSearch(q) {
 }
 
 export default function SearchPage() {
+  usePageTitle('Search | MovieDex');
+
   const [searchParams, setSearchParams] = useSearchParams();
   const initialQuery = searchParams.get('q') || '';
 
   const [query, setQuery] = useState(initialQuery);
   const [inputVal, setInputVal] = useState(initialQuery);
+  const inputRef = useRef(null);
   const [typeFilter, setTypeFilter] = useState('all');
   const [results, setResults] = useState([]);
   const [people, setPeople] = useState([]);
@@ -151,6 +155,7 @@ export default function SearchPage() {
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
           </svg>
           <input
+            ref={inputRef}
             type="text"
             placeholder="Search for movies, TV shows, anime, people..."
             value={inputVal}
@@ -158,6 +163,22 @@ export default function SearchPage() {
             className="search-input"
             autoFocus
           />
+          {inputVal && (
+            <button
+              type="button"
+              className="search-clear-btn"
+              aria-label="Clear search"
+              title="Clear search"
+              onClick={() => {
+                setInputVal('');
+                inputRef.current?.focus();
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+                <path d="M18 6 6 18M6 6l12 12" />
+              </svg>
+            </button>
+          )}
           <button type="submit" className="btn-primary search-submit-btn">Search</button>
         </div>
       </form>

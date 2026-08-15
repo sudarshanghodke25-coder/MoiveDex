@@ -30,6 +30,7 @@ const ContactPage = lazy(() => import('../pages/ContactPage'));
 const FeedbackPage = lazy(() => import('../pages/FeedbackPage'));
 const PrivacyPolicyPage = lazy(() => import('../pages/PrivacyPolicyPage'));
 const TermsOfUsePage = lazy(() => import('../pages/TermsOfUsePage'));
+const NotFoundPage = lazy(() => import('../pages/NotFoundPage'));
 
 /**
  * AppRouter — full application routes.
@@ -76,7 +77,7 @@ export default function AppRouter() {
           </Route>
 
           {/* Public 404 */}
-          <Route path="*" element={<ComingSoon page="Page Not Found" desc="Looks like this page doesn't exist." emoji="🎬" />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
   );
@@ -118,24 +119,3 @@ function RouteFallback() {
   );
 }
 
-function ComingSoon({ page, desc = 'This section is being built. Check back soon!', emoji = '🚀' }) {
-  return (
-    <div style={{
-      minHeight: '80vh',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '1rem',
-      padding: '4rem 2rem',
-      textAlign: 'center',
-    }}>
-      <span style={{ fontSize: '4rem' }}>{emoji}</span>
-      <span style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--brand-secondary)' }}>
-        Coming Soon
-      </span>
-      <h1 className="text-hero">{page}</h1>
-      <p style={{ color: 'var(--text-secondary)', maxWidth: '380px' }}>{desc}</p>
-    </div>
-  );
-}

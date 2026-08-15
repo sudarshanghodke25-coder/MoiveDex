@@ -3,8 +3,11 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import gsap from 'gsap';
 import AuthVisual from '../../components/auth/AuthVisual';
+import usePageTitle from '../../hooks/usePageTitle';
 
 export default function VerifyEmail() {
+  usePageTitle('Verify Email | MovieDex');
+
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);

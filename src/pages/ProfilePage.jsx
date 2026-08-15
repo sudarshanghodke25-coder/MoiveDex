@@ -5,6 +5,7 @@ import { getUserProfile, updateUserProfile } from '../services/userProfile';
 import { getContinueWatchingList } from '../services/history';
 import { useNavigate } from 'react-router-dom';
 import { getDefaultAvatarUrl, getUserInitial } from '../utils/userAvatar';
+import usePageTitle from '../hooks/usePageTitle';
 
 const AVATAR_PRESETS = [
   { id: 'crimson', label: 'Cinema Crimson', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=Crimson&backgroundColor=e11d48', gradient: 'linear-gradient(135deg, #e11d48 0%, #f59e0b 100%)', emoji: '🎬' },
@@ -15,6 +16,7 @@ const AVATAR_PRESETS = [
 ];
 
 export default function ProfilePage() {
+  usePageTitle('Profile | MovieDex');
   const { currentUser, updateProfileInfo, verifyEmail } = useAuth();
   const { watchlist } = useWatchlist();
   const navigate = useNavigate();

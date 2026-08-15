@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import useTMDB from '../hooks/useTMDB';
 import usePaginatedTMDB from '../hooks/usePaginatedTMDB';
+import usePageTitle from '../hooks/usePageTitle';
 import {
   discoverMovies,
   discoverTV,
@@ -37,6 +38,8 @@ const SORTS = {
 };
 
 export default function DiscoverPage() {
+  usePageTitle('Discover | MovieDex');
+
   const [mediaTab, setMediaTab] = useState('movie');
   const [genreId, setGenreId] = useState(null);
   const [year, setYear] = useState('');

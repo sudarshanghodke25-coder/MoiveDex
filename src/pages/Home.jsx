@@ -6,6 +6,7 @@
  */
 
 import useTMDB from '../hooks/useTMDB';
+import usePageTitle from '../hooks/usePageTitle';
 import {
   getTrending,
   getTrendingToday,
@@ -39,6 +40,8 @@ function RowError({ error }) {
 }
 
 export default function Home() {
+  usePageTitle('Home | MovieDex');
+
   const hero      = useTMDB(fetchTrendingHero, []);
   const trending  = useTMDB(fetchTrendingToday, []);
   const nowPlaying = useTMDB(fetchNowPlaying, []);

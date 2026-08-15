@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import usePaginatedTMDB from '../hooks/usePaginatedTMDB';
+import usePageTitle from '../hooks/usePageTitle';
 import { getAnime, getTopRatedAnime, getAiringAnime } from '../services/tmdb';
 import MovieCard from '../components/movie-card/MovieCard';
 
@@ -10,6 +11,8 @@ const TABS = [
 ];
 
 export default function AnimePage() {
+  usePageTitle('Anime | MovieDex');
+
   const [activeTab, setActiveTab] = useState('popular');
   const tab = TABS.find(t => t.id === activeTab) || TABS[0];
 

@@ -1,6 +1,9 @@
 import ContactForm from '../components/common/ContactForm';
+import usePageTitle from '../hooks/usePageTitle';
 
 export default function FeedbackPage() {
+  usePageTitle('Feedback | MovieDex');
+
   return (
     <div className="page-content" style={{ maxWidth: '680px', margin: '0 auto' }}>
       {/* Header */}

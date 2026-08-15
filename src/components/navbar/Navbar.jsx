@@ -395,6 +395,18 @@ export default function Navbar() {
               {searchLoading && (
                 <div style={{ width: 14, height: 14, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.2)', borderTopColor: 'var(--brand-accent)', animation: 'spin 0.8s linear infinite' }} />
               )}
+              {searchQuery && !searchLoading && (
+                <button
+                  type="button"
+                  className="navbar-search-clear"
+                  aria-label="Clear search"
+                  onClick={() => setSearchQuery('')}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+                    <path d="M18 6 6 18M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
             </form>
 
             {/* Live Search Popup */}
@@ -625,6 +637,18 @@ export default function Navbar() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 aria-label="Search movies, shows, anime"
               />
+              {searchQuery && (
+                <button
+                  type="button"
+                  className="navbar-search-clear"
+                  aria-label="Clear search"
+                  onClick={() => setSearchQuery('')}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+                    <path d="M18 6 6 18M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
             </form>
 
             {/* Mobile Live Search Results */}

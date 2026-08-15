@@ -4,8 +4,11 @@ import { useAuth } from '../../contexts/AuthContext';
 import { getAuthErrorMessage } from '../../utils/authErrors';
 import gsap from 'gsap';
 import AuthVisual from '../../components/auth/AuthVisual';
+import usePageTitle from '../../hooks/usePageTitle';
 
 export default function Login() {
+  usePageTitle('Log In | MovieDex');
+
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   

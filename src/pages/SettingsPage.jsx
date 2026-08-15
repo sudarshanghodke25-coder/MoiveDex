@@ -5,6 +5,7 @@ import { getUserSettings, updateUserSettings } from '../services/settings';
 import { clearAllHistory } from '../services/history';
 import { useNavigate } from 'react-router-dom';
 import { getDefaultAvatarUrl, getUserInitial } from '../utils/userAvatar';
+import usePageTitle from '../hooks/usePageTitle';
 
 const LANGUAGES = [
   { code: 'en', label: 'English' },
@@ -34,6 +35,7 @@ const WATCH_REGIONS = [
 ];
 
 export default function SettingsPage() {
+  usePageTitle('Settings | MovieDex');
   const { currentUser, resetPassword, updateUserPassword, logout, deleteAccount } = useAuth();
   const { clearWatchlist } = useWatchlist();
   const navigate = useNavigate();

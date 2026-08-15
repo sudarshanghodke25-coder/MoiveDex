@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useWatchlist } from '../contexts/WatchlistContext';
 import MovieCard from '../components/movie-card/MovieCard';
+import usePageTitle from '../hooks/usePageTitle';
 
 const TABS = [
   { id: 'all',    label: 'All Saved' },
@@ -10,8 +11,18 @@ const TABS = [
 ];
 
 export default function MyListPage() {
+  usePageTitle('My List | MovieDex');
+
   const { watchlist, clearWatchlist, loading } = useWatchlist();
   const [activeTab, setActiveTab] = useState('all');
+  const [confirmingClear, setConfirmingClear] = useState(false);
+
+  // Auto-cancel the inline confirm if the user walks away
+  useEffect(() => {
+    if (!confirmingClear) return undefined;
+    const timer = setTimeout(() => setConfirmingClear(false), 4000);
+    return () => clearTimeout(timer);
+  }, [confirmingClear]);
 
   const filteredItems = watchlist.filter(item => {
     if (activeTab === 'all') return true;
@@ -31,28 +42,71 @@ export default function MyListPage() {
           <p className="page-subtitle">Your saved collection of movies, TV series, and anime.</p>
         </div>
         {watchlist.length > 0 && (
-          <button
-            onClick={() => {
-              if (window.confirm('Are you sure you want to clear your watchlist?')) {
-                clearWatchlist();
-              }
-            }}
-            style={{
-              padding: '0.5rem 1rem',
-              borderRadius: '999px',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              background: 'rgba(239, 68, 68, 0.1)',
-              color: '#ef4444',
-              fontSize: '0.85rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'; }}
-          >
-            Clear All ({watchlist.length})
-          </button>
+          confirmingClear ? (
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                Remove all {watchlist.length} titles?
+              </span>
+              <button
+                type="button"
+                onClick={() => { clearWatchlist(); setConfirmingClear(false); }}
+                style={{
+                  padding: '0.5rem 1rem',
+                  borderRadius: '999px',
+                  border: '1px solid rgba(239, 68, 68, 0.5)',
+                  background: 'rgba(239, 68, 68, 0.2)',
+                  color: '#fff',
+                  fontSize: '0.85rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.35)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'; }}
+              >
+                Yes, clear all
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmingClear(false)}
+                style={{
+                  padding: '0.5rem 1rem',
+                  borderRadius: '999px',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  color: 'var(--text-secondary)',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.color = '#f8fafc'; }}
+                onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-secondary)'; }}
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setConfirmingClear(true)}
+              style={{
+                padding: '0.5rem 1rem',
+                borderRadius: '999px',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                background: 'rgba(239, 68, 68, 0.1)',
+                color: '#ef4444',
+                fontSize: '0.85rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'; }}
+            >
+              Clear All ({watchlist.length})
+            </button>
+          )
         )}
       </div>
 

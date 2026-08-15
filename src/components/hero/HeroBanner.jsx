@@ -14,6 +14,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { backdropUrl, backdropSrcSet, preloadImage } from '../../services/tmdb';
+import { useWatchlist } from '../../contexts/WatchlistContext';
 
 const SLIDE_INTERVAL = 8000; // 8 seconds per slide
 const MAX_SLIDES     = 6;
@@ -21,8 +22,10 @@ const MAX_SLIDES     = 6;
 export default function HeroBanner({ items = [], loading = false }) {
   const [activeIdx,  setActiveIdx]  = useState(0);
   const [startX, setStartX] = useState(null);
+  const [paused, setPaused] = useState(false);
   const contentRef = useRef(null);
   const navigate   = useNavigate();
+  const { isInWatchlist, toggleWatchlist } = useWatchlist();
 
   const slides = items.slice(0, MAX_SLIDES);
 
@@ -53,12 +56,14 @@ export default function HeroBanner({ items = [], loading = false }) {
     preloadImage(url).catch(() => {});
   }, [activeIdx, slides]);
 
-  // ── Auto-rotate ───────────────────────────────────────────────────
+  // ── Auto-rotate (paused on hover; skipped when reduced motion) ────
   useEffect(() => {
     if (!slides.length) return;
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced || paused) return;
     const timer = setInterval(() => goTo(activeIdx + 1, 1), SLIDE_INTERVAL);
     return () => clearInterval(timer);
-  }, [activeIdx, slides.length, goTo]);
+  }, [activeIdx, slides.length, goTo, paused]);
 
   // ── Reset index when items change ─────────────────────────────────
   useEffect(() => { setActiveIdx(0); }, [items]);
@@ -102,6 +107,7 @@ export default function HeroBanner({ items = [], loading = false }) {
   if (!slides.length) return null;
 
   const movie    = slides[activeIdx];
+  const inHeroList = isInWatchlist(movie.id, movie.mediaType || 'movie');
   const backdrop = movie?.backdropPath ? backdropUrl(movie.backdropPath, 'lg') : null;
   const srcset   = movie?.backdropPath ? backdropSrcSet(movie.backdropPath) : '';
   const year     = movie?.releaseDate ? new Date(movie.releaseDate).getFullYear() : '';
@@ -122,6 +128,8 @@ export default function HeroBanner({ items = [], loading = false }) {
       onMouseUp={handleDragEnd}
       onTouchStart={handleDragStart}
       onTouchEnd={handleDragEnd}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
       style={{ 
         cursor: startX !== null ? 'grabbing' : 'grab',
         userSelect: 'none',
@@ -178,11 +186,21 @@ export default function HeroBanner({ items = [], loading = false }) {
             </svg>
             View Details
           </button>
-          <button className="btn-ghost" onClick={handleDetail} aria-label={`More info about ${movie.title}`}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-              <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+          <button
+            className="btn-ghost"
+            onClick={(e) => { e.stopPropagation(); toggleWatchlist(movie); }}
+            aria-label={inHeroList ? `Remove ${movie.title} from My List` : `Add ${movie.title} to My List`}
+            aria-pressed={inHeroList}
+            style={{
+              borderColor: inHeroList ? 'rgba(245,158,11,0.6)' : undefined,
+              background: inHeroList ? 'rgba(245,158,11,0.15)' : undefined,
+              color: inHeroList ? 'var(--brand-accent)' : undefined,
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill={inHeroList ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
             </svg>
-            More Info
+            {inHeroList ? 'In My List' : 'Add to List'}
           </button>
         </div>
       </div>
